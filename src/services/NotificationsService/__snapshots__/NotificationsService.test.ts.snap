@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NotificationsService should add or remove notification on notification event 1`] = `
+[
+  {
+    "canBeDismissed": true,
+    "createdAt": "2023-05-15T12:00:00.000Z",
+    "description": "This is a test notification with sound alert and yellow light which can ignore DND mode",
+    "extraInfo": "extra payload",
+    "id": "test2",
+    "ignoreDND": true,
+    "light": "yellow",
+    "priorityOrder": "medium",
+    "title": "Test notification",
+  },
+  {
+    "canBeDismissed": true,
+    "createdAt": "2023-05-15T12:00:00.000Z",
+    "description": "This is a test notification with low priority",
+    "extraInfo": undefined,
+    "id": "test3",
+    "ignoreDND": undefined,
+    "light": undefined,
+    "priorityOrder": "low",
+    "title": "Test notification",
+  },
+]
+`;

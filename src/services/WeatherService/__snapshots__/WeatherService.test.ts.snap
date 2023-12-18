@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WeatherService should fetch weather data 1`] = `
+{
+  "aqiStation": "Warsaw, Poland",
+  "current": {
+    "aqi": 2,
+    "clouds": 75,
+    "dewPoint": -0.46,
+    "feelsLike": -3.73,
+    "humidity": 91,
+    "pressure": 991,
+    "sunrise": 1700805653000,
+    "sunset": 1700836319000,
+    "temp": 0.78,
+    "uvi": 0,
+    "visibility": 10000,
+    "weather": {
+      "icon": "04n",
+      "type": "Clouds",
+    },
+    "windDeg": 270,
+    "windGust": NaN,
+    "windSpeed": 16.668,
+  },
+  "historicalWeather": {
+    "pressure": [
+      991,
+    ],
+    "temp": [
+      1,
+    ],
+    "windSpeed": [
+      17,
+    ],
+  },
+  "longForecast": [
+    {
+      "clouds": 81,
+      "dayTemp": 4.09,
+      "maxTemp": 6.09,
+      "minTemp": 0.01,
+      "nightTemp": 0.01,
+      "pop": 100,
+      "pressure": 993,
+      "summary": "The day will start with partly cloudy with rain through the late morning hours, transitioning to partly cloudy with snow",
+      "sunrise": 1700805653000,
+      "sunset": 1700836319000,
+      "timestamp": 1700820000000,
+      "uvi": 0.64,
+      "weather": {
+        "icon": "13d",
+        "type": "Snow",
+      },
+      "windGust": 87.94800000000001,
+      "windSpeed": 46.368,
+    },
+  ],
+  "shortForecast": [
+    {
+      "clouds": 75,
+      "feelsLike": -4.07,
+      "pop": 0,
+      "pressure": 991,
+      "temp": 0.78,
+      "timestamp": 1700848800000,
+      "uvi": 0,
+      "visibility": 10000,
+      "weather": {
+        "icon": "04n",
+        "type": "Clouds",
+      },
+      "windGust": 42.300000000000004,
+      "windSpeed": 18.864,
+    },
+  ],
+  "timestamp": 1621008720000,
+}
+`;

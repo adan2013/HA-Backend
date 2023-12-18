@@ -5,6 +5,8 @@ export type WebSocketIncomingMessagePayload = {
     notificationId?: string
     serviceName?: string
     enabled?: boolean
+    id?: string
+    value?: string
   }
   sendResponse: (msgType: string, payload: object) => void
 }

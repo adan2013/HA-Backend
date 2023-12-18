@@ -5,6 +5,7 @@ const WS_CMD = {
     SWITCH_SERVICE: 'switchService',
     TRIGGER_NOTIFICATION: 'triggerNotification',
     DISMISS_NOTIFICATION: 'dismissNotification',
+    REMOTE_CONTROL: 'remoteControl',
   },
   outgoing: {
     WELCOME: 'welcome',

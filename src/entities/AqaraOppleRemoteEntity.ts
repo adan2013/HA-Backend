@@ -1,4 +1,6 @@
 import HomeAssistantEntity from './HomeAssistantEntity'
+import { webSocketMessage } from '../events/events'
+import WS_CMD from '../connectors/wsCommands'
 
 export type PressType = 'single' | 'double' | 'triple' | 'hold' | 'release'
 
@@ -20,7 +22,13 @@ class AqaraOppleRemoteEntity extends HomeAssistantEntity {
     this.onAnyStateUpdate((state) =>
       this.emitAction(this.decodeState(state.state)),
     )
-    // TODO incoming message event
+    webSocketMessage(WS_CMD.incoming.REMOTE_CONTROL).on(
+      ({ message: { id, value } }) => {
+        if (id && value && id === this.entityId) {
+          this.emitAction(this.decodeState(value))
+        }
+      },
+    )
   }
 
   public decodeState(state = ''): ActionType | null {

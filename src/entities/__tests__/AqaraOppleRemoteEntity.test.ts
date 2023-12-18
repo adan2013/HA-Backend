@@ -1,5 +1,7 @@
 import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
 import Entity from '../Entity'
+import { webSocketMessage } from '../../events/events'
+import WS_CMD from '../../connectors/wsCommands'
 
 mockEntity('sensor', 'None')
 
@@ -54,5 +56,34 @@ describe('AqaraOppleRemoteEntity', () => {
     expect(decode('button_5_release')).toEqual({ button: 5, type: 'release' })
     expect(decode('None')).toEqual(null)
     expect(decode(undefined)).toEqual(null)
+  })
+
+  it('should trigger action by remote signal', () => {
+    const remote = Entity.aqaraOpple('sensor')
+    const callback = jest.fn()
+    remote.onDoublePress(4, callback)
+    webSocketMessage(WS_CMD.incoming.REMOTE_CONTROL).emit({
+      message: {
+        id: 'WRONG_ID',
+        value: 'button_4_double',
+      },
+      sendResponse: jest.fn(),
+    })
+    expect(callback).not.toHaveBeenCalled()
+    webSocketMessage(WS_CMD.incoming.REMOTE_CONTROL).emit({
+      message: {
+        id: 'sensor',
+        value: 'button_4_single',
+      },
+      sendResponse: jest.fn(),
+    })
+    webSocketMessage(WS_CMD.incoming.REMOTE_CONTROL).emit({
+      message: {
+        id: 'sensor',
+        value: 'button_4_double',
+      },
+      sendResponse: jest.fn(),
+    })
+    expect(callback).toHaveBeenCalledTimes(1)
   })
 })

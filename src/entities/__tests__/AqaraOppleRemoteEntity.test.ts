@@ -44,4 +44,15 @@ describe('AqaraOppleRemoteEntity', () => {
     emitAllStateUpdates()
     expect(callback).toHaveBeenCalledTimes(callCount)
   })
+
+  it('sould decode action type from entity state', () => {
+    const decode = Entity.aqaraOpple('sensor').decodeState
+    expect(decode('button_1_single')).toEqual({ button: 1, type: 'single' })
+    expect(decode('button_2_double')).toEqual({ button: 2, type: 'double' })
+    expect(decode('button_3_triple')).toEqual({ button: 3, type: 'triple' })
+    expect(decode('button_4_hold')).toEqual({ button: 4, type: 'hold' })
+    expect(decode('button_5_release')).toEqual({ button: 5, type: 'release' })
+    expect(decode('None')).toEqual(null)
+    expect(decode(undefined)).toEqual(null)
+  })
 })

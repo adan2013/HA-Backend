@@ -6,6 +6,8 @@ Before, I reached a point where I did not know how to create a desired automatio
 
 The dedicated frontend for this backend is [here](https://github.com/adan2013/HA-Dashboard).
 
+![data flow home assistant](docs/data-flow.png)
+
 ## Scripts
 
 | COMMAND           | DESCRIPTION                                         |

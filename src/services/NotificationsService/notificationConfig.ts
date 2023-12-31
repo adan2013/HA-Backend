@@ -25,16 +25,15 @@ const notificationConfig: NotificationConfig[] = [
   {
     id: 'test3',
     title: 'Test notification',
-    description: 'This is a test notification with low priority',
+    description:
+      'This is a test notification with low priority and quick action button',
     canBeDismissed: true,
   },
   {
     id: 'loadedWashingMachine',
     title: 'Laundry is ready',
-    description:
-      'Unload the washing machine and mark state the device as empty',
+    description: 'Unload the washing machine and mark the device as empty',
     light: 'green',
-    sound: 'doubleBeep',
     ignoreDND: true,
   },
 ]

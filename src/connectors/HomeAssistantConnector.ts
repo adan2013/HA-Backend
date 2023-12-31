@@ -139,7 +139,7 @@ class HomeAssistantConnector {
   }
 
   public callService(
-    entityId: string | undefined,
+    entityId: string | string[] | undefined,
     domain: string,
     service: string,
     data: object = {},

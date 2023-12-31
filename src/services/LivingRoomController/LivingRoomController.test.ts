@@ -12,13 +12,13 @@ const pressButton = (v: string) => {
   emitStateUpdate('sensor.livingroomremote_action', 'None')
 }
 
-const offPayload = (id: string): ServiceCallPayload => ({
+const offPayload = (id: string | string[]): ServiceCallPayload => ({
   entityId: id,
   domain: 'light',
   service: 'turn_off',
 })
 
-const onPayload = (id: string, lvl: number): ServiceCallPayload => ({
+const onPayload = (id: string | string[], lvl: number): ServiceCallPayload => ({
   entityId: id,
   domain: 'light',
   service: 'turn_on',
@@ -50,14 +50,14 @@ describe('LivingRoomController', () => {
   it('should turn off all ligths on button 6', () => {
     const serviceCallMock = init()
     pressButton('button_6_single')
-    expect(serviceCallMock).toHaveBeenCalledTimes(4)
-    expect(serviceCallMock).toBeCalledWith(offPayload('light.tablelight'))
-    expect(serviceCallMock).toBeCalledWith(offPayload('light.tvlight'))
+    expect(serviceCallMock).toHaveBeenCalledTimes(1)
     expect(serviceCallMock).toBeCalledWith(
-      offPayload('light.livingroombacklight'),
-    )
-    expect(serviceCallMock).toBeCalledWith(
-      offPayload('light.livingroomfrontlight'),
+      offPayload([
+        'light.tablelight',
+        'light.tvlight',
+        'light.livingroombacklight',
+        'light.livingroomfrontlight',
+      ]),
     )
   })
 
@@ -66,22 +66,22 @@ describe('LivingRoomController', () => {
     pressButton('button_1_single')
     expect(serviceCallMock).toHaveBeenCalledTimes(2)
     expect(serviceCallMock).toBeCalledWith(
-      onPayload('light.livingroombacklight', 130),
+      onPayload(['light.livingroombacklight'], 130),
     )
     expect(serviceCallMock).toBeCalledWith(
-      offPayload('light.livingroomfrontlight'),
+      offPayload(['light.livingroomfrontlight']),
     )
   })
 
   it('should turn on back and front section on button 2', () => {
     const serviceCallMock = init()
     pressButton('button_2_single')
-    expect(serviceCallMock).toHaveBeenCalledTimes(2)
+    expect(serviceCallMock).toHaveBeenCalledTimes(1)
     expect(serviceCallMock).toBeCalledWith(
-      onPayload('light.livingroombacklight', 160),
-    )
-    expect(serviceCallMock).toBeCalledWith(
-      onPayload('light.livingroomfrontlight', 160),
+      onPayload(
+        ['light.livingroomfrontlight', 'light.livingroombacklight'],
+        160,
+      ),
     )
   })
 
@@ -89,36 +89,36 @@ describe('LivingRoomController', () => {
     const serviceCallMock = init()
     pressButton('button_3_single')
     expect(serviceCallMock).toHaveBeenCalledTimes(1)
-    expect(serviceCallMock).toBeCalledWith(onPayload('light.tvlight', 255))
+    expect(serviceCallMock).toBeCalledWith(onPayload(['light.tvlight'], 255))
   })
 
   it('should turn on table light on button 4', () => {
     const serviceCallMock = init()
     pressButton('button_4_single')
     expect(serviceCallMock).toHaveBeenCalledTimes(1)
-    expect(serviceCallMock).toBeCalledWith(onPayload('light.tablelight', 90))
+    expect(serviceCallMock).toBeCalledWith(onPayload(['light.tablelight'], 90))
   })
 
   it('should switch between levels and turn off light if is already on this level', () => {
     const serviceCallMock = init()
     pressButton('button_4_single')
     expect(serviceCallMock).toHaveBeenLastCalledWith(
-      onPayload('light.tablelight', 90),
+      onPayload(['light.tablelight'], 90),
     )
     setLight('light.tablelight', 90)
     pressButton('button_4_double')
     expect(serviceCallMock).toHaveBeenLastCalledWith(
-      onPayload('light.tablelight', 160),
+      onPayload(['light.tablelight'], 160),
     )
     setLight('light.tablelight', 160)
     pressButton('button_4_hold')
     expect(serviceCallMock).toHaveBeenLastCalledWith(
-      onPayload('light.tablelight', 255),
+      onPayload(['light.tablelight'], 255),
     )
     setLight('light.tablelight', 255)
     pressButton('button_4_hold')
     expect(serviceCallMock).toHaveBeenLastCalledWith(
-      offPayload('light.tablelight'),
+      offPayload(['light.tablelight']),
     )
   })
 })

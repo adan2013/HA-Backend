@@ -56,21 +56,26 @@ class LivingRoomController extends Service {
     const brightnessIsAlreadySet = toTurnOn.every(
       (entity) => entity.brightness === brightnessLevel,
     )
-    toTurnOn.forEach((entity) => {
+    if (toTurnOn.length) {
+      const extraIdsToTurnOn = toTurnOn.slice(1).map((e) => e.entityId)
       if (brightnessIsAlreadySet) {
-        entity.turnOff()
+        toTurnOn[0].turnOff(extraIdsToTurnOn)
       } else {
-        entity.turnOn(brightnessLevel)
+        toTurnOn[0].turnOn(brightnessLevel, extraIdsToTurnOn)
       }
-    })
-    toTurnOff.forEach((entity) => entity.turnOff())
+    }
+    if (toTurnOff.length) {
+      const extraIdsToTurnOff = toTurnOff.slice(1).map((e) => e.entityId)
+      toTurnOff[0].turnOff(extraIdsToTurnOff)
+    }
   }
 
   public turnOffAllLights() {
-    this.tableLight.turnOff()
-    this.tvLight.turnOff()
-    this.backSection.turnOff()
-    this.frontSection.turnOff()
+    this.tableLight.turnOff([
+      this.tvLight.entityId,
+      this.backSection.entityId,
+      this.frontSection.entityId,
+    ])
   }
 }
 

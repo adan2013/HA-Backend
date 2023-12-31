@@ -15,7 +15,7 @@ class LivingRoomController extends Service {
   private frontSection = Entity.monoLight('light.livingroomfrontlight')
 
   constructor() {
-    super('LivingRoomController')
+    super('livingRoomController')
     this.mapRemoteBtnToLight(1, {
       levels: this.backSectionLevels,
       toTurnOn: [this.backSection],

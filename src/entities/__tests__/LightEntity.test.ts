@@ -2,14 +2,20 @@ import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
 import Entity from '../Entity'
 import { serviceCall } from '../../events/events'
 
-mockEntity('sensor', 'on', {
-  brightness: 130,
-  color_temp_kelvin: 5000,
-  min_color_temp_kelvin: 3000,
-  max_color_temp_kelvin: 7000,
-})
-
 describe('LightEntity', () => {
+  beforeEach(() => {
+    mockEntity('sensor', 'on', {
+      brightness: 130,
+      color_temp_kelvin: 5000,
+      min_color_temp_kelvin: 3000,
+      max_color_temp_kelvin: 7000,
+    })
+  })
+
+  afterEach(() => {
+    serviceCall.resetListeners()
+  })
+
   it('should create an instance add fetch the entity state', () => {
     const monoEntity = Entity.monoLight('sensor')
     const cctEntity = Entity.cctLight('sensor')
@@ -125,5 +131,34 @@ describe('LightEntity', () => {
     entity.onLightOff(callbackMock)
     emitStateUpdate('sensor', 'off')
     expect(callbackMock).toHaveBeenCalled()
+  })
+
+  it('should trigger multiple entities in one service call', () => {
+    const extraEntities = ['sensor2', 'sensor3']
+    const expectedEntities = ['sensor', 'sensor2', 'sensor3']
+    const serviceCallMock = jest.fn()
+    serviceCall.on(serviceCallMock)
+    const entity = Entity.monoLight('sensor')
+    entity.turnOn(40, extraEntities)
+    expect(serviceCallMock).toHaveBeenCalledWith({
+      entityId: expectedEntities,
+      domain: 'light',
+      service: 'turn_on',
+      data: {
+        brightness: 40,
+      },
+    })
+    entity.turnOff(extraEntities)
+    expect(serviceCallMock).toHaveBeenCalledWith({
+      entityId: expectedEntities,
+      domain: 'light',
+      service: 'turn_off',
+    })
+    entity.toggle(extraEntities)
+    expect(serviceCallMock).toHaveBeenCalledWith({
+      entityId: expectedEntities,
+      domain: 'light',
+      service: 'toggle',
+    })
   })
 })

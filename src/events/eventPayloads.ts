@@ -21,7 +21,7 @@ export type HomeAssistantCallbackPayload = (payload: any) => void
 export type ServiceCallPayload = {
   domain: string
   service: string
-  entityId?: string
+  entityId?: string | string[]
   data?: object
 }
 

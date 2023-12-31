@@ -25,10 +25,12 @@ class LightEntity extends HomeAssistantEntity {
     this.lightType = lightType
   }
 
-  public turnOn(brightness?: number) {
+  public turnOn(brightness?: number, extraEntities?: string[]) {
     if (this.isUnavailable) return
     serviceCall.emit({
-      entityId: this.entityId,
+      entityId: extraEntities
+        ? [this.entityId, ...extraEntities]
+        : this.entityId,
       domain: 'light',
       service: 'turn_on',
       data: {
@@ -37,37 +39,43 @@ class LightEntity extends HomeAssistantEntity {
     })
   }
 
-  public turnOff() {
+  public turnOff(extraEntities?: string[]) {
     if (this.isUnavailable) return
     serviceCall.emit({
-      entityId: this.entityId,
+      entityId: extraEntities
+        ? [this.entityId, ...extraEntities]
+        : this.entityId,
       domain: 'light',
       service: 'turn_off',
     })
   }
 
-  public toggle() {
+  public toggle(extraEntities?: string[]) {
     if (this.isUnavailable) return
     serviceCall.emit({
-      entityId: this.entityId,
+      entityId: extraEntities
+        ? [this.entityId, ...extraEntities]
+        : this.entityId,
       domain: 'light',
       service: 'toggle',
     })
   }
 
-  public setBrightness(brightness: number) {
+  public setBrightness(brightness: number, extraEntities?: string[]) {
     if (brightness > 0) {
-      this.turnOn(brightness)
+      this.turnOn(brightness, extraEntities)
     } else {
-      this.turnOff()
+      this.turnOff(extraEntities)
     }
   }
 
-  public setTemperature(kelvin: number) {
+  public setTemperature(kelvin: number, extraEntities?: string[]) {
     if (this.isUnavailable) return
     if (this.lightType === 'cct') {
       serviceCall.emit({
-        entityId: this.entityId,
+        entityId: extraEntities
+          ? [this.entityId, ...extraEntities]
+          : this.entityId,
         domain: 'light',
         service: 'turn_on',
         data: {
@@ -77,11 +85,13 @@ class LightEntity extends HomeAssistantEntity {
     }
   }
 
-  public setColor(r: number, g: number, b: number) {
+  public setColor(r: number, g: number, b: number, extraEntities?: string[]) {
     if (this.isUnavailable) return
     if (this.lightType === 'rgb') {
       serviceCall.emit({
-        entityId: this.entityId,
+        entityId: extraEntities
+          ? [this.entityId, ...extraEntities]
+          : this.entityId,
         domain: 'light',
         service: 'turn_on',
         data: {
@@ -91,10 +101,12 @@ class LightEntity extends HomeAssistantEntity {
     }
   }
 
-  public setEffect(effect: string) {
+  public setEffect(effect: string, extraEntities?: string[]) {
     if (this.isUnavailable) return
     serviceCall.emit({
-      entityId: this.entityId,
+      entityId: extraEntities
+        ? [this.entityId, ...extraEntities]
+        : this.entityId,
       domain: 'light',
       service: 'turn_on',
       data: {

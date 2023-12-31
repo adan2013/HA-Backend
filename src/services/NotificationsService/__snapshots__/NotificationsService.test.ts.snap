@@ -16,7 +16,7 @@ exports[`NotificationsService should add or remove notification on notification 
   {
     "canBeDismissed": true,
     "createdAt": "2023-05-15T12:00:00.000Z",
-    "description": "This is a test notification with low priority",
+    "description": "This is a test notification with low priority and quick action button",
     "extraInfo": undefined,
     "id": "test3",
     "ignoreDND": undefined,

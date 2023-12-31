@@ -11,7 +11,8 @@ type KitchenLightsState =
 
 class KitchenController extends Service {
   private readonly LUX_DARK_THRESHOLD = 60
-  private readonly DIMMING_DURATION = 6000
+  private readonly DISABLED_STATE_DURATION = 6000
+  private readonly DIMMING_STATE_DURATION = 6000
   private readonly DIMMING_BRIGHTNESS = 130
   private readonly AUTO_BRIGHTNESS = 255
   private readonly MANUAL_BRIGHTNESS = 255
@@ -54,7 +55,10 @@ class KitchenController extends Service {
             break
         }
       },
-      [{ from: 'auto-dimming', to: 'off', delay: this.DIMMING_DURATION }],
+      [
+        { from: 'disabled', to: 'off', delay: this.DISABLED_STATE_DURATION },
+        { from: 'auto-dimming', to: 'off', delay: this.DIMMING_STATE_DURATION },
+      ],
     )
     this.remote.onAnyShortPressCount(1, () => this.rightLightToggle.toggle())
     this.remote.onAnyShortPressCount(2, () => this.leftLightToggle.toggle())

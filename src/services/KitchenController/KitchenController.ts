@@ -31,7 +31,7 @@ class KitchenController extends Service {
   )
   private leftLightToggle = Entity.toggle('input_boolean.kitchenleftlighton')
   private rightLightToggle = Entity.toggle('input_boolean.kitchenrightlighton')
-  private state: StateMachine<KitchenLightsState>
+  public state: StateMachine<KitchenLightsState>
 
   constructor() {
     super('kitchenController')

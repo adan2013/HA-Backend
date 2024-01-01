@@ -10,6 +10,7 @@ import BalconyController from './services/BalconyController/BalconyController'
 import ReminderService from './services/ReminderService/ReminderService'
 import formatDateTime from './utils/formatDateTime'
 import LivingRoomController from './services/LivingRoomController/LivingRoomController'
+import KitchenController from './services/KitchenController/KitchenController'
 
 console.log(`Timezone: ${process.env['TZ'] || '(default)'}`)
 console.log(`System time: ${formatDateTime()}`)
@@ -29,5 +30,6 @@ homeAssistantSync.once(() => {
   sm.registerService(new WeatherService())
   sm.registerService(new BalconyController())
   sm.registerService(new LivingRoomController())
+  sm.registerService(new KitchenController())
   sm.registerService(new ReminderService())
 })

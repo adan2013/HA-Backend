@@ -60,6 +60,7 @@ class KitchenController extends Service {
         { from: 'auto-dimming', to: 'off', delay: this.DIMMING_STATE_DURATION },
       ],
     )
+    this.registerHelper(this.state)
     this.remote.onAnyShortPressCount(1, () => this.rightLightToggle.toggle())
     this.remote.onAnyShortPressCount(2, () => this.leftLightToggle.toggle())
     this.remote.onAnyShortPressCount(3, () => {

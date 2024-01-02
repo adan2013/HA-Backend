@@ -38,10 +38,28 @@ The dedicated frontend for this backend is [here](https://github.com/adan2013/HA
 ### DataCollector
 Allows to store historical data in queue. For exaple, it is used to collect values of temperature, wind speed and pressure from the weather API.
 
+### DebouncedNumericToggle
+Very useful tool that allows you to convert the numeric value to the toggle with the debounce functionality. I am using it to determine when my washing machine is working, depending on the power consumption reported by the smart plug.
+
+### StateMachine
+Simple state machine implementation with implemented "auto-return" functionality and Type-Script support.
+
 ## Services
 
+### BalconyController
+The service is using the CRON job to turn on and off the Christmas lights on the balcony.
+
+### KitchenController
+Custom logic for my automatic lights in the kitchen. It uses an Aqara motion and light sensor to automatically turn on the lights if someone enters the kitchen.
+
+### LivingRoomController
+Custom logic for all the lights in the living room. For now, it contains four different light sources and one Aqara Opple remote.
+
 ### NotificationsService
-Is responsible for controlling the active notifications which are displayed on the dashboard. It is also responsible for setting the notification light behind the tablet and playing sound alerts through the buzzer.
+It is responsible for controlling the active notifications that are displayed on the dashboard. It is also responsible for setting the notification light behind the tablet and playing sound alerts through the buzzer.
+
+### ReminderService
+It is a group service that contains all the micro-integrations related to reminders - for example: ready laundry or opened main doors.
 
 ### WeatherService
 Is collecting weather data from the OpenWeatherMap API by using "OneCall API 3.0". The air quality index is collected from the AQICN API, because I was unhappy with the measurement precision of the Air Pollution API from OpenWeatherMap.

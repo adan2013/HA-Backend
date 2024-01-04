@@ -12,7 +12,7 @@ type KitchenLightsState =
 class KitchenController extends Service {
   private readonly LUX_DARK_THRESHOLD = 60
   private readonly DISABLED_STATE_DURATION = 6000
-  private readonly DIMMING_STATE_DURATION = 6000
+  private readonly DIMMING_STATE_DURATION = 10000
   private readonly DIMMING_BRIGHTNESS = 130
   private readonly AUTO_BRIGHTNESS = 255
   private readonly MANUAL_BRIGHTNESS = 255

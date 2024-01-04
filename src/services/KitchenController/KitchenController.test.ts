@@ -137,7 +137,7 @@ describe('kitchenController', () => {
     expect(serviceCallMock).toBeCalledWith(
       onPayload([ids.leftLight, ids.rightLight], 130),
     )
-    jest.advanceTimersByTime(7000)
+    jest.advanceTimersByTime(11000)
     expect(controller.state.currentState).toBe('off')
     expect(serviceCallMock).toBeCalledWith(
       offPayload([ids.leftLight, ids.rightLight]),

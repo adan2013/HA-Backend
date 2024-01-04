@@ -36,6 +36,11 @@ const notificationConfig: NotificationConfig[] = [
     light: 'green',
     ignoreDND: true,
   },
+  {
+    id: 'waterFilterInspection',
+    title: 'Water filter inspection',
+    description: 'One of your water filters needs to be inspected and replaced',
+  },
 ]
 
 export default notificationConfig

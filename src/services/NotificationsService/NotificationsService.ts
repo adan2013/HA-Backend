@@ -45,6 +45,7 @@ class NotificationsService extends Service {
           this.addNotification(
             notificationId,
             'Notification triggered manually',
+            true,
           )
         }
       },
@@ -52,12 +53,7 @@ class NotificationsService extends Service {
     webSocketMessage(WS_CMD.incoming.DISMISS_NOTIFICATION).on(
       ({ message: { notificationId } }) => {
         if (notificationId) {
-          const config = notificationConfig.find(
-            (nc) => nc.id === notificationId,
-          )
-          if (config?.canBeDismissed) {
-            this.removeNotification(notificationId)
-          }
+          this.removeNotification(notificationId)
         }
       },
     )
@@ -133,7 +129,11 @@ class NotificationsService extends Service {
     ]
   }
 
-  private addNotification(id: string, extraInfo?: string) {
+  private addNotification(
+    id: string,
+    extraInfo?: string,
+    alwaysCanBeDismissed = false,
+  ) {
     if (this.isDisabled) return
     const existingNotification = this.activeNotifications.find(
       (n) => n.id === id,
@@ -155,7 +155,7 @@ class NotificationsService extends Service {
         extraInfo,
         priorityOrder: config.priorityOrder || 'low',
         light: config.light,
-        canBeDismissed: config.canBeDismissed,
+        canBeDismissed: config.canBeDismissed || alwaysCanBeDismissed,
         ignoreDND: config.ignoreDND,
         createdAt: new Date().toISOString(),
       })

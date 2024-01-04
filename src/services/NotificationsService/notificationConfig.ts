@@ -27,7 +27,7 @@ const notificationConfig: NotificationConfig[] = [
     title: 'Test notification',
     description:
       'This is a test notification with low priority and quick action button',
-    canBeDismissed: true,
+    canBeDismissed: false, // always can be dismissed if triggered manually by the user
   },
   {
     id: 'loadedWashingMachine',

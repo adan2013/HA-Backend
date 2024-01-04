@@ -27,7 +27,7 @@ const notificationConfig: NotificationConfig[] = [
     title: 'Test notification',
     description:
       'This is a test notification with low priority and quick action button',
-    canBeDismissed: true,
+    canBeDismissed: false, // always can be dismissed if triggered manually by the user
   },
   {
     id: 'loadedWashingMachine',
@@ -35,6 +35,11 @@ const notificationConfig: NotificationConfig[] = [
     description: 'Unload the washing machine and mark the device as empty',
     light: 'green',
     ignoreDND: true,
+  },
+  {
+    id: 'waterFilterInspection',
+    title: 'Water filter inspection',
+    description: 'One of your water filters needs to be inspected and replaced',
   },
 ]
 

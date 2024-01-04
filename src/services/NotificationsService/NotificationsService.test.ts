@@ -72,7 +72,10 @@ describe('NotificationsService', () => {
       },
     })
     expect(service.count).toBe(1)
-    expect(service.getNotifications()[0].id).toBe('test3')
+    const firstNotification = service.getNotifications()[0]
+    expect(firstNotification.id).toBe('test3')
+    expect(firstNotification.extraInfo).toBe('Notification triggered manually')
+    expect(firstNotification.canBeDismissed).toBe(true)
     expect(service.getServiceStatus()).toEqual({
       helpers: {},
       status: {
@@ -89,6 +92,12 @@ describe('NotificationsService', () => {
       sendResponse: jest.fn(),
       message: {
         notificationId: 'test3',
+      },
+    })
+    webSocketMessage(WS_CMD.incoming.DISMISS_NOTIFICATION).emit({
+      sendResponse: jest.fn(),
+      message: {
+        notificationId: 'test1',
       },
     })
     expect(service.count).toBe(1)

@@ -15,14 +15,17 @@ class WeatherService extends Service {
   private weatherEndpoint =
     'https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&appid={apiKey}&units=metric&exclude=minutely,alerts'
   private airQualityEndpoint =
-    'https://api.waqi.info/feed/geo:{lat};{lon}/?token={aqiApiKey}'
+    'https://api.waqi.info/feed/{aqiStationId}?token={aqiApiKey}'
   private readonly apiKey: string
   private readonly aqiApiKey: string
+  private readonly aqiStationId: string
   private readonly lat: string
   private readonly lon: string
   private readonly tempHistory: DataCollector
   private readonly windHistory: DataCollector
   private readonly pressureHistory: DataCollector
+  private readonly uviHistory: DataCollector
+  private readonly aqiHistory: DataCollector
 
   constructor() {
     super('weather')
@@ -34,9 +37,12 @@ class WeatherService extends Service {
     this.tempHistory = new DataCollector('temperature', 0, limit, freq)
     this.windHistory = new DataCollector('wind', 0, limit, freq)
     this.pressureHistory = new DataCollector('pressure', 0, limit, freq)
+    this.uviHistory = new DataCollector('uvi', 0, limit, freq)
+    this.aqiHistory = new DataCollector('aqi', 0, limit, freq)
     this.registerHelper(this.tempHistory)
     this.apiKey = process.env['WEATHER_API_KEY'] || ''
     this.aqiApiKey = process.env['AQI_API_KEY'] || ''
+    this.aqiStationId = process.env['AQI_STATION'] || ''
     this.lat = process.env['WEATHER_LAT'] || ''
     this.lon = process.env['WEATHER_LON'] || ''
     let errorMsg
@@ -67,6 +73,7 @@ class WeatherService extends Service {
       .replace('{lon}', this.lon)
       .replace('{apiKey}', this.apiKey)
       .replace('{aqiApiKey}', this.aqiApiKey)
+      .replace('{aqiStationId}', this.aqiStationId)
   }
 
   private parseAqiValue(apiValue: number): number {
@@ -89,12 +96,17 @@ class WeatherService extends Service {
     weatherData: OpenWeatherOneCallApiResponse,
     airQualityData: AirQualityApiResponse,
   ): WeatherServiceData {
+    const airQualityIndexValue = this.parseAqiValue(airQualityData.data.aqi)
     this.tempHistory.saveValue(weatherData.current.temp)
     this.windHistory.saveValue(weatherData.current.wind_speed * 3.6)
     this.pressureHistory.saveValue(weatherData.current.pressure)
+    this.uviHistory.saveValue(weatherData.current.uvi)
+    this.aqiHistory.saveValue(airQualityIndexValue)
     return {
       timestamp: new Date().getTime(),
-      aqiStation: airQualityData.data?.city?.name,
+      aqiStationName: airQualityData.data?.city?.name || '(no-name)',
+      aqiStationId: airQualityData.data?.idx.toString() || '(no-id)',
+      aqiStationTime: airQualityData.data?.time.iso || '(unknown)',
       current: {
         sunrise: weatherData.current.sunrise * 1000,
         sunset: weatherData.current.sunset * 1000,
@@ -104,7 +116,7 @@ class WeatherService extends Service {
         humidity: weatherData.current.humidity,
         dewPoint: weatherData.current.dew_point,
         uvi: weatherData.current.uvi,
-        aqi: this.parseAqiValue(airQualityData.data.aqi),
+        aqi: airQualityIndexValue,
         clouds: weatherData.current.clouds,
         visibility: weatherData.current.visibility,
         windSpeed: weatherData.current.wind_speed * 3.6,
@@ -155,6 +167,8 @@ class WeatherService extends Service {
         temp: this.tempHistory.getValues(),
         windSpeed: this.windHistory.getValues(),
         pressure: this.pressureHistory.getValues(),
+        uvi: this.uviHistory.getValues(),
+        aqi: this.aqiHistory.getValues(),
       },
     }
   }

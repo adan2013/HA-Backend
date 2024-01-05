@@ -12,7 +12,7 @@ export const weatherApiMock = {
     pressure: 991,
     humidity: 91,
     dew_point: -0.46,
-    uvi: 0,
+    uvi: 5,
     clouds: 75,
     visibility: 10000,
     wind_speed: 4.63,
@@ -101,7 +101,11 @@ export const weatherApiMock = {
 export const airQualityApiMock = {
   status: 'ok',
   data: {
+    idx: '12345',
     aqi: 78,
+    time: {
+      iso: '2023-11-04T17:14:00Z',
+    },
     city: {
       name: 'Warsaw, Poland',
     },

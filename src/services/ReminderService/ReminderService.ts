@@ -76,6 +76,7 @@ class ReminderService extends Service {
           : undefined,
       })
     }
+    entites.forEach((e) => e.onAnyStateUpdate(() => checkInspections()))
     Timer.onTime(7, 0, () => checkInspections())
     checkInspections()
   }

@@ -108,5 +108,22 @@ describe('ReminderService', () => {
         extraInfo: 'two prefilters, membrane filter, mineralization filter',
       })
     })
+
+    it('should refresh notification state on inspection date change', () => {
+      const notificationMock = jest.fn()
+      notifications.on(notificationMock)
+      jest.setSystemTime(new Date('2023-09-14'))
+      new ReminderService()
+      expect(notificationMock).toHaveBeenLastCalledWith({
+        id: 'waterFilterInspection',
+        enabled: true,
+        extraInfo: 'two prefilters',
+      })
+      emitStateUpdate('input_datetime.kitchenfilterservice', '2023-09-14')
+      expect(notificationMock).toHaveBeenLastCalledWith({
+        id: 'waterFilterInspection',
+        enabled: false,
+      })
+    })
   })
 })

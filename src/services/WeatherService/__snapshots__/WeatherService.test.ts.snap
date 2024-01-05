@@ -2,7 +2,9 @@
 
 exports[`WeatherService should fetch weather data 1`] = `
 {
-  "aqiStation": "Warsaw, Poland",
+  "aqiStationId": "12345",
+  "aqiStationName": "Warsaw, Poland",
+  "aqiStationTime": "2023-11-04T17:14:00Z",
   "current": {
     "aqi": 2,
     "clouds": 75,
@@ -13,7 +15,7 @@ exports[`WeatherService should fetch weather data 1`] = `
     "sunrise": 1700805653000,
     "sunset": 1700836319000,
     "temp": 0.78,
-    "uvi": 0,
+    "uvi": 5,
     "visibility": 10000,
     "weather": {
       "icon": "04n",
@@ -24,11 +26,17 @@ exports[`WeatherService should fetch weather data 1`] = `
     "windSpeed": 16.668,
   },
   "historicalWeather": {
+    "aqi": [
+      2,
+    ],
     "pressure": [
       991,
     ],
     "temp": [
       1,
+    ],
+    "uvi": [
+      5,
     ],
     "windSpeed": [
       17,

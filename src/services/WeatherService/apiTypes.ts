@@ -85,7 +85,11 @@ export interface OpenWeatherOneCallApiResponse {
 export interface AirQualityApiResponse {
   status: string
   data: {
+    idx: number
     aqi: number
+    time: {
+      iso: string
+    }
     city: {
       name: string
     }

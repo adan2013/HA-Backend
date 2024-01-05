@@ -5,8 +5,7 @@ import { WeatherServiceData } from './types'
 
 const weatherApiUrl =
   'https://api.openweathermap.org/data/3.0/onecall?lat=COORDS_LAT&lon=COORDS_LON&appid=API_KEY&units=metric&exclude=minutely,alerts'
-const airQualityApiUrl =
-  'https://api.waqi.info/feed/geo:COORDS_LAT;COORDS_LON/?token=AQI_API_KEY'
+const airQualityApiUrl = 'https://api.waqi.info/feed/A12345?token=AQI_API_KEY'
 
 jest.useFakeTimers().setSystemTime(new Date('2021-05-14T16:12:00.000'))
 jest.mock('axios')
@@ -31,6 +30,7 @@ describe('WeatherService', () => {
     process.env = {
       ...OLD_ENV,
       AQI_API_KEY: 'AQI_API_KEY',
+      AQI_STATION: 'A12345',
       WEATHER_API_KEY: 'API_KEY',
       WEATHER_LAT: 'COORDS_LAT',
       WEATHER_LON: 'COORDS_LON',

@@ -177,7 +177,7 @@ describe('kitchenController', () => {
     expect(isBrightCase.controller.state.currentState).toBe('off')
   })
 
-  it('should turn on auto lights only if it is getting dark', () => {
+  it('should turn on auto lights if it is getting dark', () => {
     const { controller } = init({
       isDark: false,
       movement: true,
@@ -185,8 +185,32 @@ describe('kitchenController', () => {
     expect(controller.state.currentState).toBe('off')
     emitStateUpdate(ids.light, '20')
     expect(controller.state.currentState).toBe('auto-on')
+  })
+
+  it('should NOT turn on auto lights if it is getting bright', () => {
+    const { controller } = init({
+      isDark: false,
+      movement: true,
+    })
+    expect(controller.state.currentState).toBe('off')
     emitStateUpdate(ids.light, '100')
-    expect(controller.state.currentState).toBe('auto-on')
+    expect(controller.state.currentState).toBe('off')
+  })
+
+  it('should trigger update only on toggle from bright to dark state', () => {
+    const { controller, serviceCallMock } = init({
+      isDark: false,
+      movement: true,
+    })
+    expect(controller.state.currentState).toBe('off')
+    emitStateUpdate(ids.light, '20')
+    serviceCallMock.mockReset()
+    emitStateUpdate(ids.light, '19')
+    expect(serviceCallMock).not.toBeCalled()
+    emitStateUpdate(ids.light, '101')
+    expect(serviceCallMock).not.toBeCalled()
+    emitStateUpdate(ids.light, '21')
+    expect(serviceCallMock).toBeCalled()
   })
 
   it('should disable auto lights if autoLight toggle is off', () => {

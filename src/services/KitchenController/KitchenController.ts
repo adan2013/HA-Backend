@@ -32,6 +32,7 @@ class KitchenController extends Service {
   private leftLightToggle = Entity.toggle('input_boolean.kitchenleftlighton')
   private rightLightToggle = Entity.toggle('input_boolean.kitchenrightlighton')
   public state: StateMachine<KitchenLightsState>
+  private isDark = false
 
   constructor() {
     super('kitchenController')
@@ -70,9 +71,11 @@ class KitchenController extends Service {
     this.remote.onAnyShortPressCount(4, () => this.ignoreSunToggle.toggle())
     this.remote.onHoldPress(4, () => this.autoLightsToggle.toggle())
     this.lightSensor.onAnyStateUpdate((state) => {
-      if (Number(state.state) < this.LUX_DARK_THRESHOLD) {
+      const nowIsDark = Number(state.state) < this.LUX_DARK_THRESHOLD
+      if (!this.isDark && nowIsDark) {
         this.switchState()
       }
+      this.isDark = nowIsDark
     })
     this.motionSensor.onAnyStateUpdate(() => this.switchState())
     this.autoLightsToggle.onAnyStateUpdate(() => this.switchState())
@@ -123,7 +126,9 @@ class KitchenController extends Service {
           if (this.motionSensor.isOn && (this.ignoreSunToggle.isOn || isDark)) {
             this.state.setState('auto-on')
           } else {
-            this.state.setState('off')
+            if (this.state.currentState !== 'auto-dimming') {
+              this.state.setState('off')
+            }
           }
         }
       } else {

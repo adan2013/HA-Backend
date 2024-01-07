@@ -29,6 +29,7 @@ The dedicated frontend for this backend is [here](https://github.com/adan2013/HA
 | HA_HOST         | IP address of Home Assistant instance |
 | HA_TOKEN        | access token for Home Assistant       |
 | AQI_API_KEY     | access token for AQICN API            |
+| AQI_STATION     | ID of the AQICN air quality station   |
 | WEATHER_API_KEY | access token for OpenWeatherMap API   |
 | WEATHER_LAT     | weather coordinates - latitude        |
 | WEATHER_LON     | weather coordinates - longitude       |

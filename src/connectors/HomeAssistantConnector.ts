@@ -66,7 +66,9 @@ class HomeAssistantConnector {
           console.log(
             `Synced with Home Assistant! Count of entities: ${this.entities.length}`,
           )
-          homeAssistantSync.emit()
+          homeAssistantSync.emit({
+            entitiesCount: this.entities.length,
+          })
         },
       },
     )

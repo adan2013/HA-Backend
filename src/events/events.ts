@@ -6,6 +6,7 @@ import {
   ServiceCallPayload,
   EntityStatePayload,
   NotificationsPayload,
+  HomeAssistantSyncPayload,
 } from './eventPayloads'
 import { EntityState } from '../connectors/types'
 
@@ -16,7 +17,9 @@ export const serviceDataUpdate = new TypedEvent<ServiceDataUpdatePayload>(
 export const webSocketMessage = (topic: string) =>
   new TypedEvent<WebSocketIncomingMessagePayload>('ws/incoming', topic)
 
-export const homeAssistantSync = new TypedEvent<void>('ha/sync')
+export const homeAssistantSync = new TypedEvent<HomeAssistantSyncPayload>(
+  'ha/sync',
+)
 
 export const homeAssistantEvent = (msgId: number) =>
   new TypedEvent<HomeAssistantCallbackPayload>('ha/event', msgId.toString())

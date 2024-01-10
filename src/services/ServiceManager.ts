@@ -1,15 +1,19 @@
 import Service from './Service'
 import { ServiceManagerStatus, ServiceStatus } from './types'
-import { webSocketMessage } from '../events/events'
+import { homeAssistantSync, webSocketMessage } from '../events/events'
 import WS_CMD from '../connectors/wsCommands'
 import formatDateTime from '../utils/formatDateTime'
 
 class ServiceManager {
+  private readonly startDate: Date
   private services: Service[] = []
-  private startDate: Date
+  private syncedEntitiesCount = 0
 
   constructor() {
     this.startDate = new Date()
+    homeAssistantSync.on(({ entitiesCount }) => {
+      this.syncedEntitiesCount = entitiesCount
+    })
     webSocketMessage(WS_CMD.incoming.SYNC_DATA).on(({ sendResponse }) => {
       sendResponse(
         WS_CMD.outgoing.DATA_UPDATE,
@@ -50,6 +54,7 @@ class ServiceManager {
     return {
       currentTime: formatDateTime(),
       startTime: formatDateTime(this.startDate),
+      syncedEntitiesCount: this.syncedEntitiesCount,
       daysRunning,
       services,
     }

@@ -11,6 +11,18 @@ import ReminderService from './services/ReminderService/ReminderService'
 import formatDateTime from './utils/formatDateTime'
 import LivingRoomController from './services/LivingRoomController/LivingRoomController'
 import KitchenController from './services/KitchenController/KitchenController'
+import { checkEnvironmentVariables } from './utils/envVariables'
+
+checkEnvironmentVariables([
+  'ENV',
+  'HA_HOST',
+  'HA_TOKEN',
+  'AQI_API_KEY',
+  'AQI_STATION',
+  'WEATHER_API_KEY',
+  'LOCATION_LAT',
+  'LOCATION_LON',
+])
 
 console.log(`Timezone: ${process.env['TZ'] || '(default)'}`)
 console.log(`System time: ${formatDateTime()}`)
@@ -21,13 +33,21 @@ if (process.env['ENV'] === 'dev') {
   )
 }
 
+const sm = new ServiceManager()
 new WebSocketServerConnector()
-new HomeAssistantConnector()
+new HomeAssistantConnector(process.env['HA_HOST'], process.env['HA_TOKEN'])
 
 homeAssistantSync.once(() => {
-  const sm = new ServiceManager()
   sm.registerService(new NotificationsService())
-  sm.registerService(new WeatherService())
+  sm.registerService(
+    new WeatherService(
+      process.env['WEATHER_API_KEY'],
+      process.env['LOCATION_LAT'],
+      process.env['LOCATION_LON'],
+      process.env['AQI_API_KEY'],
+      process.env['AQI_STATION'],
+    ),
+  )
   sm.registerService(new BalconyController())
   sm.registerService(new LivingRoomController())
   sm.registerService(new KitchenController())

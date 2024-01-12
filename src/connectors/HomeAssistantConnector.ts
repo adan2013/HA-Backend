@@ -10,6 +10,8 @@ import {
 } from '../events/events'
 
 class HomeAssistantConnector {
+  private readonly host: string
+  private readonly token: string
   private msgId = 1
   private socket: WebSocket | undefined
 
@@ -26,7 +28,7 @@ class HomeAssistantConnector {
   }
 
   private connectToHomeAssistant() {
-    this.socket = new WebSocket(`ws://${process.env.HA_HOST}/api/websocket`)
+    this.socket = new WebSocket(`ws://${this.host}/api/websocket`)
     this.socket.onmessage = (e) => this.onReceive(e)
     this.socket.onclose = () => {
       console.error('Connection to Home Assistant closed!')
@@ -37,11 +39,13 @@ class HomeAssistantConnector {
     }
   }
 
-  public constructor() {
-    if (!process.env.HA_HOST || !process.env.HA_TOKEN) {
+  public constructor(host?: string, token?: string) {
+    if (!host || !token) {
       console.error('Missing HA_HOST or HA_TOKEN env variable!')
       throw new Error('Missing basic env variables')
     }
+    this.host = host
+    this.token = token
     this.connectToHomeAssistant()
     entityStateRequest.on(({ entityId, callback }) => {
       const entityState = this.entities.find((e) => e.id === entityId)
@@ -66,7 +70,9 @@ class HomeAssistantConnector {
           console.log(
             `Synced with Home Assistant! Count of entities: ${this.entities.length}`,
           )
-          homeAssistantSync.emit()
+          homeAssistantSync.emit({
+            entitiesCount: this.entities.length,
+          })
         },
       },
     )
@@ -101,7 +107,7 @@ class HomeAssistantConnector {
         case 'auth_required':
           this.sendMsg(
             'auth',
-            { access_token: process.env.HA_TOKEN },
+            { access_token: this.token },
             {
               includeId: false,
             },

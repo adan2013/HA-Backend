@@ -6,8 +6,8 @@ import { BrightnessLevels, LightConfig } from './types'
 class LivingRoomController extends Service {
   private readonly tableLevels: BrightnessLevels = [90, 160, 255]
   private readonly tvLevels: BrightnessLevels = [255, 255, 255]
-  private readonly backSectionLevels: BrightnessLevels = [130, 76, 220]
-  private readonly frontSectionLevels: BrightnessLevels = [160, 62, 255]
+  private readonly backSectionLevels: BrightnessLevels = [160, 70, 220]
+  private readonly frontSectionLevels: BrightnessLevels = [160, 80, 255]
   private remote = Entity.aqaraOpple('sensor.livingroomremote_action')
   private tableLight = Entity.monoLight('light.tablelight')
   private tvLight = Entity.monoLight('light.tvlight')
@@ -54,7 +54,7 @@ class LivingRoomController extends Service {
     toTurnOff: LightEntity[] = [],
   ) {
     const brightnessIsAlreadySet = toTurnOn.every(
-      (entity) => entity.brightness === brightnessLevel,
+      (entity) => Math.abs(entity.brightness - brightnessLevel) <= 3,
     )
     if (toTurnOn.length) {
       const extraIdsToTurnOn = toTurnOn.slice(1).map((e) => e.entityId)

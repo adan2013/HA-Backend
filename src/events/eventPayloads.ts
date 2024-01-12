@@ -16,6 +16,10 @@ export type ServiceDataUpdatePayload = {
   data: object
 }
 
+export type HomeAssistantSyncPayload = {
+  entitiesCount: number
+}
+
 export type HomeAssistantCallbackPayload = (payload: any) => void
 
 export type ServiceCallPayload = {

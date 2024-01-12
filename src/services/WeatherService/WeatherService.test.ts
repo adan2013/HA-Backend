@@ -22,51 +22,32 @@ mockedAxios.get.mockImplementation((url) => {
   }
 })
 
+const initService = () =>
+  new WeatherService(
+    'API_KEY',
+    'COORDS_LAT',
+    'COORDS_LON',
+    'AQI_API_KEY',
+    'A12345',
+  )
+
 describe('WeatherService', () => {
-  const OLD_ENV = process.env
-
-  beforeEach(() => {
-    jest.resetModules()
-    process.env = {
-      ...OLD_ENV,
-      AQI_API_KEY: 'AQI_API_KEY',
-      AQI_STATION: 'A12345',
-      WEATHER_API_KEY: 'API_KEY',
-      WEATHER_LAT: 'COORDS_LAT',
-      WEATHER_LON: 'COORDS_LON',
-    }
-  })
-
-  afterAll(() => {
-    process.env = OLD_ENV
-  })
-
   it('should disable sevice if one of the env variables is missing', () => {
-    const initialVariables = { ...process.env }
+    const withoutApiKey = new WeatherService(undefined, '2', '3', '4', '5')
+    const withoutLat = new WeatherService('1', undefined, '3', '4', '5')
+    const withoutLon = new WeatherService('1', '2', undefined, '4', '5')
+    const withoutAqiApiKey = new WeatherService('1', '2', '3', undefined, '5')
+    const withoutAqiStation = new WeatherService('1', '2', '3', '4', undefined)
 
-    process.env.AQI_API_KEY = undefined
-    const withoutAqiApiKey = new WeatherService()
-    process.env = initialVariables
-
-    process.env.WEATHER_API_KEY = undefined
-    const withoutApiKey = new WeatherService()
-    process.env = initialVariables
-
-    process.env.WEATHER_LAT = undefined
-    const withoutLat = new WeatherService()
-    process.env = initialVariables
-
-    process.env.WEATHER_LON = undefined
-    const withoutLon = new WeatherService()
-
-    expect(withoutAqiApiKey.getServiceStatus().status.enabled).toBe(false)
     expect(withoutApiKey.getServiceStatus().status.enabled).toBe(false)
     expect(withoutLat.getServiceStatus().status.enabled).toBe(false)
     expect(withoutLon.getServiceStatus().status.enabled).toBe(false)
+    expect(withoutAqiApiKey.getServiceStatus().status.enabled).toBe(false)
+    expect(withoutAqiStation.getServiceStatus().status.enabled).toBe(false)
   })
 
   it('should create a new instance of WeatherService with correct status', async () => {
-    const weather = new WeatherService()
+    const weather = initService()
     await weather.fetchWeather()
     const status = weather.getServiceStatus()
     expect(status).toEqual({
@@ -85,7 +66,7 @@ describe('WeatherService', () => {
   })
 
   it('should fetch weather data', async () => {
-    const weather = new WeatherService()
+    const weather = initService()
     await weather.fetchWeather()
     expect(mockedAxios.get).toHaveBeenCalledWith(weatherApiUrl)
     expect(mockedAxios.get).toHaveBeenCalledWith(airQualityApiUrl)
@@ -98,7 +79,7 @@ describe('WeatherService', () => {
   })
 
   it('should store historical data', async () => {
-    const weather = new WeatherService()
+    const weather = initService()
     // it saves data every 2 values, so we need to call it 5 times
     await weather.fetchWeather()
     await weather.fetchWeather()
@@ -116,7 +97,7 @@ describe('WeatherService', () => {
     mockedAxios.get.mockImplementationOnce(() => {
       return Promise.reject(new Error('ERROR_MESSAGE'))
     })
-    const weather = new WeatherService()
+    const weather = initService()
     await weather.fetchWeather()
     expect(weather.getServiceStatus().status).toEqual({
       enabled: true,
@@ -126,7 +107,7 @@ describe('WeatherService', () => {
   })
 
   it('should block requests if service is disabled', async () => {
-    const weather = new WeatherService()
+    const weather = initService()
     weather.setServiceEnabled(false)
     await weather.fetchWeather()
     expect(weather.getServiceData()).toBeNull()

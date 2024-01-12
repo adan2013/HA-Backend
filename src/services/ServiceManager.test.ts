@@ -1,8 +1,9 @@
 import ServiceManager from './ServiceManager'
 import Service from './Service'
 import Helper from '../helpers/Helper'
-import { webSocketMessage } from '../events/events'
+import { homeAssistantSync, webSocketMessage } from '../events/events'
 import WS_CMD from '../connectors/wsCommands'
+import { ServiceManagerStatus } from './types'
 
 jest.useFakeTimers().setSystemTime(new Date('2023-05-15T12:00:00Z'))
 
@@ -15,10 +16,11 @@ class TestService extends Service {
   }
 }
 
-const correctStatus = {
+const correctStatus: ServiceManagerStatus = {
   currentTime: '12:00 15-05-2023',
   startTime: '12:00 15-05-2023',
   daysRunning: 0,
+  syncedEntitiesCount: 47,
   services: {
     testService: {
       helpers: {
@@ -52,6 +54,9 @@ const initializeTestServiceManager = () => {
   service.registerHelper(helper)
   manager.registerService(service)
   manager.registerService(service2)
+  homeAssistantSync.emit({
+    entitiesCount: 47,
+  })
   return manager
 }
 

@@ -66,7 +66,7 @@ describe('LivingRoomController', () => {
     pressButton('button_1_single')
     expect(serviceCallMock).toHaveBeenCalledTimes(2)
     expect(serviceCallMock).toBeCalledWith(
-      onPayload(['light.livingroombacklight'], 130),
+      onPayload(['light.livingroombacklight'], 160),
     )
     expect(serviceCallMock).toBeCalledWith(
       offPayload(['light.livingroomfrontlight']),
@@ -99,7 +99,7 @@ describe('LivingRoomController', () => {
     expect(serviceCallMock).toBeCalledWith(onPayload(['light.tablelight'], 90))
   })
 
-  it('should switch between levels and turn off light if is already on this level', () => {
+  it('should switch table light between levels and turn off if is already on this level', () => {
     const serviceCallMock = init()
     pressButton('button_4_single')
     expect(serviceCallMock).toHaveBeenLastCalledWith(
@@ -119,6 +119,32 @@ describe('LivingRoomController', () => {
     pressButton('button_4_hold')
     expect(serviceCallMock).toHaveBeenLastCalledWith(
       offPayload(['light.tablelight']),
+    )
+  })
+
+  it('should switch main light between levels and turn off if is already on this level', () => {
+    const serviceCallMock = init()
+    pressButton('button_2_single')
+    expect(serviceCallMock).toHaveBeenLastCalledWith(
+      onPayload(
+        ['light.livingroomfrontlight', 'light.livingroombacklight'],
+        160,
+      ),
+    )
+    setLight('light.livingroomfrontlight', 159)
+    setLight('light.livingroombacklight', 161)
+    pressButton('button_2_double')
+    expect(serviceCallMock).toHaveBeenLastCalledWith(
+      onPayload(
+        ['light.livingroomfrontlight', 'light.livingroombacklight'],
+        80,
+      ),
+    )
+    setLight('light.livingroomfrontlight', 79)
+    setLight('light.livingroombacklight', 80)
+    pressButton('button_2_double')
+    expect(serviceCallMock).toHaveBeenLastCalledWith(
+      offPayload(['light.livingroomfrontlight', 'light.livingroombacklight']),
     )
   })
 })

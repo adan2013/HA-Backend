@@ -27,7 +27,13 @@ class WeatherService extends Service {
   private readonly uviHistory: DataCollector
   private readonly aqiHistory: DataCollector
 
-  constructor() {
+  constructor(
+    weatherApiKey?: string,
+    locationLat?: string,
+    locationLon?: string,
+    aqiApiKey?: string,
+    aqiStation?: string,
+  ) {
     super('weather')
     const limit = Math.round(
       (this.historicalDataHourLimit * (60 / this.refetchIntervalMinutes)) /
@@ -40,23 +46,18 @@ class WeatherService extends Service {
     this.uviHistory = new DataCollector('uvi', 0, limit, freq)
     this.aqiHistory = new DataCollector('aqi', 0, limit, freq)
     this.registerHelper(this.tempHistory)
-    this.apiKey = process.env['WEATHER_API_KEY'] || ''
-    this.aqiApiKey = process.env['AQI_API_KEY'] || ''
-    this.aqiStationId = process.env['AQI_STATION'] || ''
-    this.lat = process.env['WEATHER_LAT'] || ''
-    this.lon = process.env['WEATHER_LON'] || ''
-    let errorMsg
-    if (!this.apiKey) {
-      errorMsg = 'Weather service: API key is not set'
-    }
-    if (!this.aqiApiKey) {
-      errorMsg = 'Weather service: air quality API key is not set'
-    }
-    if (!this.lat || !this.lon) {
-      errorMsg = 'Weather service: coordinates are not set'
-    }
-    if (errorMsg) {
-      console.error(errorMsg)
+    this.apiKey = weatherApiKey || ''
+    this.aqiApiKey = aqiApiKey || ''
+    this.aqiStationId = aqiStation || ''
+    this.lat = locationLat || ''
+    this.lon = locationLon || ''
+    if (
+      !this.apiKey ||
+      !this.aqiApiKey ||
+      !this.aqiStationId ||
+      !this.lat ||
+      !this.lon
+    ) {
       this.setServiceEnabled(false)
       this.setServiceStatus('Bad config', 'red')
     } else {

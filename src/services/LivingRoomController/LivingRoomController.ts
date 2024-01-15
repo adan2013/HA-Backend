@@ -53,12 +53,17 @@ class LivingRoomController extends Service {
     toTurnOn: LightEntity[] = [],
     toTurnOff: LightEntity[] = [],
   ) {
-    const brightnessIsAlreadySet = toTurnOn.every(
+    const lightsToTurnOnAlreadySet = toTurnOn.every(
       (entity) => Math.abs(entity.brightness - brightnessLevel) <= 3,
     )
+    const lightsToTurnOffAlreadySet = toTurnOff.every(
+      (entity) => entity.state?.state === 'off',
+    )
+    const lightsAlreadySet =
+      lightsToTurnOnAlreadySet && lightsToTurnOffAlreadySet
     if (toTurnOn.length) {
       const extraIdsToTurnOn = toTurnOn.slice(1).map((e) => e.entityId)
-      if (brightnessIsAlreadySet) {
+      if (lightsAlreadySet) {
         toTurnOn[0].turnOff(extraIdsToTurnOn)
       } else {
         toTurnOn[0].turnOn(brightnessLevel, extraIdsToTurnOn)

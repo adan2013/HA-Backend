@@ -147,4 +147,35 @@ describe('LivingRoomController', () => {
       offPayload(['light.livingroomfrontlight', 'light.livingroombacklight']),
     )
   })
+
+  it('should switch main light between back and full section', () => {
+    const serviceCallMock = init()
+    pressButton('button_1_single')
+    expect(serviceCallMock).toHaveBeenCalledWith(
+      onPayload(['light.livingroombacklight'], 160),
+    )
+    expect(serviceCallMock).toHaveBeenCalledWith(
+      offPayload(['light.livingroomfrontlight']),
+    )
+    setLight('light.livingroombacklight', 161)
+    pressButton('button_2_single')
+    expect(serviceCallMock).toHaveBeenLastCalledWith(
+      onPayload(
+        ['light.livingroomfrontlight', 'light.livingroombacklight'],
+        160,
+      ),
+    )
+    setLight('light.livingroomfrontlight', 159)
+    setLight('light.livingroombacklight', 161)
+    serviceCallMock.mockReset()
+    pressButton('button_1_single')
+    // turn on back and turn off front section even if the back section has correct brightness level
+    expect(serviceCallMock).toHaveBeenCalledTimes(2)
+    expect(serviceCallMock).toHaveBeenCalledWith(
+      onPayload(['light.livingroombacklight'], 160),
+    )
+    expect(serviceCallMock).toHaveBeenCalledWith(
+      offPayload(['light.livingroomfrontlight']),
+    )
+  })
 })

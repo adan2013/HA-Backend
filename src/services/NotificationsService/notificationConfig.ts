@@ -41,6 +41,15 @@ const notificationConfig: NotificationConfig[] = [
     title: 'Water filter inspection',
     description: 'One of your water filters needs to be inspected and replaced',
   },
+  {
+    id: 'mainDoorOpen',
+    title: 'The main door is open',
+    description:
+      'Remember to close the main door and use the deadbolt to secure the house',
+    priorityOrder: 'medium',
+    light: 'yellow',
+    ignoreDND: true,
+  },
 ]
 
 export default notificationConfig

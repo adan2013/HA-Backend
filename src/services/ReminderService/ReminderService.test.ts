@@ -2,14 +2,18 @@ import ReminderService from './ReminderService'
 import { notifications, serviceCall } from '../../events/events'
 import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
 
-jest.useFakeTimers()
-mockEntity('sensor.washingmachineplug_power', '0.6')
-mockEntity('input_select.washingmachinestate', 'LOADED')
-mockEntity('input_datetime.kitchenfilterservice', '2023-02-15')
-mockEntity('input_datetime.kitchenmembranefilterservice', '2023-02-14')
-mockEntity('input_datetime.kitchenfinalfilterservice', '2023-02-13')
-
 describe('ReminderService', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+    mockEntity('sensor.washingmachineplug_power', '0.6')
+    mockEntity('input_select.washingmachinestate', 'LOADED')
+    mockEntity('input_datetime.kitchenfilterservice', '2023-02-15')
+    mockEntity('input_datetime.kitchenmembranefilterservice', '2023-02-14')
+    mockEntity('input_datetime.kitchenfinalfilterservice', '2023-02-13')
+    mockEntity('input_boolean.alertdeadbolt', 'on')
+    mockEntity('binary_sensor.maindoordeadboltsensor_contact', 'off')
+  })
+
   describe('washing machine watchdog', () => {
     it('should reset state of the washing machine', () => {
       const serviceMock = jest.fn()
@@ -79,7 +83,7 @@ describe('ReminderService', () => {
       notifications.on(notificationMock)
       jest.setSystemTime(new Date('2023-05-05'))
       new ReminderService()
-      expect(notificationMock).toHaveBeenLastCalledWith({
+      expect(notificationMock).toHaveBeenCalledWith({
         id: 'waterFilterInspection',
         enabled: false,
       })
@@ -90,7 +94,7 @@ describe('ReminderService', () => {
       notifications.on(notificationMock)
       jest.setSystemTime(new Date('2023-09-14'))
       new ReminderService()
-      expect(notificationMock).toHaveBeenLastCalledWith({
+      expect(notificationMock).toHaveBeenCalledWith({
         id: 'waterFilterInspection',
         enabled: true,
         extraInfo: 'two prefilters',
@@ -102,7 +106,7 @@ describe('ReminderService', () => {
       notifications.on(notificationMock)
       jest.setSystemTime(new Date('2024-08-01'))
       new ReminderService()
-      expect(notificationMock).toHaveBeenLastCalledWith({
+      expect(notificationMock).toHaveBeenCalledWith({
         id: 'waterFilterInspection',
         enabled: true,
         extraInfo: 'two prefilters, membrane filter, mineralization filter',
@@ -114,7 +118,7 @@ describe('ReminderService', () => {
       notifications.on(notificationMock)
       jest.setSystemTime(new Date('2023-09-14'))
       new ReminderService()
-      expect(notificationMock).toHaveBeenLastCalledWith({
+      expect(notificationMock).toHaveBeenCalledWith({
         id: 'waterFilterInspection',
         enabled: true,
         extraInfo: 'two prefilters',
@@ -123,6 +127,54 @@ describe('ReminderService', () => {
       expect(notificationMock).toHaveBeenLastCalledWith({
         id: 'waterFilterInspection',
         enabled: false,
+      })
+    })
+  })
+
+  describe('main door deadbolt watchdog', () => {
+    it('should show and hide the notification about the open main doors', () => {
+      const notificationMock = jest.fn()
+      notifications.on(notificationMock)
+      new ReminderService()
+      expect(notificationMock).toHaveBeenCalledWith({
+        id: 'mainDoorOpen',
+        enabled: false,
+      })
+      emitStateUpdate('binary_sensor.maindoordeadboltsensor_contact', 'on')
+      expect(notificationMock).toHaveBeenLastCalledWith({
+        id: 'mainDoorOpen',
+        enabled: true,
+      })
+      emitStateUpdate('binary_sensor.maindoordeadboltsensor_contact', 'unknown')
+      expect(notificationMock).toHaveBeenLastCalledWith({
+        id: 'mainDoorOpen',
+        enabled: false,
+      })
+      emitStateUpdate('binary_sensor.maindoordeadboltsensor_contact', 'off')
+      expect(notificationMock).toHaveBeenLastCalledWith({
+        id: 'mainDoorOpen',
+        enabled: false,
+      })
+    })
+
+    it('should disable the main door notification if the toggle is off', () => {
+      const notificationMock = jest.fn()
+      notifications.on(notificationMock)
+      new ReminderService()
+      emitStateUpdate('binary_sensor.maindoordeadboltsensor_contact', 'on')
+      expect(notificationMock).toHaveBeenLastCalledWith({
+        id: 'mainDoorOpen',
+        enabled: true,
+      })
+      emitStateUpdate('input_boolean.alertdeadbolt', 'off')
+      expect(notificationMock).toHaveBeenLastCalledWith({
+        id: 'mainDoorOpen',
+        enabled: false,
+      })
+      emitStateUpdate('input_boolean.alertdeadbolt', 'on')
+      expect(notificationMock).toHaveBeenLastCalledWith({
+        id: 'mainDoorOpen',
+        enabled: true,
       })
     })
   })

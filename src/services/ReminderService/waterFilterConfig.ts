@@ -2,6 +2,7 @@ export type WaterFilterInspection = {
   label: string
   entityId: string
   interval: number
+  warningThreshold: number
 }
 
 export const inspections: WaterFilterInspection[] = [
@@ -9,16 +10,19 @@ export const inspections: WaterFilterInspection[] = [
     label: 'two prefilters',
     entityId: 'input_datetime.kitchenfilterservice',
     interval: 120,
+    warningThreshold: 10,
   },
   {
     label: 'membrane filter',
     entityId: 'input_datetime.kitchenmembranefilterservice',
     interval: 485,
+    warningThreshold: 10,
   },
   {
     label: 'mineralization filter',
     entityId: 'input_datetime.kitchenfinalfilterservice',
     interval: 365,
+    warningThreshold: 10,
   },
 ]
 

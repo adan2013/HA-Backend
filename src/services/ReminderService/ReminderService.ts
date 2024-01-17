@@ -7,12 +7,11 @@ import Timer from '../../Timer'
 import HomeAssistantEntity from '../../entities/HomeAssistantEntity'
 
 class ReminderService extends Service {
-  private readonly WATER_FILTER_INSPECTION_THRESHOLD = 10
-
   constructor() {
     super('reminder')
     this.initializeWashingMachineWatchdog()
     this.initializeWaterFilterWatchdog()
+    this.initializeMainDoorDeadboltWatchdog()
   }
 
   private initializeWashingMachineWatchdog() {
@@ -62,7 +61,7 @@ class ReminderService extends Service {
             entity.state?.state,
             ins.interval,
           )
-          if (daysLeft <= this.WATER_FILTER_INSPECTION_THRESHOLD) {
+          if (daysLeft <= ins.warningThreshold) {
             detectedInspections.push(ins.label)
           }
         }
@@ -79,6 +78,22 @@ class ReminderService extends Service {
     entites.forEach((e) => e.onAnyStateUpdate(() => checkInspections()))
     Timer.onTime(7, 0, () => checkInspections())
     checkInspections()
+  }
+
+  private initializeMainDoorDeadboltWatchdog() {
+    const alertToggle = Entity.toggle('input_boolean.alertdeadbolt')
+    const deadboltSensor = Entity.general(
+      'binary_sensor.maindoordeadboltsensor_contact',
+    )
+    const checkDoorState = () => {
+      notifications.emit({
+        id: 'mainDoorOpen',
+        enabled: deadboltSensor.isOn && alertToggle.isOn,
+      })
+    }
+    alertToggle.onChange(() => checkDoorState())
+    deadboltSensor.onAnyStateUpdate(() => checkDoorState())
+    checkDoorState()
   }
 }
 

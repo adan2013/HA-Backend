@@ -40,7 +40,7 @@ const notificationConfig: NotificationConfig[] = [
     id: 'deadlineWarning',
     title: 'Upcoming deadline detected',
     description:
-      'One of your deadline intervals is coming to and end. Take an action and reset the date',
+      'One of your deadline intervals are coming to and end. Take an action and reset the date',
   },
   {
     id: 'mainDoorOpen',

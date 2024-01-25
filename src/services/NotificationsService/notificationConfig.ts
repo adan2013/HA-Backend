@@ -37,9 +37,10 @@ const notificationConfig: NotificationConfig[] = [
     ignoreDND: true,
   },
   {
-    id: 'waterFilterInspection',
-    title: 'Water filter inspection',
-    description: 'One of your water filters needs to be inspected and replaced',
+    id: 'deadlineWarning',
+    title: 'Upcoming deadline detected',
+    description:
+      'One of your deadline intervals is coming to and end. Take an action and reset the date',
   },
   {
     id: 'mainDoorOpen',
@@ -48,6 +49,16 @@ const notificationConfig: NotificationConfig[] = [
       'Remember to close the main door and use the deadbolt to secure the house',
     priorityOrder: 'medium',
     light: 'yellow',
+    ignoreDND: true,
+  },
+  {
+    id: 'mainDoorOpenAlert',
+    title: 'The main door is open',
+    description:
+      'The main door is open too long. Sound alert has been triggered',
+    priorityOrder: 'medium',
+    light: 'red',
+    sound: 'scaleUp',
     ignoreDND: true,
   },
 ]

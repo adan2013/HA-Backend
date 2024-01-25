@@ -87,10 +87,11 @@ class WeatherService extends Service {
         return 3
       } else if (apiValue <= 200) {
         return 4
+      } else if (apiValue > 200) {
+        return 5
       }
-      return 5
     }
-    return 1
+    return 0
   }
 
   private parseWeatherData(

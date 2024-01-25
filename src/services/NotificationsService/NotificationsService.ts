@@ -167,6 +167,8 @@ class NotificationsService extends Service {
           playSoundAlert(config.sound)
         }
       }
+    } else {
+      console.error('Unknown notification id:', id)
     }
   }
 

@@ -1,6 +1,6 @@
 import Service from '../Service'
 import { NotificationLight, NotificationPayload } from './types'
-import notificationConfig from './notificationConfig'
+import notificationConfig from '../../configs/notification.config'
 import { notifications, webSocketMessage } from '../../events/events'
 import Entity from '../../entities/Entity'
 import Timer from '../../Timer'

@@ -1,4 +1,4 @@
-import { NotificationConfig } from './types'
+import { NotificationConfig } from '../services/NotificationsService/types'
 
 const notificationConfig: NotificationConfig[] = [
   {
@@ -59,6 +59,16 @@ const notificationConfig: NotificationConfig[] = [
     priorityOrder: 'medium',
     light: 'red',
     sound: 'scaleUp',
+    ignoreDND: true,
+  },
+  {
+    id: 'waterLeak',
+    title: 'Water leak detected',
+    description:
+      'One of the water leak sensors has been triggered. Check the source of the leak and turn off the water supply!',
+    priorityOrder: 'high',
+    light: 'redFlashing',
+    sound: 'alarm',
     ignoreDND: true,
   },
 ]

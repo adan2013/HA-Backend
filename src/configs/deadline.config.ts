@@ -1,4 +1,9 @@
-import { DeadlineConfig } from './utils'
+export type DeadlineConfig = {
+  label: string
+  entityId: string
+  interval: number
+  warningThreshold: number
+}
 
 export const deadlines: DeadlineConfig[] = [
   {

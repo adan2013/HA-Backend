@@ -3,8 +3,8 @@ import HomeAssistantEntity from '../../../../entities/HomeAssistantEntity'
 import Entity from '../../../../entities/Entity'
 import { notifications } from '../../../../events/events'
 import Timer from '../../../../Timer'
-import { deadlines } from './deadlineConfig'
 import { getDaysToDeadline } from './utils'
+import { deadlines } from '../../../../configs/deadline.config'
 
 export const initDeadlinesWatchdog = (reminderService: ReminderService) => {
   const entites: HomeAssistantEntity[] = deadlines.map((dl) =>

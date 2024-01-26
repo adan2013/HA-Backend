@@ -6,13 +6,20 @@ jest.useFakeTimers()
 
 describe('StateMachine', () => {
   it('should set the default state', () => {
-    const sm = new StateMachine<TestState>('myName', 's3')
+    const sm = new StateMachine<TestState>({
+      name: 'myName',
+      defaultState: 's3',
+    })
     expect(sm.currentState).toEqual('s3')
   })
 
   it('should call onStateChange callback with new and old state value', () => {
     const callback = jest.fn()
-    const sm = new StateMachine<TestState>('myName', 's3', callback)
+    const sm = new StateMachine<TestState>({
+      name: 'myName',
+      defaultState: 's3',
+      onStateChange: callback,
+    })
     expect(sm.currentState).toEqual('s3')
     expect(callback).not.toHaveBeenCalled()
     sm.setState('s2')
@@ -21,7 +28,11 @@ describe('StateMachine', () => {
   })
 
   it('should set correct helper status', () => {
-    const sm = new StateMachine<TestState>('myName', 's3')
+    const sm = new StateMachine<TestState>({
+      name: 'myName',
+      defaultState: 's3',
+      autoStateResetRules: [{ from: 's2', to: 's1', delay: 100 }],
+    })
     expect(sm.getHelperStatus()).toEqual({
       message: 'State: s3',
       color: 'none',
@@ -31,14 +42,23 @@ describe('StateMachine', () => {
       message: 'State: s1',
       color: 'none',
     })
+    sm.setState('s2')
+    expect(sm.getHelperStatus()).toEqual({
+      message: 'State: s2; auto switch to s1 in 100ms',
+      color: 'none',
+    })
   })
 
   it('should reset state after delay', () => {
-    const sm = new StateMachine<TestState>('myName', 's3', undefined, [
-      { from: 's3', to: 's2', delay: 50 },
-      { from: 's2', to: 's1', delay: 50 },
-      { from: 's1', to: 's3', delay: 100 },
-    ])
+    const sm = new StateMachine<TestState>({
+      name: 'myName',
+      defaultState: 's3',
+      autoStateResetRules: [
+        { from: 's3', to: 's2', delay: 50 },
+        { from: 's2', to: 's1', delay: 50 },
+        { from: 's1', to: 's3', delay: 100 },
+      ],
+    })
     sm.setState('s2')
     expect(sm.currentState).toEqual('s2')
     jest.advanceTimersByTime(60)
@@ -50,9 +70,11 @@ describe('StateMachine', () => {
   })
 
   it('should not reset state if state is changed', () => {
-    const sm = new StateMachine<TestState>('myName', 's3', undefined, [
-      { from: 's2', to: 's1', delay: 100 },
-    ])
+    const sm = new StateMachine<TestState>({
+      name: 'myName',
+      defaultState: 's3',
+      autoStateResetRules: [{ from: 's2', to: 's1', delay: 100 }],
+    })
     sm.setState('s2')
     jest.advanceTimersByTime(90)
     sm.setState('s2')

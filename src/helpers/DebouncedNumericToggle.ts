@@ -20,10 +20,14 @@ class DebouncedNumericToggle extends Helper {
   constructor(config: ToggleConfig) {
     super('debouncedToggle', config.name)
     this.threshold = config.threshold
-    this.stateMachine = new StateMachine<ToggleState>(
-      config.name,
-      config.defaultState || 'off',
-      (newState, oldState) => {
+    this.stateMachine = new StateMachine<ToggleState>({
+      name: config.name,
+      defaultState: config.defaultState || 'off',
+      autoStateResetRules: [
+        { from: 'switching-on', to: 'on', delay: config.onDelay },
+        { from: 'switching-off', to: 'off', delay: config.offDelay },
+      ],
+      onStateChange: (newState, oldState) => {
         this.updateStatus()
         if (
           newState === 'on' &&
@@ -40,11 +44,7 @@ class DebouncedNumericToggle extends Helper {
           config.onToggleOff()
         }
       },
-      [
-        { from: 'switching-on', to: 'on', delay: config.onDelay },
-        { from: 'switching-off', to: 'off', delay: config.offDelay },
-      ],
-    )
+    })
     this.updateStatus()
   }
 

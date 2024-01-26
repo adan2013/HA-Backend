@@ -13,10 +13,17 @@ export const initMainDoorDeadboltWatchdog = (
 ) => {
   const alertToggle = Entity.toggle(alertToggleId)
   const deadboltSensor = Entity.general(deadboltSensorId)
-  const stateMachine = new StateMachine<MainDoorState>(
-    'deadbolt',
-    'closed',
-    (newState) => {
+  const stateMachine = new StateMachine<MainDoorState>({
+    name: 'deadbolt',
+    defaultState: 'closed',
+    autoStateResetRules: [
+      {
+        from: 'open',
+        to: 'openAlert',
+        delay: 60000,
+      },
+    ],
+    onStateChange: (newState) => {
       if (reminderService.isDisabled) return
       notifications.emit({
         id: 'mainDoorOpen',
@@ -27,14 +34,7 @@ export const initMainDoorDeadboltWatchdog = (
         enabled: newState === 'openAlert',
       })
     },
-    [
-      {
-        from: 'open',
-        to: 'openAlert',
-        delay: 60000,
-      },
-    ],
-  )
+  })
   reminderService.registerHelper(stateMachine)
   const checkDoorState = () => {
     if (reminderService.isDisabled) return

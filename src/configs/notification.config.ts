@@ -71,6 +71,15 @@ const notificationConfig: NotificationConfig[] = [
     sound: 'alarm',
     ignoreDND: true,
   },
+  {
+    id: 'waterLeakOfflineSensor',
+    title: 'Water leak protection failure',
+    description:
+      'One of the water leak sensors is offline. Check the source of the problem and fix it!',
+    priorityOrder: 'low',
+    light: 'blue',
+    canBeDismissed: true,
+  },
 ]
 
 export default notificationConfig

@@ -12,7 +12,7 @@ export const initDeadlinesWatchdog = (reminderService: ReminderService) => {
   )
   const checkDeadlines = () => {
     if (reminderService.isDisabled) return
-    const detectedWarnings: string[] = []
+    const warningLabels: string[] = []
     deadlines.forEach((deadline) => {
       const entity = entites.find((e) => e.entityId === deadline.entityId)
       if (entity && !entity.isUnavailable) {
@@ -21,15 +21,15 @@ export const initDeadlinesWatchdog = (reminderService: ReminderService) => {
           deadline.interval,
         )
         if (daysLeft <= deadline.warningThreshold) {
-          detectedWarnings.push(deadline.label)
+          warningLabels.push(deadline.label)
         }
       }
     })
-    const warningsDetected = detectedWarnings.length > 0
+    const warningsDetected = warningLabels.length > 0
     notifications.emit({
       id: 'deadlineWarning',
       enabled: warningsDetected,
-      extraInfo: warningsDetected ? detectedWarnings.join(', ') : undefined,
+      extraInfo: warningsDetected ? warningLabels.join(', ') : undefined,
     })
   }
   entites.forEach((e) => e.onAnyStateUpdate(() => checkDeadlines()))

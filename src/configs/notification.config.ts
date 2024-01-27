@@ -65,7 +65,7 @@ const notificationConfig: NotificationConfig[] = [
     id: 'waterLeak',
     title: 'Water leak detected',
     description:
-      'One of the water leak sensors has been triggered. Check the source of the leak and turn off the water supply!',
+      'One of the water leak sensors has been triggered. Check the source of the leak and turn off the water supply! To reset the alarm, turn off and on the water leak protection toggle',
     priorityOrder: 'high',
     light: 'redFlashing',
     sound: 'alarm',

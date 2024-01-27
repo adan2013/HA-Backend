@@ -4,7 +4,7 @@ import Entity from '../../../../entities/Entity'
 import { notifications } from '../../../../events/events'
 import Timer from '../../../../Timer'
 import { getDaysToDeadline } from './utils'
-import { deadlines } from '../../../../configs/deadline.config'
+import deadlines from '../../../../configs/deadline.config'
 
 export const initDeadlinesWatchdog = (reminderService: ReminderService) => {
   const entites: HomeAssistantEntity[] = deadlines.map((dl) =>

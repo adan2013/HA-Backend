@@ -72,10 +72,10 @@ const notificationConfig: NotificationConfig[] = [
     ignoreDND: true,
   },
   {
-    id: 'waterLeakOfflineSensor',
-    title: 'Water leak protection failure',
+    id: 'offlineSensor',
+    title: 'Sensor unavailable',
     description:
-      'One of the water leak sensors is offline. Check the source of the problem and fix it!',
+      'One of your important sensors is unavailable. Check the connection and battery level',
     priorityOrder: 'low',
     light: 'blue',
     canBeDismissed: true,

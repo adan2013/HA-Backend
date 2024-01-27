@@ -1,11 +1,11 @@
-export type DeadlineConfig = {
+type DeadlineConfig = {
   label: string
   entityId: string
   interval: number
   warningThreshold: number
 }
 
-export const deadlines: DeadlineConfig[] = [
+const deadlines: DeadlineConfig[] = [
   {
     label: 'water prefilters',
     entityId: 'input_datetime.kitchenfilterservice',
@@ -25,3 +25,5 @@ export const deadlines: DeadlineConfig[] = [
     warningThreshold: 10,
   },
 ]
+
+export default deadlines

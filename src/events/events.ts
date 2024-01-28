@@ -30,6 +30,8 @@ export const homeAssistantResult = (msgId: number) =>
 export const entityUpdate = (entityId: string) =>
   new TypedEvent<EntityState>('ha/entity', entityId)
 
+export const anyEntityUpdate = new TypedEvent<EntityState>('ha/any-entity')
+
 export const entityStateRequest = new TypedEvent<EntityStatePayload>('ha/state')
 
 export const serviceCall = new TypedEvent<ServiceCallPayload>('ha/service')

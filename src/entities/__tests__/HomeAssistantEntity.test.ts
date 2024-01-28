@@ -1,16 +1,22 @@
 import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
 import Entity from '../Entity'
-
-mockEntity('sensor', 'on', {
-  battery: 53,
-  linkquality: 30,
-})
+import { entityStateRequest } from '../../events/events'
 
 describe('HomeAssistantEntity', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockEntity('sensor', 'on', {
+      battery: 53,
+      linkquality: 30,
+    })
+  })
+
   it('should create an instance add fetch the entity state', () => {
+    const entityStateRequestSpy = jest.spyOn(entityStateRequest, 'emit')
     const entity = Entity.general('sensor')
     expect(entity).toBeDefined()
     expect(entity.state?.state).toBe('on')
+    expect(entityStateRequestSpy).toHaveBeenCalledTimes(1)
   })
 
   it.each([
@@ -31,8 +37,40 @@ describe('HomeAssistantEntity', () => {
       expect(entity.isUnavailable).toBe(isUnavailable)
       expect(entity.isBatteryPowered).toBeTruthy()
       expect(entity.isWireless).toBeTruthy()
+      expect(entity.batteryLevel).toBe(53)
+      expect(entity.linkQuality).toBe(30)
     },
   )
+
+  it('should initialize with initial state and subscribe to updates', () => {
+    const entityStateRequestSpy = jest.spyOn(entityStateRequest, 'emit')
+    const entity = Entity.general('sensor', {
+      initialState: {
+        id: 'sensor',
+        state: 'customState',
+        lastChanged: '',
+        lastUpdated: '',
+        attributes: {
+          friendly_name: `entityName`,
+        },
+      },
+    })
+    expect(entity).toBeDefined()
+    expect(entity.state?.state).toBe('customState')
+    expect(entityStateRequestSpy).not.toHaveBeenCalled()
+    emitStateUpdate('sensor', 'updatedState')
+    expect(entity.state?.state).toBe('updatedState')
+  })
+
+  it('should not subscribe to updates', () => {
+    const entity = Entity.general('sensor', {
+      subscribeToUpdates: false,
+    })
+    expect(entity).toBeDefined()
+    expect(entity.state?.state).toBe('on')
+    emitStateUpdate('sensor', 'updatedState')
+    expect(entity.state?.state).toBe('on')
+  })
 
   it('should trigger callback on any state update', () => {
     const callback = jest.fn()

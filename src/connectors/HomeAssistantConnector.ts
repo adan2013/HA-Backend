@@ -7,6 +7,7 @@ import {
   serviceCall,
   homeAssistantSync,
   entityStateRequest,
+  anyEntityUpdate,
 } from '../events/events'
 
 class HomeAssistantConnector {
@@ -94,6 +95,7 @@ class HomeAssistantConnector {
             )
             this.entities[changedEntityIndex] = updatedState
             entityUpdate(updatedState.id).emit(updatedState)
+            anyEntityUpdate.emit(updatedState)
           }
         },
       },

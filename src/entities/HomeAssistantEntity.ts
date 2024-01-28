@@ -1,8 +1,14 @@
 import { EntityState } from '../connectors/types'
 import { entityStateRequest, entityUpdate } from '../events/events'
 
+export type EntityExtraOptions = {
+  initialState?: EntityState
+  subscribeToUpdates?: boolean
+}
+
 class HomeAssistantEntity {
   readonly entityId: string
+  readonly options: EntityExtraOptions
   state: EntityState | undefined
 
   get isUnavailable(): boolean {
@@ -29,16 +35,39 @@ class HomeAssistantEntity {
     return !!this.state?.attributes.battery
   }
 
-  constructor(entityId: string) {
+  get linkQuality(): number | undefined {
+    return this.state?.attributes.linkquality
+  }
+
+  get batteryLevel(): number | undefined {
+    return this.state?.attributes.battery
+  }
+
+  constructor(entityId: string, options?: EntityExtraOptions) {
     this.entityId = entityId
-    entityStateRequest.emit({
-      entityId,
-      callback: (initialState) => {
-        this.state = initialState
-        this.onAnyStateUpdate((newState) => {
-          this.state = newState
-        })
-      },
+    this.options = {
+      initialState: undefined,
+      subscribeToUpdates: true,
+      ...options,
+    }
+    if (this.options.initialState) {
+      this.state = this.options.initialState
+      this.subscribeToUpdates()
+    } else {
+      entityStateRequest.emit({
+        entityId,
+        callback: (firstStateUpdate) => {
+          this.state = firstStateUpdate
+          this.subscribeToUpdates()
+        },
+      })
+    }
+  }
+
+  private subscribeToUpdates() {
+    if (!this.options.subscribeToUpdates) return
+    this.onAnyStateUpdate((newState) => {
+      this.state = newState
     })
   }
 

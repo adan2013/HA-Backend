@@ -35,12 +35,12 @@ class HomeAssistantEntity {
     return !!this.state?.attributes.battery
   }
 
-  get linkQuality(): number | undefined {
-    return this.state?.attributes.linkquality
+  get linkQuality(): number {
+    return this.state?.attributes.linkquality || 255
   }
 
-  get batteryLevel(): number | undefined {
-    return this.state?.attributes.battery
+  get batteryLevel(): number {
+    return this.state?.attributes.battery || 100
   }
 
   constructor(entityId: string, options?: EntityExtraOptions) {

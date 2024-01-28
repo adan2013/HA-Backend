@@ -72,6 +72,15 @@ const notificationConfig: NotificationConfig[] = [
     ignoreDND: true,
   },
   {
+    id: 'lowBattery',
+    title: 'Low battery detected',
+    description:
+      'One of your sensors has low battery. Replace the battery as soon as possible',
+    priorityOrder: 'low',
+    light: 'blue',
+    canBeDismissed: true,
+  },
+  {
     id: 'offlineSensor',
     title: 'Sensor unavailable',
     description:

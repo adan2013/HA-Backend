@@ -1,0 +1,1 @@
+describe('Device monitor service', () => {})

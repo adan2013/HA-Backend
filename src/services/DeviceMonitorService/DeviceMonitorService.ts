@@ -15,13 +15,14 @@ type DetectedDeviceMetadata = {
 class DeviceMonitorService extends Service {
   private readonly BATTERY_LOW_THRESHOLD = 30
   private readonly SIGNAL_LOW_THRESHOLD = 30
-  private detectedLowBatteryDevices: DetectedDeviceMetadata[] = []
-  private detectedOfflineDevices: DetectedDeviceMetadata[] = []
+  detectedLowBatteryDevices: DetectedDeviceMetadata[] = []
+  detectedOfflineDevices: DetectedDeviceMetadata[] = []
 
   constructor() {
     super('deviceMonitor')
     this.updateServiceStatus()
     anyEntityUpdate.on((state) => {
+      if (this.isDisabled) return
       this.checkBattery(state)
       this.checkSignal(state)
     })
@@ -31,7 +32,7 @@ class DeviceMonitorService extends Service {
     const bat = this.detectedLowBatteryDevices
     const sig = this.detectedOfflineDevices
     this.setServiceStatus(
-      `Low batteries: ${bat.length}; Offline: ${sig.length}`,
+      `Low batteries: ${bat.length}; Offline: ${sig.length}; On watchlist: ${devices.length}`,
       bat.length > 0 || sig.length > 0 ? 'yellow' : 'green',
     )
     notifications.emit({
@@ -74,9 +75,8 @@ class DeviceMonitorService extends Service {
       initialState: updatedState,
       subscribeToUpdates: false,
     })
-    if (!entity.isBatteryPowered) return
-    const batteryLevel = entity.batteryLevel || 0
-    const batteryLow = batteryLevel < this.BATTERY_LOW_THRESHOLD
+    if (entity.isUnavailable || !entity.isBatteryPowered) return
+    const batteryLow = entity.batteryLevel < this.BATTERY_LOW_THRESHOLD
     this.updateList(this.detectedLowBatteryDevices, entity, batteryLow)
   }
 

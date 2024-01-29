@@ -5,6 +5,8 @@ import { notifications } from '../../../../events/events'
 
 type MainDoorState = 'closed' | 'open' | 'openAlert'
 
+const ALERT_DELAY = 90000
+
 export const alertToggleId = 'input_boolean.alertdeadbolt'
 export const deadboltSensorId = 'binary_sensor.maindoordeadboltsensor_contact'
 
@@ -20,7 +22,7 @@ export const initMainDoorDeadboltWatchdog = (
       {
         from: 'open',
         to: 'openAlert',
-        delay: 60000,
+        delay: ALERT_DELAY,
       },
     ],
     onStateChange: (newState) => {

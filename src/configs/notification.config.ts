@@ -1,4 +1,4 @@
-import { NotificationConfig } from './types'
+import { NotificationConfig } from '../services/NotificationsService/types'
 
 const notificationConfig: NotificationConfig[] = [
   {
@@ -60,6 +60,34 @@ const notificationConfig: NotificationConfig[] = [
     light: 'red',
     sound: 'scaleUp',
     ignoreDND: true,
+  },
+  {
+    id: 'waterLeak',
+    title: 'Water leak detected',
+    description:
+      'One of the water leak sensors has been triggered. Check the source of the leak and turn off the water supply! To reset the alarm, turn off and on the water leak protection toggle',
+    priorityOrder: 'high',
+    light: 'redFlashing',
+    sound: 'alarm',
+    ignoreDND: true,
+  },
+  {
+    id: 'lowBattery',
+    title: 'Low battery detected',
+    description:
+      'One of your sensors has low battery. Replace the battery as soon as possible',
+    priorityOrder: 'low',
+    light: 'blue',
+    canBeDismissed: true,
+  },
+  {
+    id: 'offlineSensor',
+    title: 'Sensor unavailable',
+    description:
+      'One of your important sensors is unavailable. Check the connection and battery level',
+    priorityOrder: 'low',
+    light: 'blue',
+    canBeDismissed: true,
   },
 ]
 

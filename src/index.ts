@@ -12,6 +12,8 @@ import formatDateTime from './utils/formatDateTime'
 import LivingRoomController from './services/LivingRoomController/LivingRoomController'
 import KitchenController from './services/KitchenController/KitchenController'
 import { checkEnvironmentVariables } from './utils/envVariables'
+import WaterLeakService from './services/WaterLeakService/WaterLeakService'
+import DeviceMonitorService from './services/DeviceMonitorService/DeviceMonitorService'
 
 checkEnvironmentVariables([
   'ENV',
@@ -52,4 +54,6 @@ homeAssistantSync.once(() => {
   sm.registerService(new LivingRoomController())
   sm.registerService(new KitchenController())
   sm.registerService(new ReminderService())
+  sm.registerService(new WaterLeakService())
+  sm.registerService(new DeviceMonitorService())
 })

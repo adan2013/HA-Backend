@@ -34,7 +34,7 @@ describe('main door deadbolt watchdog', () => {
     emitStateUpdate(deadboltSensorId, 'on')
     checkNotificationState(notificationMock, true, false)
     notificationMock.mockReset()
-    jest.advanceTimersByTime(61000)
+    jest.advanceTimersByTime(91000)
     checkNotificationState(notificationMock, false, true)
     notificationMock.mockReset()
     emitStateUpdate(deadboltSensorId, 'unknown')

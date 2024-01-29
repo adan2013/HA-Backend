@@ -36,10 +36,14 @@ class KitchenController extends Service {
 
   constructor() {
     super('kitchenController')
-    this.state = new StateMachine<KitchenLightsState>(
-      'state',
-      'off',
-      (newState) => {
+    this.state = new StateMachine<KitchenLightsState>({
+      name: 'state',
+      defaultState: 'off',
+      autoStateResetRules: [
+        { from: 'disabled', to: 'off', delay: this.DISABLED_STATE_DURATION },
+        { from: 'auto-dimming', to: 'off', delay: this.DIMMING_STATE_DURATION },
+      ],
+      onStateChange: (newState) => {
         switch (newState) {
           case 'off':
           case 'disabled':
@@ -56,11 +60,7 @@ class KitchenController extends Service {
             break
         }
       },
-      [
-        { from: 'disabled', to: 'off', delay: this.DISABLED_STATE_DURATION },
-        { from: 'auto-dimming', to: 'off', delay: this.DIMMING_STATE_DURATION },
-      ],
-    )
+    })
     this.registerHelper(this.state)
     this.remote.onAnyShortPressCount(1, () => this.rightLightToggle.toggle())
     this.remote.onAnyShortPressCount(2, () => this.leftLightToggle.toggle())

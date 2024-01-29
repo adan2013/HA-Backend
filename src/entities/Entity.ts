@@ -1,4 +1,4 @@
-import HomeAssistantEntity from './HomeAssistantEntity'
+import HomeAssistantEntity, { EntityExtraOptions } from './HomeAssistantEntity'
 import InputBooleanEntity from './InputBooleanEntity'
 import InputDateTimeEntity from './InputDateTimeEntity'
 import LightEntity from './LightEntity'
@@ -7,8 +7,8 @@ import SwitchEntity from './SwitchEntity'
 import AqaraOppleRemoteEntity from './AqaraOppleRemoteEntity'
 
 class Entity {
-  public static general(entityId: string) {
-    return new HomeAssistantEntity(entityId)
+  public static general(entityId: string, options?: EntityExtraOptions) {
+    return new HomeAssistantEntity(entityId, options)
   }
 
   public static aqaraOpple(entityId: string) {

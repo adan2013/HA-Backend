@@ -1,5 +1,9 @@
-import { EntityAttributeInterface } from '../connectors/types'
-import { entityStateRequest, entityUpdate } from '../events/events'
+import { EntityAttributeInterface, EntityState } from '../connectors/types'
+import {
+  anyEntityUpdate,
+  entityStateRequest,
+  entityUpdate,
+} from '../events/events'
 
 export const mockEntity = (
   entityId: string,
@@ -27,7 +31,7 @@ export const emitStateUpdate = (
   state: string,
   attributes: Partial<EntityAttributeInterface> = {},
 ) => {
-  entityUpdate(entityId).emit({
+  const payload: EntityState = {
     id: entityId,
     state,
     lastChanged: '',
@@ -36,5 +40,7 @@ export const emitStateUpdate = (
       friendly_name: `${entityId}_name`,
       ...attributes,
     },
-  })
+  }
+  entityUpdate(entityId).emit(payload)
+  anyEntityUpdate.emit(payload)
 }

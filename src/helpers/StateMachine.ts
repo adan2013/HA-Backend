@@ -6,6 +6,13 @@ export type AutoResetRule<T> = {
   delay: number
 }
 
+export type StateMachineOptions<T> = {
+  name: string
+  defaultState: T
+  onStateChange?: (newState: T, oldState: T) => void
+  autoStateResetRules?: AutoResetRule<T>[]
+}
+
 class StateMachine<T> extends Helper {
   private readonly onStateChange?: (newState: T, oldState: T) => void
   private readonly autoResetRules: AutoResetRule<T>[]
@@ -16,17 +23,17 @@ class StateMachine<T> extends Helper {
     return this.state
   }
 
-  constructor(
-    name: string,
-    defaultState: T,
-    onStateChange?: (newState: T, oldState: T) => void,
-    autoStateResetRules?: AutoResetRule<T>[],
-  ) {
+  constructor({
+    name,
+    defaultState,
+    onStateChange,
+    autoStateResetRules,
+  }: StateMachineOptions<T>) {
     super('stateMachine', name)
     this.state = defaultState
-    this.updateStatus()
     this.onStateChange = onStateChange
     this.autoResetRules = autoStateResetRules || []
+    this.updateStatus()
   }
 
   public setState(state: T) {
@@ -48,7 +55,14 @@ class StateMachine<T> extends Helper {
   }
 
   private updateStatus() {
-    this.setHelperStatus(`State: ${this.state}`)
+    const autoResetRule = this.autoResetRules.find((r) => r.from === this.state)
+    if (autoResetRule) {
+      this.setHelperStatus(
+        `State: ${this.state}; auto switch to ${autoResetRule.to} in ${autoResetRule.delay}ms`,
+      )
+    } else {
+      this.setHelperStatus(`State: ${this.state}`)
+    }
   }
 }
 

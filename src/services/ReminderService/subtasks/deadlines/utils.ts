@@ -1,10 +1,3 @@
-export type DeadlineConfig = {
-  label: string
-  entityId: string
-  interval: number
-  warningThreshold: number
-}
-
 export const getDaysToDeadline = (
   lastUpdate = '',
   interval: number,

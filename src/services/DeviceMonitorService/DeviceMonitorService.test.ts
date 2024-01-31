@@ -43,7 +43,7 @@ describe('Device monitor service', () => {
   it('should initialize service with correct status', () => {
     const service = new DeviceMonitorService()
     expect(service.getServiceStatus().status).toEqual({
-      message: 'Low batteries: 0; Offline: 0; On watchlist: 3',
+      message: 'Low batteries: 0; Low signal: 0; Offline: 0; On watchlist: 3',
       color: 'green',
       enabled: true,
     })
@@ -58,7 +58,7 @@ describe('Device monitor service', () => {
       linkquality: 200,
     })
     expect(service.getServiceStatus().status).toEqual({
-      message: 'Low batteries: 1; Offline: 0; On watchlist: 3',
+      message: 'Low batteries: 1; Low signal: 0; Offline: 0; On watchlist: 3',
       color: 'yellow',
       enabled: true,
     })
@@ -70,8 +70,13 @@ describe('Device monitor service', () => {
   })
 
   it('should trigger offline sensor notification', () => {
-    const expectedStatus = {
-      message: 'Low batteries: 0; Offline: 1; On watchlist: 3',
+    const lowSignalStatus = {
+      message: 'Low batteries: 0; Low signal: 1; Offline: 0; On watchlist: 3',
+      color: 'yellow',
+      enabled: true,
+    }
+    const offlineStatus = {
+      message: 'Low batteries: 0; Low signal: 0; Offline: 1; On watchlist: 3',
       color: 'yellow',
       enabled: true,
     }
@@ -87,13 +92,13 @@ describe('Device monitor service', () => {
       battery: 50,
       linkquality: 10,
     })
-    expect(service.getServiceStatus().status).toEqual(expectedStatus)
+    expect(service.getServiceStatus().status).toEqual(lowSignalStatus)
     expect(notificationMock).toHaveBeenCalledWith(expectedNotificationPayload)
     emitStateUpdate('important3', 'unknown', {
       battery: 50,
       linkquality: 100,
     })
-    expect(service.getServiceStatus().status).toEqual(expectedStatus)
+    expect(service.getServiceStatus().status).toEqual(offlineStatus)
     expect(notificationMock).toHaveBeenCalledWith(expectedNotificationPayload)
   })
 
@@ -101,12 +106,9 @@ describe('Device monitor service', () => {
     const service = new DeviceMonitorService()
     service.setServiceEnabled(false)
     emitTestEntityUpdates()
-    const lowBatteryDevices = service.detectedLowBatteryDevices
-    const offlineDevices = service.detectedOfflineDevices
-    expect(lowBatteryDevices).toHaveLength(0)
-    expect(offlineDevices).toHaveLength(0)
+    expect(service.detectedDevices).toHaveLength(0)
     expect(service.getServiceStatus().status).toEqual({
-      message: 'Low batteries: 0; Offline: 0; On watchlist: 3',
+      message: 'Low batteries: 0; Low signal: 0; Offline: 0; On watchlist: 3',
       color: 'green',
       enabled: false,
     })
@@ -115,44 +117,34 @@ describe('Device monitor service', () => {
   it('should detect all devices with low battery level and signal quality', () => {
     const service = new DeviceMonitorService()
     emitTestEntityUpdates()
-    const lowBatteryDevices = service.detectedLowBatteryDevices
-    const offlineDevices = service.detectedOfflineDevices
-    expect(lowBatteryDevices).toStrictEqual([
+    expect(service.detectedDevices).toEqual([
       {
         entityId: 'standard4',
         name: 'standard4',
-        batteryLevel: 20,
-        linkQuality: 100,
+        lowBattery: true,
+        lowSignal: false,
+        offline: false,
+        monitored: false,
       },
-      {
-        entityId: 'standard6',
-        name: 'standard6',
-        batteryLevel: 5,
-        linkQuality: 5,
-      },
-      {
-        entityId: 'important1',
-        name: 'important1',
-        batteryLevel: 10,
-        linkQuality: 5,
-      },
-    ])
-    expect(offlineDevices).toStrictEqual([
       {
         entityId: 'important1',
         name: 'name1',
-        batteryLevel: 10,
-        linkQuality: 5,
+        lowBattery: true,
+        lowSignal: true,
+        offline: false,
+        monitored: true,
       },
       {
         entityId: 'important2',
         name: 'name2',
-        batteryLevel: 15,
-        linkQuality: 50,
+        lowBattery: false,
+        lowSignal: false,
+        offline: true,
+        monitored: true,
       },
     ])
     expect(service.getServiceStatus().status).toEqual({
-      message: 'Low batteries: 3; Offline: 2; On watchlist: 3',
+      message: 'Low batteries: 2; Low signal: 1; Offline: 1; On watchlist: 3',
       color: 'yellow',
       enabled: true,
     })

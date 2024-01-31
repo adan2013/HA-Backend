@@ -3,37 +3,61 @@ import { anyEntityUpdate, notifications } from '../../events/events'
 import Entity from '../../entities/Entity'
 import { EntityState } from '../../connectors/types'
 import devices from '../../configs/deviceMonitor.config'
-import HomeAssistantEntity from '../../entities/HomeAssistantEntity'
 
 type DetectedDeviceMetadata = {
   entityId: string
   name: string
-  batteryLevel?: number
-  linkQuality?: number
+  lowBattery: boolean
+  lowSignal: boolean
+  offline: boolean
+  monitored: boolean
 }
 
 class DeviceMonitorService extends Service {
   private readonly BATTERY_LOW_THRESHOLD = 30
-  private readonly SIGNAL_LOW_THRESHOLD = 30
-  detectedLowBatteryDevices: DetectedDeviceMetadata[] = []
-  detectedOfflineDevices: DetectedDeviceMetadata[] = []
+  private readonly SIGNAL_LOW_THRESHOLD = 20
+  detectedDevices: DetectedDeviceMetadata[] = []
 
   constructor() {
     super('deviceMonitor')
     this.updateServiceStatus()
     anyEntityUpdate.on((state) => {
       if (this.isDisabled) return
-      this.checkBattery(state)
-      this.checkSignal(state)
+      const metadata = this.checkDevice(state)
+      const reportThisDevice =
+        metadata.lowBattery ||
+        ((metadata.lowSignal || metadata.offline) && metadata.monitored)
+      this.updateList(metadata, reportThisDevice)
     })
   }
 
+  private updateList(metadata: DetectedDeviceMetadata, addToList: boolean) {
+    const isOnList = this.detectedDevices.some(
+      (d) => d.entityId === metadata.entityId,
+    )
+    if (isOnList) {
+      this.detectedDevices = this.detectedDevices.filter(
+        (d) => d.entityId !== metadata.entityId,
+      )
+    }
+    if (addToList) {
+      this.detectedDevices.push(metadata)
+    }
+    if (isOnList || addToList) {
+      this.updateServiceStatus()
+    }
+  }
+
   private updateServiceStatus() {
-    const bat = this.detectedLowBatteryDevices
-    const sig = this.detectedOfflineDevices
+    const bat = this.detectedDevices.filter((dd) => dd.lowBattery)
+    const sig = this.detectedDevices.filter((dd) => dd.lowSignal)
+    const off = this.detectedDevices.filter((dd) => dd.offline)
+    const sigAndOff = this.detectedDevices.filter(
+      (dd) => dd.lowSignal || dd.offline,
+    )
     this.setServiceStatus(
-      `Low batteries: ${bat.length}; Offline: ${sig.length}; On watchlist: ${devices.length}`,
-      bat.length > 0 || sig.length > 0 ? 'yellow' : 'green',
+      `Low batteries: ${bat.length}; Low signal: ${sig.length}; Offline: ${off.length}; On watchlist: ${devices.length}`,
+      this.detectedDevices.length > 0 ? 'yellow' : 'green',
     )
     notifications.emit({
       id: 'lowBattery',
@@ -42,60 +66,35 @@ class DeviceMonitorService extends Service {
     })
     notifications.emit({
       id: 'offlineSensor',
-      enabled: sig.length > 0,
-      extraInfo: sig.map((d) => d.name).join(', '),
+      enabled: sigAndOff.length > 0,
+      extraInfo: sigAndOff.map((d) => d.name).join(', '),
     })
   }
 
-  private updateList(
-    list: DetectedDeviceMetadata[],
-    entity: HomeAssistantEntity,
-    shouldBeOnList: boolean,
-    name?: string,
-  ) {
-    const isOnList = list.some((d) => d.entityId === entity.entityId)
-    if (isOnList) {
-      list = list.filter((d) => d.entityId !== entity.entityId)
-    }
-    if (shouldBeOnList) {
-      list.push({
-        entityId: entity.entityId,
-        name: name || entity.entityId,
-        batteryLevel: entity.batteryLevel,
-        linkQuality: entity.linkQuality,
-      })
-      this.updateServiceStatus()
-    } else if (isOnList) {
-      this.updateServiceStatus()
-    }
-  }
-
-  private checkBattery(updatedState: EntityState) {
-    const entity = Entity.general(updatedState.id, {
-      initialState: updatedState,
+  private checkDevice(state: EntityState): DetectedDeviceMetadata {
+    const config = devices.find((d) => d.entityId === state.id)
+    const entity = Entity.general(state.id, {
+      initialState: state,
       subscribeToUpdates: false,
     })
-    if (entity.isUnavailable || !entity.isBatteryPowered) return
-    const batteryLow = entity.batteryLevel < this.BATTERY_LOW_THRESHOLD
-    this.updateList(this.detectedLowBatteryDevices, entity, batteryLow)
-  }
-
-  private checkSignal(updatedState: EntityState) {
-    const deviceMetadata = devices.find((d) => d.entityId === updatedState.id)
-    if (!deviceMetadata) return
-    const entity = Entity.general(updatedState.id, {
-      initialState: updatedState,
-      subscribeToUpdates: false,
-    })
-    const problemDetected =
-      entity.isUnavailable ||
-      (entity.isWireless && entity.linkQuality < this.SIGNAL_LOW_THRESHOLD)
-    this.updateList(
-      this.detectedOfflineDevices,
-      entity,
-      problemDetected,
-      deviceMetadata.name,
-    )
+    const result: DetectedDeviceMetadata = {
+      entityId: entity.entityId,
+      name: config?.name || entity.entityId,
+      lowBattery: false,
+      lowSignal: false,
+      offline: false,
+      monitored: !!config,
+    }
+    if (entity.isUnavailable) {
+      result.offline = true
+    } else {
+      result.lowBattery =
+        entity.isBatteryPowered &&
+        entity.batteryLevel < this.BATTERY_LOW_THRESHOLD
+      result.lowSignal =
+        entity.isWireless && entity.linkQuality < this.SIGNAL_LOW_THRESHOLD
+    }
+    return result
   }
 }
 

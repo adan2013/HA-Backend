@@ -38,9 +38,10 @@ const notificationConfig: NotificationConfig[] = [
   },
   {
     id: 'deadlineWarning',
-    title: 'Upcoming deadline detected',
+    title: 'Upcoming deadline',
     description:
       'One of your deadline intervals are coming to and end. Take an action and reset the date',
+    canBeDismissed: true,
   },
   {
     id: 'mainDoorOpen',
@@ -82,11 +83,19 @@ const notificationConfig: NotificationConfig[] = [
   },
   {
     id: 'offlineSensor',
-    title: 'Sensor unavailable',
+    title: 'Sensor is offline',
     description:
       'One of your important sensors is unavailable. Check the connection and battery level',
     priorityOrder: 'low',
     light: 'blue',
+    canBeDismissed: true,
+  },
+  {
+    id: 'weakSignal',
+    title: 'Weak sensor signal',
+    description:
+      'One of your important sensors has weak signal. Check the connection and battery level',
+    priorityOrder: 'low',
     canBeDismissed: true,
   },
 ]

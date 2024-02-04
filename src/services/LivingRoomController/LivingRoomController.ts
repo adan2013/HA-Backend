@@ -53,6 +53,7 @@ class LivingRoomController extends Service {
     toTurnOn: LightEntity[] = [],
     toTurnOff: LightEntity[] = [],
   ) {
+    if (this.isDisabled) return
     const lightsToTurnOnAlreadySet = toTurnOn.every(
       (entity) => Math.abs(entity.brightness - brightnessLevel) <= 3,
     )
@@ -76,6 +77,7 @@ class LivingRoomController extends Service {
   }
 
   public turnOffAllLights() {
+    if (this.isDisabled) return
     this.tableLight.turnOff([
       this.tvLight.entityId,
       this.backSection.entityId,

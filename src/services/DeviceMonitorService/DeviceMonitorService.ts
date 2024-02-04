@@ -50,25 +50,22 @@ class DeviceMonitorService extends Service {
 
   private updateServiceStatus() {
     const bat = this.detectedDevices.filter((dd) => dd.lowBattery)
-    const sig = this.detectedDevices.filter((dd) => dd.lowSignal)
     const off = this.detectedDevices.filter((dd) => dd.offline)
-    const sigAndOff = this.detectedDevices.filter(
-      (dd) => dd.lowSignal || dd.offline,
-    )
+    const lqi = this.detectedDevices.filter((dd) => dd.lowSignal)
     this.setServiceStatus(
-      `Low batteries: ${bat.length}; Low signal: ${sig.length}; Offline: ${off.length}; On watchlist: ${devices.length}`,
+      `Low batteries: ${bat.length}; Low signal: ${lqi.length}; Offline: ${off.length}; On watchlist: ${devices.length}`,
       this.detectedDevices.length > 0 ? 'yellow' : 'green',
     )
-    notifications.emit({
-      id: 'lowBattery',
-      enabled: bat.length > 0,
-      extraInfo: bat.map((d) => d.name).join(', '),
-    })
-    notifications.emit({
-      id: 'offlineSensor',
-      enabled: sigAndOff.length > 0,
-      extraInfo: sigAndOff.map((d) => d.name).join(', '),
-    })
+    const switchNotification = (id: string, list: DetectedDeviceMetadata[]) => {
+      notifications.emit({
+        id: id,
+        enabled: list.length > 0,
+        extraInfo: list.map((d) => d.name).join(', '),
+      })
+    }
+    switchNotification('lowBattery', bat)
+    switchNotification('offlineSensor', off)
+    switchNotification('weakSignal', lqi)
   }
 
   private checkDevice(state: EntityState): DetectedDeviceMetadata {

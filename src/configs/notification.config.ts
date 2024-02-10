@@ -30,6 +30,14 @@ const notificationConfig: NotificationConfig[] = [
     canBeDismissed: false, // always can be dismissed if triggered manually by the user
   },
   {
+    id: 'backendStarted',
+    title: 'System restarted',
+    description:
+      'The backend service has been started successfully. If you did not start it, please check the logs and verify the health of the system',
+    priorityOrder: 'high',
+    canBeDismissed: true,
+  },
+  {
     id: 'loadedWashingMachine',
     title: 'Laundry is ready',
     description: 'Unload the washing machine and mark the device as empty',

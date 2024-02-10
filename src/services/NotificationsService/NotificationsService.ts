@@ -148,7 +148,7 @@ class NotificationsService extends Service {
     }
     const config = notificationConfig.find((c) => c.id === id)
     if (config) {
-      this.activeNotifications.push({
+      this.activeNotifications.unshift({
         id: config.id,
         title: config.title,
         description: config.description,

@@ -14,7 +14,7 @@ type DetectedDeviceMetadata = {
 }
 
 class DeviceMonitorService extends Service {
-  private readonly BATTERY_LOW_THRESHOLD = 30
+  private readonly BATTERY_LOW_THRESHOLD = 16
   private readonly SIGNAL_LOW_THRESHOLD = 20
   detectedDevices: DetectedDeviceMetadata[] = []
 

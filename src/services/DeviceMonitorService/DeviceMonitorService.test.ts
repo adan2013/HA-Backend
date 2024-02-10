@@ -27,7 +27,7 @@ const emitTestEntityUpdates = () => {
   emit('standard1', 100, 255)
   emit('standard2', 40, 78)
   emit('standard3', 30, 30)
-  emit('standard4', 20, 100)
+  emit('standard4', 15, 100)
   emit('standard5', 50, 14)
   emit('standard6', 5, 5)
   emit('standard6', 100, 5)
@@ -54,7 +54,7 @@ describe('Device monitor service', () => {
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
     emitStateUpdate('sensor', 'off', {
-      battery: 18,
+      battery: 12,
       linkquality: 200,
     })
     expect(service.getServiceStatus().status).toEqual({

@@ -1,5 +1,5 @@
 import DeviceMonitorService from './DeviceMonitorService'
-import { emitStateUpdate } from '../../utils/testUtils'
+import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
 import { notifications } from '../../events/events'
 
 jest.mock('../../configs/deviceMonitor.config', () => [
@@ -40,6 +40,11 @@ const emitTestEntityUpdates = () => {
 }
 
 describe('Device monitor service', () => {
+  beforeEach(() => {
+    mockEntity('input_boolean.alertbatterylevel', 'on')
+    mockEntity('input_boolean.alertselfdiagnostic', 'on')
+  })
+
   it('should initialize service with correct status', () => {
     const service = new DeviceMonitorService()
     expect(service.getServiceStatus().status).toEqual({

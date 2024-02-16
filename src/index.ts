@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import './events/EventEmitterHub'
-import { homeAssistantSync } from './events/events'
+import { homeAssistantSync, notifications } from './events/events'
 import WebSocketServerConnector from './connectors/WebSocketServerConnector'
 import HomeAssistantConnector from './connectors/HomeAssistantConnector'
 import ServiceManager from './services/ServiceManager'
@@ -56,4 +56,9 @@ homeAssistantSync.once(() => {
   sm.registerService(new ReminderService())
   sm.registerService(new WaterLeakService())
   sm.registerService(new DeviceMonitorService())
+
+  notifications.emit({
+    id: 'backendStarted',
+    enabled: true,
+  })
 })

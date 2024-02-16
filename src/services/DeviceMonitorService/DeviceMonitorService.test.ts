@@ -1,5 +1,5 @@
 import DeviceMonitorService from './DeviceMonitorService'
-import { emitStateUpdate } from '../../utils/testUtils'
+import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
 import { notifications } from '../../events/events'
 
 jest.mock('../../configs/deviceMonitor.config', () => [
@@ -27,7 +27,7 @@ const emitTestEntityUpdates = () => {
   emit('standard1', 100, 255)
   emit('standard2', 40, 78)
   emit('standard3', 30, 30)
-  emit('standard4', 20, 100)
+  emit('standard4', 15, 100)
   emit('standard5', 50, 14)
   emit('standard6', 5, 5)
   emit('standard6', 100, 5)
@@ -40,6 +40,11 @@ const emitTestEntityUpdates = () => {
 }
 
 describe('Device monitor service', () => {
+  beforeEach(() => {
+    mockEntity('input_boolean.alertbatterylevel', 'on')
+    mockEntity('input_boolean.alertselfdiagnostic', 'on')
+  })
+
   it('should initialize service with correct status', () => {
     const service = new DeviceMonitorService()
     expect(service.getServiceStatus().status).toEqual({
@@ -54,7 +59,7 @@ describe('Device monitor service', () => {
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
     emitStateUpdate('sensor', 'off', {
-      battery: 18,
+      battery: 12,
       linkquality: 200,
     })
     expect(service.getServiceStatus().status).toEqual({
@@ -70,16 +75,6 @@ describe('Device monitor service', () => {
   })
 
   it('should trigger offline sensor notification', () => {
-    const offlineStatus = {
-      message: 'Low batteries: 0; Low signal: 0; Offline: 1; On watchlist: 3',
-      color: 'yellow',
-      enabled: true,
-    }
-    const expectedNotificationPayload = {
-      id: 'offlineSensor',
-      enabled: true,
-      extraInfo: 'name3',
-    }
     const service = new DeviceMonitorService()
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
@@ -88,21 +83,19 @@ describe('Device monitor service', () => {
       battery: 50,
       linkquality: 100,
     })
-    expect(service.getServiceStatus().status).toEqual(offlineStatus)
-    expect(notificationMock).toHaveBeenCalledWith(expectedNotificationPayload)
+    expect(service.getServiceStatus().status).toEqual({
+      message: 'Low batteries: 0; Low signal: 0; Offline: 1; On watchlist: 3',
+      color: 'yellow',
+      enabled: true,
+    })
+    expect(notificationMock).toHaveBeenCalledWith({
+      id: 'offlineSensor',
+      enabled: true,
+      extraInfo: 'name3',
+    })
   })
 
   it('should trigger weak signal sensor notification', () => {
-    const weakSignalStatus = {
-      message: 'Low batteries: 0; Low signal: 1; Offline: 0; On watchlist: 3',
-      color: 'yellow',
-      enabled: true,
-    }
-    const expectedNotificationPayload = {
-      id: 'weakSignal',
-      enabled: true,
-      extraInfo: 'name3',
-    }
     const service = new DeviceMonitorService()
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
@@ -110,8 +103,16 @@ describe('Device monitor service', () => {
       battery: 50,
       linkquality: 10,
     })
-    expect(service.getServiceStatus().status).toEqual(weakSignalStatus)
-    expect(notificationMock).toHaveBeenCalledWith(expectedNotificationPayload)
+    expect(service.getServiceStatus().status).toEqual({
+      message: 'Low batteries: 0; Low signal: 1; Offline: 0; On watchlist: 3',
+      color: 'yellow',
+      enabled: true,
+    })
+    expect(notificationMock).toHaveBeenCalledWith({
+      id: 'weakSignal',
+      enabled: true,
+      extraInfo: 'name3',
+    })
   })
 
   it('should not detect anything if the service is disabled', () => {
@@ -159,6 +160,33 @@ describe('Device monitor service', () => {
       message: 'Low batteries: 2; Low signal: 1; Offline: 1; On watchlist: 3',
       color: 'yellow',
       enabled: true,
+    })
+  })
+
+  it('should not trigger any notification if the alerts are disabled', () => {
+    const service = new DeviceMonitorService()
+    emitStateUpdate('input_boolean.alertbatterylevel', 'off')
+    emitStateUpdate('input_boolean.alertselfdiagnostic', 'off')
+    const notificationMock = jest.fn()
+    notifications.on(notificationMock)
+    emitTestEntityUpdates()
+    expect(service.detectedDevices).toHaveLength(3)
+    expect(service.getServiceStatus().status).toEqual({
+      message: 'Low batteries: 2; Low signal: 1; Offline: 1; On watchlist: 3',
+      color: 'yellow',
+      enabled: true,
+    })
+    expect(notificationMock).toHaveBeenCalledWith({
+      id: 'lowBattery',
+      enabled: false,
+    })
+    expect(notificationMock).toHaveBeenCalledWith({
+      id: 'weakSignal',
+      enabled: false,
+    })
+    expect(notificationMock).toHaveBeenCalledWith({
+      id: 'offlineSensor',
+      enabled: false,
     })
   })
 })

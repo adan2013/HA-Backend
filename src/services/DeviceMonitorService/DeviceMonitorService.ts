@@ -14,9 +14,15 @@ type DetectedDeviceMetadata = {
 }
 
 class DeviceMonitorService extends Service {
-  private readonly BATTERY_LOW_THRESHOLD = 30
+  private readonly BATTERY_LOW_THRESHOLD = 16
   private readonly SIGNAL_LOW_THRESHOLD = 20
   detectedDevices: DetectedDeviceMetadata[] = []
+  private batteryLevelAlertToggle = Entity.toggle(
+    'input_boolean.alertbatterylevel',
+  )
+  private selfDiagnosticAlertToggle = Entity.toggle(
+    'input_boolean.alertselfdiagnostic',
+  )
 
   constructor() {
     super('deviceMonitor')
@@ -29,6 +35,8 @@ class DeviceMonitorService extends Service {
         ((metadata.lowSignal || metadata.offline) && metadata.monitored)
       this.updateList(metadata, reportThisDevice)
     })
+    this.batteryLevelAlertToggle.onChange(() => this.updateServiceStatus())
+    this.selfDiagnosticAlertToggle.onChange(() => this.updateServiceStatus())
   }
 
   private updateList(metadata: DetectedDeviceMetadata, addToList: boolean) {
@@ -50,22 +58,31 @@ class DeviceMonitorService extends Service {
 
   private updateServiceStatus() {
     const bat = this.detectedDevices.filter((dd) => dd.lowBattery)
-    const off = this.detectedDevices.filter((dd) => dd.offline)
     const lqi = this.detectedDevices.filter((dd) => dd.lowSignal)
+    const off = this.detectedDevices.filter((dd) => dd.offline)
     this.setServiceStatus(
       `Low batteries: ${bat.length}; Low signal: ${lqi.length}; Offline: ${off.length}; On watchlist: ${devices.length}`,
       this.detectedDevices.length > 0 ? 'yellow' : 'green',
     )
-    const switchNotification = (id: string, list: DetectedDeviceMetadata[]) => {
+    const switchNotification = (
+      id: string,
+      list: DetectedDeviceMetadata[],
+      alertsEnabled = true,
+    ) => {
+      const isOn = alertsEnabled && list.length > 0
       notifications.emit({
         id: id,
-        enabled: list.length > 0,
-        extraInfo: list.map((d) => d.name).join(', '),
+        enabled: isOn,
+        extraInfo: isOn ? list.map((d) => d.name).join(', ') : undefined,
       })
     }
-    switchNotification('lowBattery', bat)
-    switchNotification('offlineSensor', off)
-    switchNotification('weakSignal', lqi)
+    switchNotification('lowBattery', bat, this.batteryLevelAlertToggle.isOn)
+    switchNotification('weakSignal', lqi, this.selfDiagnosticAlertToggle.isOn)
+    switchNotification(
+      'offlineSensor',
+      off,
+      this.selfDiagnosticAlertToggle.isOn,
+    )
   }
 
   private checkDevice(state: EntityState): DetectedDeviceMetadata {

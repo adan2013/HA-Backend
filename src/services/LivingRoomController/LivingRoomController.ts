@@ -4,11 +4,13 @@ import LightEntity from '../../entities/LightEntity'
 import { BrightnessLevels, LightConfig } from './types'
 
 class LivingRoomController extends Service {
+  private readonly cabinetLevels: BrightnessLevels = [200, 60, 255]
   private readonly tableLevels: BrightnessLevels = [90, 160, 255]
   private readonly tvLevels: BrightnessLevels = [255, 255, 255]
   private readonly backSectionLevels: BrightnessLevels = [160, 70, 220]
   private readonly frontSectionLevels: BrightnessLevels = [160, 80, 255]
   private remote = Entity.aqaraOpple('sensor.livingroomremote_action')
+  private cabinetLight = Entity.monoLight('light.cabinetlight')
   private tableLight = Entity.monoLight('light.tablelight')
   private tvLight = Entity.monoLight('light.tvlight')
   private backSection = Entity.monoLight('light.livingroombacklight')
@@ -32,6 +34,10 @@ class LivingRoomController extends Service {
     this.mapRemoteBtnToLight(4, {
       levels: this.tableLevels,
       toTurnOn: [this.tableLight],
+    })
+    this.mapRemoteBtnToLight(5, {
+      levels: this.cabinetLevels,
+      toTurnOn: [this.cabinetLight],
     })
     this.remote.onAnyShortPressCount(6, () => this.turnOffAllLights())
   }
@@ -82,6 +88,7 @@ class LivingRoomController extends Service {
       this.tvLight.entityId,
       this.backSection.entityId,
       this.frontSection.entityId,
+      this.cabinetLight.entityId,
     ])
   }
 }

@@ -57,6 +57,7 @@ describe('LivingRoomController', () => {
         'light.tvlight',
         'light.livingroombacklight',
         'light.livingroomfrontlight',
+        'light.cabinetlight',
       ]),
     )
   })

@@ -42,6 +42,9 @@ Allows to store historical data in queue. For exaple, it is used to collect valu
 ### DebouncedNumericToggle
 Very useful tool that allows you to convert the numeric value to the toggle with the debounce functionality. I am using it to determine when my washing machine is working, depending on the power consumption reported by the smart plug.
 
+### DoubleThresholdToggle
+It is a simple tool that allows you to convert the numeric value to the toggle with the double threshold. I am using it to determine when is bright enough to turn off the auto-lights in the kitchen.
+
 ### StateMachine
 Simple state machine implementation with implemented "auto-return" functionality and Type-Script support.
 
@@ -49,6 +52,9 @@ Simple state machine implementation with implemented "auto-return" functionality
 
 ### BalconyController
 The service is using the CRON job to turn on and off the Christmas lights on the balcony.
+
+### DeviceMonitor
+The service is responsible for monitoring the devices in the network. It is checking the availability of the devices and the battery levels.
 
 ### KitchenController
 Custom logic for my automatic lights in the kitchen. It uses an Aqara motion and light sensor to automatically turn on the lights if someone enters the kitchen.
@@ -61,6 +67,9 @@ It is responsible for controlling the active notifications that are displayed on
 
 ### ReminderService
 It is a group service that contains all the micro-integrations related to reminders - for example: ready laundry or opened main doors.
+
+### WaterLeak
+The service is responsible for monitoring the water leak sensors and triggering the notification and sound alarm if the water is detected.
 
 ### WeatherService
 Is collecting weather data from the OpenWeatherMap API by using "OneCall API 3.0". The air quality index is collected from the AQICN API, because I was unhappy with the measurement precision of the Air Pollution API from OpenWeatherMap.

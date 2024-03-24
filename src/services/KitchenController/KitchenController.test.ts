@@ -73,6 +73,7 @@ const init = ({
   const serviceCallMock = jest.fn()
   serviceCall.on(serviceCallMock)
   const controller = new KitchenController()
+  emitStateUpdate(ids.light, isDark ? '30' : '80')
   return { serviceCallMock, controller }
 }
 
@@ -195,22 +196,6 @@ describe('kitchenController', () => {
     expect(controller.state.currentState).toBe('off')
     emitStateUpdate(ids.light, '100')
     expect(controller.state.currentState).toBe('off')
-  })
-
-  it('should trigger update only on toggle from bright to dark state', () => {
-    const { controller, serviceCallMock } = init({
-      isDark: false,
-      movement: true,
-    })
-    expect(controller.state.currentState).toBe('off')
-    emitStateUpdate(ids.light, '20')
-    serviceCallMock.mockReset()
-    emitStateUpdate(ids.light, '19')
-    expect(serviceCallMock).not.toBeCalled()
-    emitStateUpdate(ids.light, '101')
-    expect(serviceCallMock).not.toBeCalled()
-    emitStateUpdate(ids.light, '21')
-    expect(serviceCallMock).toBeCalled()
   })
 
   it('should disable auto lights if autoLight toggle is off', () => {

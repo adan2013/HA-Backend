@@ -62,7 +62,7 @@ const init = ({
 }: ScenarioConfig = {}) => {
   entityStateRequest.resetListeners()
   mockEntity(ids.remote, 'None')
-  mockEntity(ids.light, isDark ? '30' : '80')
+  mockEntity(ids.light, isDark ? '5' : '80')
   mockEntity(ids.motion, movement ? 'on' : 'off')
   mockEntity(ids.leftLight, 'off')
   mockEntity(ids.rightLight, 'off')
@@ -73,7 +73,7 @@ const init = ({
   const serviceCallMock = jest.fn()
   serviceCall.on(serviceCallMock)
   const controller = new KitchenController()
-  emitStateUpdate(ids.light, isDark ? '30' : '80')
+  emitStateUpdate(ids.light, isDark ? '5' : '80')
   return { serviceCallMock, controller }
 }
 
@@ -184,7 +184,7 @@ describe('kitchenController', () => {
       movement: true,
     })
     expect(controller.state.currentState).toBe('off')
-    emitStateUpdate(ids.light, '20')
+    emitStateUpdate(ids.light, '5')
     expect(controller.state.currentState).toBe('auto-on')
   })
 

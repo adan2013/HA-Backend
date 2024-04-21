@@ -11,7 +11,7 @@ type KitchenLightsState =
   | 'auto-dimming'
 
 class KitchenController extends Service {
-  private readonly NIGHT_LUX_THRESHOLD = 40
+  private readonly NIGHT_LUX_THRESHOLD = 10
   private readonly DAY_LUX_THRESHOLD = 70
   private readonly DISABLED_STATE_DURATION = 6000
   private readonly DIMMING_STATE_DURATION = 10000

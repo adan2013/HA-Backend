@@ -86,16 +86,18 @@ class HomeAssistantConnector {
         },
         eventCallback: (event) => {
           const newState = event.data['new_state']
-          const changedEntityIndex = this.entities.findIndex(
-            (e) => e.id === newState.entity_id,
-          )
-          if (changedEntityIndex >= 0) {
-            const updatedState = HomeAssistantConnector.mapEntityState(
-              newState as never,
+          if (newState) {
+            const changedEntityIndex = this.entities.findIndex(
+              (e) => e.id === newState.entity_id,
             )
-            this.entities[changedEntityIndex] = updatedState
-            entityUpdate(updatedState.id).emit(updatedState)
-            anyEntityUpdate.emit(updatedState)
+            if (changedEntityIndex >= 0) {
+              const updatedState = HomeAssistantConnector.mapEntityState(
+                newState as never,
+              )
+              this.entities[changedEntityIndex] = updatedState
+              entityUpdate(updatedState.id).emit(updatedState)
+              anyEntityUpdate.emit(updatedState)
+            }
           }
         },
       },

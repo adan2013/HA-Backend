@@ -9,6 +9,10 @@ const waterLeakSensors: WaterLeakSensor[] = [
     entityId: 'binary_sensor.waterfilterleaksensor_water_leak',
     name: 'Water filter',
   },
+  {
+    entityId: 'binary_sensor.washingmachineleaksensor_water_leak',
+    name: 'Washing machine',
+  },
 ]
 
 export default waterLeakSensors

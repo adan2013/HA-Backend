@@ -36,6 +36,12 @@ const deadlines: DeadlineConfig[] = [
     interval: 365,
     warningThreshold: 12,
   },
+  {
+    label: 'coffee machine cleaning',
+    entityId: 'input_datetime.coffeemachinecleaning',
+    interval: 14,
+    warningThreshold: 1,
+  },
 ]
 
 export default deadlines

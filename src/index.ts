@@ -14,6 +14,7 @@ import KitchenController from './services/KitchenController/KitchenController'
 import { checkEnvironmentVariables } from './utils/envVariables'
 import WaterLeakService from './services/WaterLeakService/WaterLeakService'
 import DeviceMonitorService from './services/DeviceMonitorService/DeviceMonitorService'
+import EnergyMonitorService from './services/EnergyMonitorService/EnergyMonitorService'
 
 checkEnvironmentVariables([
   'ENV',
@@ -56,6 +57,7 @@ homeAssistantSync.once(() => {
   sm.registerService(new ReminderService())
   sm.registerService(new WaterLeakService())
   sm.registerService(new DeviceMonitorService())
+  sm.registerService(new EnergyMonitorService())
 
   notifications.emit({
     id: 'backendStarted',

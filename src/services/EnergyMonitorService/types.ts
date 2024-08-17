@@ -15,7 +15,6 @@ export type DeviceStatistics = {
   deviceName: string
   consumedEnergy: EnergyStatistics
   initialValues: InitialEnergyStatistics
-  isRunning: boolean
 }
 
 export type EnergyMonitorServiceData = {

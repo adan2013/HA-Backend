@@ -107,6 +107,14 @@ const notificationConfig: NotificationConfig[] = [
     priorityOrder: 'low',
     canBeDismissed: true,
   },
+  {
+    id: 'manualKitchenLights',
+    title: 'Kitchen lights are on',
+    description:
+      'The kitchen lights are in manual mode. Turn off the lights to go back to automatic mode',
+    priorityOrder: 'low',
+    canBeDismissed: true,
+  },
 ]
 
 export default notificationConfig

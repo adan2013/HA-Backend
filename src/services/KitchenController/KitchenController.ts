@@ -2,6 +2,7 @@ import Service from '../Service'
 import Entity from '../../entities/Entity'
 import StateMachine from '../../helpers/StateMachine'
 import DoubleThresholdToggle from '../../helpers/DoubleThresholdToggle'
+import { notifications } from '../../events/events'
 
 type KitchenLightsState =
   | 'off'
@@ -47,6 +48,10 @@ class KitchenController extends Service {
         { from: 'auto-dimming', to: 'off', delay: this.DIMMING_STATE_DURATION },
       ],
       onStateChange: (newState) => {
+        notifications.emit({
+          id: 'manualKitchenLights',
+          enabled: newState === 'manual',
+        })
         switch (newState) {
           case 'off':
           case 'disabled':

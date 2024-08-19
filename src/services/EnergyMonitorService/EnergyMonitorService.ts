@@ -5,6 +5,8 @@ import { EnergyMonitorServiceData } from './types'
 import DebouncedNumericToggle from '../../helpers/DebouncedNumericToggle'
 import Timer from '../../Timer'
 
+const roundToTwoDecimals = (num: number) => Math.round(num * 100) / 100
+
 class EnergyMonitorService extends Service {
   private state: EnergyMonitorServiceData = {
     monitors: [],
@@ -13,7 +15,9 @@ class EnergyMonitorService extends Service {
   constructor() {
     super('energyMonitor')
     monitors.forEach((config) => {
-      const energyEntity = Entity.general(config.totalEnergyEntityId)
+      const energyEntity = Entity.general(config.totalEnergyEntityId, {
+        subscribeToUpdates: false,
+      })
       const initialEnergy = Number(energyEntity.state?.state || 0)
       this.state.monitors.push({
         deviceName: config.deviceName,
@@ -56,21 +60,25 @@ class EnergyMonitorService extends Service {
       this.registerHelper(debouncedDeviceState)
 
       powerEntity.onAnyStateUpdate((powerState) => {
-        if (powerEntity.isUnavailable) return
+        if (powerEntity.isUnavailable || this.isDisabled) return
         debouncedDeviceState.inputValue(Number(powerState.state))
       })
 
       energyEntity.onAnyStateUpdate((energyState) => {
-        if (energyEntity.isUnavailable) return
+        if (energyEntity.isUnavailable || this.isDisabled) return
         const consumedTotalEnergy = Number(energyState.state || 0)
         if (consumedTotalEnergy > 0) {
           monitorState.consumedEnergy = {
             total: consumedTotalEnergy,
-            monthly:
+            monthly: roundToTwoDecimals(
               consumedTotalEnergy - monitorState.initialValues.inThisMonth,
-            daily: consumedTotalEnergy - monitorState.initialValues.inThisDay,
-            runtime:
+            ),
+            daily: roundToTwoDecimals(
+              consumedTotalEnergy - monitorState.initialValues.inThisDay,
+            ),
+            runtime: roundToTwoDecimals(
               consumedTotalEnergy - monitorState.initialValues.inThisRuntime,
+            ),
           }
           this.setServiceData(this.state)
         }

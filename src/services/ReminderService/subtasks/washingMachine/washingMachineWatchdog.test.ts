@@ -6,6 +6,7 @@ import { washingMachinePlugId } from './washingMachineWatchdog'
 describe('washing machine watchdog', () => {
   beforeEach(() => {
     jest.useFakeTimers()
+    notifications.resetListeners()
     mockEntity(washingMachinePlugId, '0.6')
   })
 
@@ -34,8 +35,8 @@ describe('washing machine watchdog', () => {
   it('should not trigger notification if service is disabled', () => {
     const notificationMock = jest.fn()
     const service = new ReminderService()
-    service.setServiceEnabled(false)
     notifications.on(notificationMock)
+    service.setServiceEnabled(false)
 
     emitStateUpdate(washingMachinePlugId, '40')
     jest.advanceTimersByTime(65000)

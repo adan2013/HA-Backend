@@ -11,17 +11,17 @@ const monitors: EnergyMonitorConfig[] = [
   {
     currentPowerEntityId: 'sensor.airconditionerbreaker_power',
     totalEnergyEntityId: 'sensor.airconditionerbreaker_energy',
-    deviceName: 'Gree A/C',
+    deviceName: 'greeAirConditioner',
     runtimePowerThreshold: 10,
-    runtimeOnDelay: 60,
+    runtimeOnDelay: 10,
     runtimeOffDelay: 60,
   },
   {
     currentPowerEntityId: 'sensor.washingmachineplug_power',
     totalEnergyEntityId: 'sensor.washingmachineplug_energy',
-    deviceName: 'Washing Machine',
+    deviceName: 'washingMachine',
     runtimePowerThreshold: 10,
-    runtimeOnDelay: 60,
+    runtimeOnDelay: 10,
     runtimeOffDelay: 30,
   },
 ]

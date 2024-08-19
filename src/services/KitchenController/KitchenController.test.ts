@@ -1,4 +1,8 @@
-import { entityStateRequest, serviceCall } from '../../events/events'
+import {
+  entityStateRequest,
+  notifications,
+  serviceCall,
+} from '../../events/events'
 import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
 import KitchenController from './KitchenController'
 import { ServiceCallPayload } from '../../events/eventPayloads'
@@ -255,5 +259,22 @@ describe('kitchenController', () => {
     expect(serviceCallMock).toBeCalledWith(togglePayload(ids.ignoreSun))
     pressButton('button_4_hold')
     expect(serviceCallMock).toBeCalledWith(togglePayload(ids.autoLights))
+  })
+
+  it('should trigger notification when manual lights are on or off', () => {
+    const { controller } = init()
+    const notificationMock = jest.fn()
+    notifications.on(notificationMock)
+    emitStateUpdate(ids.leftToggle, 'on')
+    expect(controller.state.currentState).toBe('manual')
+    expect(notificationMock).toHaveBeenCalledWith({
+      id: 'manualKitchenLights',
+      enabled: true,
+    })
+    emitStateUpdate(ids.leftToggle, 'off')
+    expect(notificationMock).toHaveBeenCalledWith({
+      id: 'manualKitchenLights',
+      enabled: false,
+    })
   })
 })

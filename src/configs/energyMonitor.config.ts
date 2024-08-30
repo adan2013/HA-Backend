@@ -14,7 +14,7 @@ const monitors: EnergyMonitorConfig[] = [
     deviceName: 'greeAirConditioner',
     runtimePowerThreshold: 10,
     runtimeOnDelay: 10,
-    runtimeOffDelay: 60,
+    runtimeOffDelay: 300,
   },
   {
     currentPowerEntityId: 'sensor.washingmachineplug_power',
@@ -22,7 +22,15 @@ const monitors: EnergyMonitorConfig[] = [
     deviceName: 'washingMachine',
     runtimePowerThreshold: 10,
     runtimeOnDelay: 10,
-    runtimeOffDelay: 30,
+    runtimeOffDelay: 180,
+  },
+  {
+    currentPowerEntityId: 'sensor.bambulabprinterplug_power',
+    totalEnergyEntityId: 'sensor.bambulabprinterplug_energy',
+    deviceName: 'bambuLabPrinter',
+    runtimePowerThreshold: 50,
+    runtimeOnDelay: 20,
+    runtimeOffDelay: 300,
   },
 ]
 

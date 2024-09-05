@@ -12,7 +12,7 @@ class ReminderService extends Service {
     initDeadlinesWatchdog(this)
     initMainDoorDeadboltWatchdog(this)
     init3dPrinterWatchdog(this)
-    init3dPrinterAutoOffSwitch()
+    init3dPrinterAutoOffSwitch(this)
   }
 }
 

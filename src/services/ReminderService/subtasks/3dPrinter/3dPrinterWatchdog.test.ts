@@ -19,7 +19,7 @@ describe('3D printer watchdog', () => {
       enabled: false,
     })
     emitStateUpdate(printerPowerId, '95')
-    jest.advanceTimersByTime(130000)
+    jest.advanceTimersByTime(650000)
     expect(notificationMock).toHaveBeenLastCalledWith({
       id: '3dPrintFinished',
       enabled: false,
@@ -39,7 +39,7 @@ describe('3D printer watchdog', () => {
     service.setServiceEnabled(false)
 
     emitStateUpdate(printerPowerId, '95')
-    jest.advanceTimersByTime(130000)
+    jest.advanceTimersByTime(650000)
 
     emitStateUpdate(printerPowerId, '16')
     jest.advanceTimersByTime(130000)

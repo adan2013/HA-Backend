@@ -51,6 +51,7 @@ const notificationConfig: NotificationConfig[] = [
     description:
       'The 3D print has been finished. Remove the print from the printer',
     light: 'green',
+    canBeDismissed: true,
   },
   {
     id: 'deadlineWarning',

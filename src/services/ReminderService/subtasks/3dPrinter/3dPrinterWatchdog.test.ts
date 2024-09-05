@@ -1,13 +1,13 @@
 import { notifications } from '../../../../events/events'
 import ReminderService from '../../ReminderService'
 import { emitStateUpdate, mockEntity } from '../../../../utils/testUtils'
-import { printerPlugId } from './3dPrinterWatchdog'
+import { printerPowerId } from './3dPrinterWatchdog'
 
 describe('3D printer watchdog', () => {
   beforeEach(() => {
     jest.useFakeTimers()
     notifications.resetListeners()
-    mockEntity(printerPlugId, '2.4')
+    mockEntity(printerPowerId, '2.4')
   })
 
   it('should trigger notification on printer state change', () => {
@@ -18,13 +18,13 @@ describe('3D printer watchdog', () => {
       id: '3dPrintFinished',
       enabled: false,
     })
-    emitStateUpdate(printerPlugId, '95')
+    emitStateUpdate(printerPowerId, '95')
     jest.advanceTimersByTime(130000)
     expect(notificationMock).toHaveBeenLastCalledWith({
       id: '3dPrintFinished',
       enabled: false,
     })
-    emitStateUpdate(printerPlugId, '16')
+    emitStateUpdate(printerPowerId, '16')
     jest.advanceTimersByTime(130000)
     expect(notificationMock).toHaveBeenLastCalledWith({
       id: '3dPrintFinished',
@@ -38,10 +38,10 @@ describe('3D printer watchdog', () => {
     notifications.on(notificationMock)
     service.setServiceEnabled(false)
 
-    emitStateUpdate(printerPlugId, '95')
+    emitStateUpdate(printerPowerId, '95')
     jest.advanceTimersByTime(130000)
 
-    emitStateUpdate(printerPlugId, '16')
+    emitStateUpdate(printerPowerId, '16')
     jest.advanceTimersByTime(130000)
 
     expect(notificationMock).not.toHaveBeenCalled()

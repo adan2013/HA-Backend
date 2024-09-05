@@ -3,10 +3,10 @@ import Entity from '../../../../entities/Entity'
 import DebouncedNumericToggle from '../../../../helpers/DebouncedNumericToggle'
 import { notifications } from '../../../../events/events'
 
-export const printerPlugId = 'sensor.bambulabprinterplug_power'
+export const printerPowerId = 'sensor.bambulabprinterplug_power'
 
 export const init3dPrinterWatchdog = (reminderService: ReminderService) => {
-  const printerPower = Entity.general(printerPlugId)
+  const printerPower = Entity.general(printerPowerId)
   const setPrinterNotification = (show: boolean) => {
     if (reminderService.isDisabled) return
     notifications.emit({

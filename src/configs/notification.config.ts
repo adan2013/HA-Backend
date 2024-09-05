@@ -46,6 +46,13 @@ const notificationConfig: NotificationConfig[] = [
     ignoreDND: true,
   },
   {
+    id: '3dPrintFinished',
+    title: '3D print finished',
+    description:
+      'The 3D print has been finished. Remove the print from the printer',
+    light: 'green',
+  },
+  {
     id: 'deadlineWarning',
     title: 'Upcoming deadline',
     description:

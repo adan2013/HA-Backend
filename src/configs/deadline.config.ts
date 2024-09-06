@@ -39,7 +39,7 @@ const deadlines: DeadlineConfig[] = [
   {
     label: 'coffee machine cleaning',
     entityId: 'input_datetime.coffeemachinecleaning',
-    interval: 14,
+    interval: 10,
     warningThreshold: 1,
   },
 ]

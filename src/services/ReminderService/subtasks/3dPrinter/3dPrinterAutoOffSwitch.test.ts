@@ -43,14 +43,22 @@ const turnOffPrinterServiceCall: ServiceCallPayload = {
   entityId: printerPlugId,
 }
 
+const turnOffAutomationServiceCall: ServiceCallPayload = {
+  domain: 'input_boolean',
+  service: 'turn_off',
+  entityId: automationToggleId,
+}
+
 describe('3D printer auto off switch', () => {
-  it('should turn off printer when nozzle is cold, print is finished and printer is on', () => {
+  it('should turn off printer and automation when nozzle is cold, print is finished and printer is on', () => {
     const serviceCall = initService({
       printerPlugIsOn: true,
       printerStatus: 'finish',
       nozzleTemp: '49',
     })
-    expect(serviceCall).toHaveBeenLastCalledWith(turnOffPrinterServiceCall)
+    expect(serviceCall).toHaveBeenCalledTimes(2)
+    expect(serviceCall).toHaveBeenCalledWith(turnOffPrinterServiceCall)
+    expect(serviceCall).toHaveBeenCalledWith(turnOffAutomationServiceCall)
   })
 
   it('should not turn off printer when nozzle is still hot', () => {

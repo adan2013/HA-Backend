@@ -26,6 +26,7 @@ export const init3dPrinterAutoOffSwitch = (
       const printerIsOn = plugEntity.isOn
       if (nozzleIsCold && printIsFinished && printerIsOn) {
         plugEntity.turnOff()
+        automationToggleEntity.turnOff()
       }
     }
   })

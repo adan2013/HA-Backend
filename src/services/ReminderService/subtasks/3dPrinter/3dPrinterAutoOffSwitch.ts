@@ -6,7 +6,7 @@ export const printerPlugId = 'switch.bambulabprinterplug'
 export const printerStatusId = 'sensor.p1s_01p00a453001011_print_status'
 export const nozzleTempId = 'sensor.p1s_01p00a453001011_nozzle_temperature'
 
-export const nozzleTempThreshold = 50
+export const nozzleTempThreshold = 42
 
 export const init3dPrinterAutoOffSwitch = (
   reminderService: ReminderService,

@@ -54,7 +54,7 @@ describe('3D printer auto off switch', () => {
     const serviceCall = initService({
       printerPlugIsOn: true,
       printerStatus: 'finish',
-      nozzleTemp: '49',
+      nozzleTemp: '41',
     })
     expect(serviceCall).toHaveBeenCalledTimes(2)
     expect(serviceCall).toHaveBeenCalledWith(turnOffPrinterServiceCall)
@@ -74,7 +74,7 @@ describe('3D printer auto off switch', () => {
     const serviceCall = initService({
       printerPlugIsOn: true,
       printerStatus: 'printing',
-      nozzleTemp: '49',
+      nozzleTemp: '41',
     })
     expect(serviceCall).not.toHaveBeenCalled()
   })
@@ -83,7 +83,7 @@ describe('3D printer auto off switch', () => {
     const serviceCall = initService({
       printerPlugIsOn: false,
       printerStatus: 'finish',
-      nozzleTemp: '49',
+      nozzleTemp: '41',
     })
     expect(serviceCall).not.toHaveBeenCalled()
   })
@@ -93,7 +93,7 @@ describe('3D printer auto off switch', () => {
       automationToggle: false,
       printerPlugIsOn: true,
       printerStatus: 'finish',
-      nozzleTemp: '49',
+      nozzleTemp: '41',
     })
     expect(serviceCall).not.toHaveBeenCalled()
   })
@@ -103,7 +103,7 @@ describe('3D printer auto off switch', () => {
       serviceEnabled: false,
       printerPlugIsOn: true,
       printerStatus: 'finish',
-      nozzleTemp: '49',
+      nozzleTemp: '41',
     })
     expect(serviceCall).not.toHaveBeenCalled()
   })

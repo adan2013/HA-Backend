@@ -9,7 +9,7 @@ class LivingRoomController extends Service {
   private readonly tvLevels: BrightnessLevels = [255, 255, 255]
   private readonly backSectionLevels: BrightnessLevels = [160, 70, 220]
   private readonly frontSectionLevels: BrightnessLevels = [160, 80, 255]
-  private remote = Entity.aqaraOpple('sensor.livingroomremote_action')
+  private remote = Entity.aqaraOppleRemote('sensor.livingroomremote_action')
   private cabinetLight = Entity.monoLight('light.cabinetlight')
   private tableLight = Entity.monoLight('light.tablelight')
   private tvLight = Entity.monoLight('light.tvlight')

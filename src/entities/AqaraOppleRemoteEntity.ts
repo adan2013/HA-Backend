@@ -1,64 +1,28 @@
-import HomeAssistantEntity from './HomeAssistantEntity'
-import { webSocketMessage } from '../events/events'
-import WS_CMD from '../connectors/wsCommands'
+import RemoteEntity, { ActionType } from './RemoteEntity'
 
-export type PressType = 'single' | 'double' | 'triple' | 'hold' | 'release'
+export type AqaraOpplePressType =
+  | 'single'
+  | 'double'
+  | 'triple'
+  | 'hold'
+  | 'release'
 
-export type ActionType = {
-  button: number
-  type: PressType
-}
-
-type Subscriber = {
-  action: ActionType
-  callback: (action: ActionType) => void
-}
-
-class AqaraOppleRemoteEntity extends HomeAssistantEntity {
-  private subscribers: Subscriber[] = []
-
+class AqaraOppleRemoteEntity extends RemoteEntity<AqaraOpplePressType> {
   constructor(entityId: string) {
     super(entityId)
-    this.onAnyStateUpdate((state) =>
-      this.emitAction(this.decodeState(state.state)),
-    )
-    webSocketMessage(WS_CMD.incoming.REMOTE_CONTROL).on(
-      ({ message: { id, value } }) => {
-        if (id && value && id === this.entityId) {
-          this.emitAction(this.decodeState(value))
-        }
-      },
-    )
   }
 
-  public decodeState(state = ''): ActionType | null {
+  public override decodeState(
+    state = '',
+  ): ActionType<AqaraOpplePressType> | null {
     const splited = state.split('_')
     if (splited.length === 3 && splited[0] === 'button') {
       return {
         button: parseInt(splited[1]),
-        type: splited[2] as PressType,
+        type: splited[2] as AqaraOpplePressType,
       }
     }
     return null
-  }
-
-  private emitAction(action: ActionType | null) {
-    if (!action) return
-    this.subscribers.forEach((subscriber) => {
-      if (
-        subscriber.action.button === action.button &&
-        subscriber.action.type === action.type
-      ) {
-        subscriber.callback(action)
-      }
-    })
-  }
-
-  private subscribe(
-    action: ActionType,
-    callback: (action: ActionType) => void,
-  ) {
-    this.subscribers.push({ action, callback })
   }
 
   public onSinglePress(button: number, callback: () => void) {
@@ -75,7 +39,7 @@ class AqaraOppleRemoteEntity extends HomeAssistantEntity {
 
   public onAnyShortPressCount(
     button: number,
-    callback: (type: PressType) => void,
+    callback: (type: AqaraOpplePressType) => void,
   ) {
     this.onSinglePress(button, () => callback('single'))
     this.onDoublePress(button, () => callback('double'))

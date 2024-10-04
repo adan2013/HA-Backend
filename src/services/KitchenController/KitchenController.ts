@@ -19,7 +19,7 @@ class KitchenController extends Service {
   private readonly DIMMING_BRIGHTNESS = 130
   private readonly AUTO_BRIGHTNESS = 255
   private readonly MANUAL_BRIGHTNESS = 255
-  private remote = Entity.aqaraOpple('sensor.kitchenremote_action')
+  private remote = Entity.aqaraOppleRemote('sensor.kitchenremote_action')
   private lightSensor = Entity.general(
     'sensor.kitchenmotionsensor_illuminance_lux',
   )

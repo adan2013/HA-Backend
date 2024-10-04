@@ -5,14 +5,19 @@ import LightEntity from './LightEntity'
 import InputSelectEntity from './InputSelectEntity'
 import SwitchEntity from './SwitchEntity'
 import AqaraOppleRemoteEntity from './AqaraOppleRemoteEntity'
+import TuyaRemoteEntity from './TuyaRemoteEntity'
 
 class Entity {
   public static general(entityId: string, options?: EntityExtraOptions) {
     return new HomeAssistantEntity(entityId, options)
   }
 
-  public static aqaraOpple(entityId: string) {
+  public static aqaraOppleRemote(entityId: string) {
     return new AqaraOppleRemoteEntity(entityId)
+  }
+
+  public static tuyaRemote(entityId: string) {
+    return new TuyaRemoteEntity(entityId)
   }
 
   public static toggle(entityId: string) {

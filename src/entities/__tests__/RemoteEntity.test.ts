@@ -32,6 +32,7 @@ describe('RemoteEntity', () => {
     const remote = new TestRemote()
     const callback = jest.fn()
     remote.subscribe({ button: 4, type: 'double' }, callback)
+    // test case: wrong id
     webSocketMessage(WS_CMD.incoming.REMOTE_CONTROL).emit({
       message: {
         id: 'WRONG_ID',
@@ -40,6 +41,7 @@ describe('RemoteEntity', () => {
       sendResponse: jest.fn(),
     })
     expect(callback).not.toHaveBeenCalled()
+    // test case: wrong event payload
     webSocketMessage(WS_CMD.incoming.REMOTE_CONTROL).emit({
       message: {
         id: 'sensor',
@@ -47,6 +49,15 @@ describe('RemoteEntity', () => {
       },
       sendResponse: jest.fn(),
     })
+    // test case: invalid payload
+    webSocketMessage(WS_CMD.incoming.REMOTE_CONTROL).emit({
+      message: {
+        id: 'sensor',
+        value: 'invalid_remote_event_payload',
+      },
+      sendResponse: jest.fn(),
+    })
+    // test case: correct payload and id
     webSocketMessage(WS_CMD.incoming.REMOTE_CONTROL).emit({
       message: {
         id: 'sensor',

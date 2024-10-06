@@ -69,7 +69,11 @@ class LightEntity extends HomeAssistantEntity {
     }
   }
 
-  public setTemperature(kelvin: number, extraEntities?: string[]) {
+  public setTemperature(
+    kelvin: number,
+    brightness?: number,
+    extraEntities?: string[],
+  ) {
     if (this.isUnavailable) return
     if (this.lightType === 'cct') {
       serviceCall.emit({
@@ -80,6 +84,7 @@ class LightEntity extends HomeAssistantEntity {
         service: 'turn_on',
         data: {
           kelvin,
+          brightness,
         },
       })
     }

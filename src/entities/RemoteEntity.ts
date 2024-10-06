@@ -23,7 +23,12 @@ class RemoteEntity<PressType> extends HomeAssistantEntity {
     webSocketMessage(WS_CMD.incoming.REMOTE_CONTROL).on(
       ({ message: { id, value } }) => {
         if (id && value && id === this.entityId) {
-          this.emitAction(this.decodeState(value))
+          const splittedValues = value.split('_')
+          if (splittedValues.length !== 2) return
+          this.emitAction({
+            button: parseInt(splittedValues[0]),
+            type: splittedValues[1] as PressType,
+          })
         }
       },
     )

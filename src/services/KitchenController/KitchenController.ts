@@ -3,6 +3,7 @@ import Entity from '../../entities/Entity'
 import StateMachine from '../../helpers/StateMachine'
 import DoubleThresholdToggle from '../../helpers/DoubleThresholdToggle'
 import { notifications } from '../../events/events'
+import Entities from '../../configs/entities.config'
 
 type KitchenLightsState =
   | 'off'
@@ -19,21 +20,25 @@ class KitchenController extends Service {
   private readonly DIMMING_BRIGHTNESS = 130
   private readonly AUTO_BRIGHTNESS = 255
   private readonly MANUAL_BRIGHTNESS = 255
-  private remote = Entity.aqaraOppleRemote('sensor.kitchenremote_action')
-  private lightSensor = Entity.general(
-    'sensor.kitchenmotionsensor_illuminance_lux',
-  )
+  private remote = Entity.aqaraOppleRemote(Entities.sensor.kitchen.remote)
+  private lightSensor = Entity.general(Entities.sensor.kitchen.lightSensor)
   private motionSensor = Entity.general(
-    'binary_sensor.kitchenmotionsensor_occupancy',
+    Entities.binarySensor.kitchen.motionSensor,
   )
-  private leftLight = Entity.monoLight('light.kitchenleftlight')
-  private rightLight = Entity.monoLight('light.kitchenrightlight')
-  private autoLightsToggle = Entity.toggle('input_boolean.kitchenautolights')
+  private leftLight = Entity.monoLight(Entities.light.kitchen.leftSide)
+  private rightLight = Entity.monoLight(Entities.light.kitchen.rightSide)
+  private autoLightsToggle = Entity.toggle(
+    Entities.inputBoolean.kitchenAutoLights,
+  )
   private ignoreSunToggle = Entity.toggle(
-    'input_boolean.kitchenignoresunposition',
+    Entities.inputBoolean.kitchenIgnoreSunPosition,
   )
-  private leftLightToggle = Entity.toggle('input_boolean.kitchenleftlighton')
-  private rightLightToggle = Entity.toggle('input_boolean.kitchenrightlighton')
+  private leftLightToggle = Entity.toggle(
+    Entities.inputBoolean.kitchenLeftLightOn,
+  )
+  private rightLightToggle = Entity.toggle(
+    Entities.inputBoolean.kitchenRightLightOn,
+  )
   public state: StateMachine<KitchenLightsState>
   public dayNightToggle: DoubleThresholdToggle
   private isDark = false

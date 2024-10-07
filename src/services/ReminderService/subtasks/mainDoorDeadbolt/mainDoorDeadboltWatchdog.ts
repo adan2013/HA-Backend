@@ -2,13 +2,14 @@ import ReminderService from '../../ReminderService'
 import Entity from '../../../../entities/Entity'
 import StateMachine from '../../../../helpers/StateMachine'
 import { notifications } from '../../../../events/events'
+import Entities from '../../../../configs/entities.config'
 
 type MainDoorState = 'closed' | 'open' | 'openAlert'
 
 const ALERT_DELAY = 90000
 
-export const alertToggleId = 'input_boolean.alertdeadbolt'
-export const deadboltSensorId = 'binary_sensor.maindoordeadboltsensor_contact'
+export const alertToggleId = Entities.inputBoolean.security.deadboltMonitoring
+export const deadboltSensorId = Entities.binarySensor.mainDoorDeadboltSensor
 
 export const initMainDoorDeadboltWatchdog = (
   reminderService: ReminderService,

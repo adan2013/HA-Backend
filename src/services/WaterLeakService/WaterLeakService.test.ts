@@ -1,6 +1,7 @@
 import WaterLeakService from './WaterLeakService'
 import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
 import { notifications } from '../../events/events'
+import Entities from '../../configs/entities.config'
 
 jest.mock('../../configs/waterLeak.config', () => [
   {
@@ -28,7 +29,7 @@ const checkServiceStatus = (
 
 describe('WaterLeakService', () => {
   beforeEach(() => {
-    mockEntity('input_boolean.alertwaterleak', 'on')
+    mockEntity(Entities.inputBoolean.security.waterLeakMonitoring, 'on')
     mockEntity('sensor1', 'off')
     mockEntity('sensor2', 'off')
   })
@@ -88,8 +89,8 @@ describe('WaterLeakService', () => {
       'Sensor count: 2; Leak detected: false; Alarm: true',
       'red',
     )
-    emitStateUpdate('input_boolean.alertwaterleak', 'off')
-    emitStateUpdate('input_boolean.alertwaterleak', 'on')
+    emitStateUpdate(Entities.inputBoolean.security.waterLeakMonitoring, 'off')
+    emitStateUpdate(Entities.inputBoolean.security.waterLeakMonitoring, 'on')
     checkServiceStatus(
       service,
       'Sensor count: 2; Leak detected: false; Alarm: false',
@@ -101,7 +102,7 @@ describe('WaterLeakService', () => {
     const service = new WaterLeakService()
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
-    emitStateUpdate('input_boolean.alertwaterleak', 'off')
+    emitStateUpdate(Entities.inputBoolean.security.waterLeakMonitoring, 'off')
     emitStateUpdate('sensor1', 'on')
     emitStateUpdate('sensor2', 'on')
     checkServiceStatus(

@@ -3,6 +3,7 @@ import { anyEntityUpdate, notifications } from '../../events/events'
 import Entity from '../../entities/Entity'
 import { EntityState } from '../../connectors/types'
 import devices from '../../configs/deviceMonitor.config'
+import Entities from '../../configs/entities.config'
 
 type DetectedDeviceMetadata = {
   entityId: string
@@ -18,10 +19,10 @@ class DeviceMonitorService extends Service {
   private readonly SIGNAL_LOW_THRESHOLD = 20
   detectedDevices: DetectedDeviceMetadata[] = []
   private batteryLevelAlertToggle = Entity.toggle(
-    'input_boolean.alertbatterylevel',
+    Entities.inputBoolean.alertBatteryLevel,
   )
   private selfDiagnosticAlertToggle = Entity.toggle(
-    'input_boolean.alertselfdiagnostic',
+    Entities.inputBoolean.alertSelfDiagnostic,
   )
 
   constructor() {

@@ -2,8 +2,9 @@ import ReminderService from '../../ReminderService'
 import Entity from '../../../../entities/Entity'
 import DebouncedNumericToggle from '../../../../helpers/DebouncedNumericToggle'
 import { notifications } from '../../../../events/events'
+import Entities from '../../../../configs/entities.config'
 
-export const printerPowerId = 'sensor.bambulabprinterplug_power'
+export const printerPowerId = Entities.sensor.bambuLabPrinterPlug.power
 
 export const init3dPrinterWatchdog = (reminderService: ReminderService) => {
   const printerPower = Entity.general(printerPowerId)

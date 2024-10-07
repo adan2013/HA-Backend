@@ -1,5 +1,6 @@
 import Service from '../Service'
 import Entity from '../../entities/Entity'
+import Entities from '../../configs/entities.config'
 
 const warmTemperature = 2000
 const warmNormalBrightness = 90
@@ -10,8 +11,8 @@ const daylightNormalBrightness = 175
 const daylightMaxBrightness = 255
 
 class DanielRoomController extends Service {
-  private bedRemote = Entity.tuyaRemote('sensor.danielbedremote_action')
-  private bedLight = Entity.cctLight('light.danielbedlamp')
+  private bedRemote = Entity.tuyaRemote(Entities.sensor.danielRoom.bedRemote)
+  private bedLight = Entity.cctLight(Entities.light.danielRoom.bedLamp)
 
   constructor() {
     super('danielRoomController')

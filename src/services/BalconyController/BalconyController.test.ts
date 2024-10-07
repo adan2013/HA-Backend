@@ -2,10 +2,11 @@ import '../../events/EventEmitterHub'
 import BalconyController from './BalconyController'
 import { serviceCall } from '../../events/events'
 import { mockEntity } from '../../utils/testUtils'
+import Entities from '../../configs/entities.config'
 
 jest.useFakeTimers().setSystemTime(new Date('2023-05-15T12:00:00Z'))
-mockEntity('input_boolean.balconylightautoswitch', 'on')
-mockEntity('switch.balconylight', 'off')
+mockEntity(Entities.inputBoolean.balconyLightAutoSwitch, 'on')
+mockEntity(Entities.switch.balconyLightPlug, 'off')
 
 describe('BalconyController', () => {
   it('should switch on and off the balcony plug', () => {

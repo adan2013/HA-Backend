@@ -1,12 +1,15 @@
 import Service from '../Service'
 import Entity from '../../entities/Entity'
 import Timer from '../../Timer'
+import Entities from '../../configs/entities.config'
 
 class BalconyController extends Service {
   private readonly TURN_ON_AT = 16
   private readonly TURN_OFF_AT = 22
-  private autoToggle = Entity.toggle('input_boolean.balconylightautoswitch')
-  private balconyLightPlug = Entity.switch('switch.balconylight')
+  private autoToggle = Entity.toggle(
+    Entities.inputBoolean.balconyLightAutoSwitch,
+  )
+  private balconyLightPlug = Entity.switch(Entities.switch.balconyLightPlug)
 
   constructor() {
     super('balconyController')

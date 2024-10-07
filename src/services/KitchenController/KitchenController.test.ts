@@ -6,6 +6,7 @@ import {
 import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
 import KitchenController from './KitchenController'
 import { ServiceCallPayload } from '../../events/eventPayloads'
+import Entities from '../../configs/entities.config'
 
 jest.useFakeTimers()
 
@@ -31,15 +32,15 @@ const togglePayload = (id: string): ServiceCallPayload => ({
 })
 
 const ids = {
-  remote: 'sensor.kitchenremote_action',
-  light: 'sensor.kitchenmotionsensor_illuminance_lux',
-  motion: 'binary_sensor.kitchenmotionsensor_occupancy',
-  leftLight: 'light.kitchenleftlight',
-  rightLight: 'light.kitchenrightlight',
-  autoLights: 'input_boolean.kitchenautolights',
-  ignoreSun: 'input_boolean.kitchenignoresunposition',
-  leftToggle: 'input_boolean.kitchenleftlighton',
-  rightToggle: 'input_boolean.kitchenrightlighton',
+  remote: Entities.sensor.kitchen.remote,
+  light: Entities.sensor.kitchen.lightSensor,
+  motion: Entities.binarySensor.kitchen.motionSensor,
+  leftLight: Entities.light.kitchen.leftSide,
+  rightLight: Entities.light.kitchen.rightSide,
+  autoLights: Entities.inputBoolean.kitchenAutoLights,
+  ignoreSun: Entities.inputBoolean.kitchenIgnoreSunPosition,
+  leftToggle: Entities.inputBoolean.kitchenLeftLightOn,
+  rightToggle: Entities.inputBoolean.kitchenRightLightOn,
 }
 
 const pressButton = (btn: string) => {

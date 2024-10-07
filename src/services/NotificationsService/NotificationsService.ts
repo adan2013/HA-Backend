@@ -6,13 +6,20 @@ import Entity from '../../entities/Entity'
 import Timer from '../../Timer'
 import WS_CMD from '../../connectors/wsCommands'
 import { playSoundAlert, switchNotificationLight } from './notificationUtils'
+import Entities from '../../configs/entities.config'
 
 class NotificationsService extends Service {
-  private tabletLightToggle = Entity.toggle('input_boolean.alerttabletlights')
-  private soundToggle = Entity.toggle('input_boolean.alertsounds')
-  private dndAtNightToggle = Entity.toggle('input_boolean.alertdndatnight')
+  private tabletLightToggle = Entity.toggle(
+    Entities.inputBoolean.notifications.tabletLight,
+  )
+  private soundToggle = Entity.toggle(
+    Entities.inputBoolean.notifications.soundOn,
+  )
+  private dndAtNightToggle = Entity.toggle(
+    Entities.inputBoolean.notifications.dndAtNight,
+  )
   private notificationLight = Entity.rgbLight(
-    'light.dash_node_tablet_notification_lights',
+    Entities.light.dashNodeTabletNotificationLights,
   )
   private activeNotifications: NotificationPayload[] = []
   private DND_START_AT = 22

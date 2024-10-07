@@ -1,13 +1,13 @@
 import { notifications } from '../../../../events/events'
 import ReminderService from '../../ReminderService'
 import { emitStateUpdate, mockEntity } from '../../../../utils/testUtils'
-import { washingMachinePlugId } from './washingMachineWatchdog'
+import { washingMachinePlugPowerId } from './washingMachineWatchdog'
 
 describe('washing machine watchdog', () => {
   beforeEach(() => {
     jest.useFakeTimers()
     notifications.resetListeners()
-    mockEntity(washingMachinePlugId, '0.6')
+    mockEntity(washingMachinePlugPowerId, '0.6')
   })
 
   it('should trigger notification on washing machine state change', () => {
@@ -18,13 +18,13 @@ describe('washing machine watchdog', () => {
       id: 'loadedWashingMachine',
       enabled: false,
     })
-    emitStateUpdate(washingMachinePlugId, '40')
+    emitStateUpdate(washingMachinePlugPowerId, '40')
     jest.advanceTimersByTime(65000)
     expect(notificationMock).toHaveBeenLastCalledWith({
       id: 'loadedWashingMachine',
       enabled: false,
     })
-    emitStateUpdate(washingMachinePlugId, '1')
+    emitStateUpdate(washingMachinePlugPowerId, '1')
     jest.advanceTimersByTime(310000)
     expect(notificationMock).toHaveBeenLastCalledWith({
       id: 'loadedWashingMachine',
@@ -38,10 +38,10 @@ describe('washing machine watchdog', () => {
     notifications.on(notificationMock)
     service.setServiceEnabled(false)
 
-    emitStateUpdate(washingMachinePlugId, '40')
+    emitStateUpdate(washingMachinePlugPowerId, '40')
     jest.advanceTimersByTime(65000)
 
-    emitStateUpdate(washingMachinePlugId, '1')
+    emitStateUpdate(washingMachinePlugPowerId, '1')
     jest.advanceTimersByTime(310000)
 
     expect(notificationMock).not.toHaveBeenCalled()

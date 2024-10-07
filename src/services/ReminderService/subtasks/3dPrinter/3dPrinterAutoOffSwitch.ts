@@ -1,10 +1,11 @@
 import Entity from '../../../../entities/Entity'
 import ReminderService from '../../ReminderService'
+import Entities from '../../../../configs/entities.config'
 
-export const automationToggleId = 'input_boolean.printerautooff'
-export const printerPlugId = 'switch.bambulabprinterplug'
-export const printerStatusId = 'sensor.p1s_01p00a453001011_print_status'
-export const nozzleTempId = 'sensor.p1s_01p00a453001011_nozzle_temperature'
+export const automationToggleId = Entities.inputBoolean.printerAutoOff
+export const printerPlugId = Entities.switch.plug.bambuLabPrinter
+export const printerStatusId = Entities.sensor.bambuLabPrinter.printStatus
+export const nozzleTempId = Entities.sensor.bambuLabPrinter.nozzleTemperature
 
 export const nozzleTempThreshold = 42
 

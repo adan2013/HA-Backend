@@ -1,12 +1,12 @@
 import Service from '../Service'
 import Entity from '../../entities/Entity'
 
-const warmTemperature = 3000
-const warmNormalBrightness = 100
-const warmDimBrightness = 50
+const warmTemperature = 2000
+const warmNormalBrightness = 90
+const warmDimBrightness = 25
 
-const daylightTemperature = 5000
-const daylightNormalBrightness = 180
+const daylightTemperature = 4300
+const daylightNormalBrightness = 175
 const daylightMaxBrightness = 255
 
 class DanielRoomController extends Service {

@@ -1,3 +1,5 @@
+import Entities from './entities.config'
+
 type EnergyMonitorConfig = {
   currentPowerEntityId: string
   totalEnergyEntityId: string
@@ -9,24 +11,24 @@ type EnergyMonitorConfig = {
 
 const monitors: EnergyMonitorConfig[] = [
   {
-    currentPowerEntityId: 'sensor.airconditionerbreaker_power',
-    totalEnergyEntityId: 'sensor.airconditionerbreaker_energy',
+    currentPowerEntityId: Entities.sensor.power.airconditioner.power,
+    totalEnergyEntityId: Entities.sensor.power.airconditioner.energy,
     deviceName: 'greeAirConditioner',
     runtimePowerThreshold: 10,
     runtimeOnDelay: 10,
     runtimeOffDelay: 300,
   },
   {
-    currentPowerEntityId: 'sensor.washingmachineplug_power',
-    totalEnergyEntityId: 'sensor.washingmachineplug_energy',
+    currentPowerEntityId: Entities.sensor.power.washingMachine.power,
+    totalEnergyEntityId: Entities.sensor.power.washingMachine.energy,
     deviceName: 'washingMachine',
     runtimePowerThreshold: 10,
     runtimeOnDelay: 10,
     runtimeOffDelay: 180,
   },
   {
-    currentPowerEntityId: 'sensor.bambulabprinterplug_power',
-    totalEnergyEntityId: 'sensor.bambulabprinterplug_energy',
+    currentPowerEntityId: Entities.sensor.power.bambuLabPrinter.power,
+    totalEnergyEntityId: Entities.sensor.power.bambuLabPrinter.energy,
     deviceName: 'bambuLabPrinter',
     runtimePowerThreshold: 50,
     runtimeOnDelay: 20,

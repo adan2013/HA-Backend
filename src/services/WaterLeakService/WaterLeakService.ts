@@ -3,9 +3,12 @@ import Entity from '../../entities/Entity'
 import waterLeakSensors from '../../configs/waterLeak.config'
 import { notifications } from '../../events/events'
 import HomeAssistantEntity from '../../entities/HomeAssistantEntity'
+import Entities from '../../configs/entities.config'
 
 class WaterLeakService extends Service {
-  private waterLeakToggle = Entity.toggle('input_boolean.alertwaterleak')
+  private waterLeakToggle = Entity.toggle(
+    Entities.inputBoolean.security.waterLeakMonitoring,
+  )
   private sensorEntities: HomeAssistantEntity[]
   private triggeredSensorNames: string[] = []
 

@@ -2,8 +2,9 @@ import ReminderService from '../../ReminderService'
 import Entity from '../../../../entities/Entity'
 import DebouncedNumericToggle from '../../../../helpers/DebouncedNumericToggle'
 import { notifications } from '../../../../events/events'
+import Entities from '../../../../configs/entities.config'
 
-export const printerPowerId = 'sensor.bambulabprinterplug_power'
+export const printerPowerId = Entities.sensor.power.bambuLabPrinter.power
 
 export const init3dPrinterWatchdog = (reminderService: ReminderService) => {
   const printerPower = Entity.general(printerPowerId)
@@ -17,8 +18,8 @@ export const init3dPrinterWatchdog = (reminderService: ReminderService) => {
 
   const debounced3dPrinterState = new DebouncedNumericToggle({
     name: '3dPrinter',
-    threshold: 30,
-    onDelay: 600000,
+    threshold: 40,
+    onDelay: 120000,
     offDelay: 120000,
     onToggleOn: () => setPrinterNotification(false),
     onToggleOff: () => setPrinterNotification(true),

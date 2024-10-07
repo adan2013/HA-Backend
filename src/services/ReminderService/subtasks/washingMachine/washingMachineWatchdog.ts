@@ -2,13 +2,15 @@ import ReminderService from '../../ReminderService'
 import Entity from '../../../../entities/Entity'
 import DebouncedNumericToggle from '../../../../helpers/DebouncedNumericToggle'
 import { notifications } from '../../../../events/events'
+import Entities from '../../../../configs/entities.config'
 
-export const washingMachinePlugId = 'sensor.washingmachineplug_power'
+export const washingMachinePlugPowerId =
+  Entities.sensor.power.washingMachine.power
 
 export const initWashingMachineWatchdog = (
   reminderService: ReminderService,
 ) => {
-  const washingMachinePower = Entity.general(washingMachinePlugId)
+  const washingMachinePower = Entity.general(washingMachinePlugPowerId)
   const setWashingMachineNotification = (show: boolean) => {
     if (reminderService.isDisabled) return
     notifications.emit({

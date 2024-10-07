@@ -53,7 +53,7 @@ class HomeAssistantConnector {
       if (entityState) {
         callback(entityState)
       } else {
-        console.warn(`Requested state for unknown entity ${entityId}`)
+        console.warn(`WARN: State request for unknown entity ${entityId}`)
       }
     })
     serviceCall.on(({ domain, service, entityId, data }) => {

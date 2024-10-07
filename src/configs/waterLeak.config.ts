@@ -1,3 +1,5 @@
+import Entities from './entities.config'
+
 type WaterLeakSensor = {
   entityId: string
   name: string
@@ -6,11 +8,11 @@ type WaterLeakSensor = {
 
 const waterLeakSensors: WaterLeakSensor[] = [
   {
-    entityId: 'binary_sensor.waterfilterleaksensor_water_leak',
+    entityId: Entities.binarySensor.waterLeak.waterFilter,
     name: 'Water filter',
   },
   {
-    entityId: 'binary_sensor.washingmachineleaksensor_water_leak',
+    entityId: Entities.binarySensor.waterLeak.washingMachine,
     name: 'Washing machine',
   },
 ]

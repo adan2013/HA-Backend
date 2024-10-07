@@ -1,4 +1,5 @@
 import waterLeakConfig from './waterLeak.config'
+import Entities from './entities.config'
 
 type DeviceMetadata = {
   entityId: string
@@ -11,11 +12,11 @@ const devices: DeviceMetadata[] = [
     name: `${wls.name} - water leak`,
   })),
   {
-    entityId: 'binary_sensor.maindoordeadboltsensor_contact',
+    entityId: Entities.binarySensor.contact.mainDoorDeadbolt,
     name: 'Main door deadbolt',
   },
   {
-    entityId: 'light.dash_node_tablet_notification_lights',
+    entityId: Entities.light.dashNode.tabletLight,
     name: 'Dash node',
   },
 ]

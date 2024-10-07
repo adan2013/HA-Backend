@@ -7,14 +7,15 @@ import {
 } from '../../events/events'
 import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
 import WS_CMD from '../../connectors/wsCommands'
+import Entities from '../../configs/entities.config'
 
 describe('NotificationsService', () => {
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date('2023-05-15T12:00:00Z'))
-    mockEntity('input_boolean.alerttabletlights', 'on')
-    mockEntity('input_boolean.alertsounds', 'on')
-    mockEntity('input_boolean.alertdndatnight', 'on')
-    mockEntity('light.dash_node_tablet_notification_lights', 'off')
+    mockEntity(Entities.inputBoolean.notifications.tabletLight, 'on')
+    mockEntity(Entities.inputBoolean.notifications.soundOn, 'on')
+    mockEntity(Entities.inputBoolean.notifications.dndAtNight, 'on')
+    mockEntity(Entities.light.dashNode.tabletLight, 'off')
   })
 
   afterEach(() => {
@@ -35,7 +36,7 @@ describe('NotificationsService', () => {
       },
     })
     expect(serviceCallMock).toHaveBeenCalledWith({
-      entityId: 'light.dash_node_tablet_notification_lights',
+      entityId: Entities.light.dashNode.tabletLight,
       domain: 'light',
       service: 'turn_off',
     })
@@ -209,13 +210,13 @@ describe('NotificationsService', () => {
     const serviceCallMock = jest.fn()
     serviceCall.on(serviceCallMock)
     new NotificationsSerivce()
-    emitStateUpdate('input_boolean.alertsounds', 'off')
+    emitStateUpdate(Entities.inputBoolean.notifications.soundOn, 'off')
     notifications.emit({
       id: 'test1',
       enabled: true,
     })
     expect(serviceCallMock).not.toBeCalledWith(servicePayload)
-    emitStateUpdate('input_boolean.alertsounds', 'on')
+    emitStateUpdate(Entities.inputBoolean.notifications.soundOn, 'on')
     notifications.emit({
       id: 'test1',
       enabled: true,
@@ -226,7 +227,7 @@ describe('NotificationsService', () => {
 
   it('should turn on notification light only if light toggle is on', () => {
     const servicePayload = {
-      entityId: 'light.dash_node_tablet_notification_lights',
+      entityId: Entities.light.dashNode.tabletLight,
       domain: 'light',
       service: 'turn_on',
       data: {
@@ -236,13 +237,13 @@ describe('NotificationsService', () => {
     const serviceCallMock = jest.fn()
     serviceCall.on(serviceCallMock)
     new NotificationsSerivce()
-    emitStateUpdate('input_boolean.alerttabletlights', 'off')
+    emitStateUpdate(Entities.inputBoolean.notifications.tabletLight, 'off')
     notifications.emit({
       id: 'test1',
       enabled: true,
     })
     expect(serviceCallMock).not.toBeCalledWith(servicePayload)
-    emitStateUpdate('input_boolean.alerttabletlights', 'on')
+    emitStateUpdate(Entities.inputBoolean.notifications.tabletLight, 'on')
     notifications.emit({
       id: 'test1',
       enabled: true,
@@ -267,7 +268,7 @@ describe('NotificationsService', () => {
     jest.setSystemTime(new Date('2023-05-15T07:34:00Z'))
     service.updateDndMode()
     expect(service.dndIsActive).toBe(false)
-    emitStateUpdate('input_boolean.alertdndatnight', 'off')
+    emitStateUpdate(Entities.inputBoolean.notifications.dndAtNight, 'off')
     jest.setSystemTime(new Date('2023-05-15T23:59:00Z'))
     service.updateDndMode()
     expect(service.dndIsActive).toBe(false)

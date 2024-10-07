@@ -1,3 +1,5 @@
+import Entities from './entities.config'
+
 type DeadlineConfig = {
   label: string
   entityId: string
@@ -8,37 +10,37 @@ type DeadlineConfig = {
 const deadlines: DeadlineConfig[] = [
   {
     label: 'water prefilters',
-    entityId: 'input_datetime.kitchenfilterservice',
+    entityId: Entities.inputDateTime.kitchenFilterService,
     interval: 120,
     warningThreshold: 5,
   },
   {
     label: 'membrane water filter',
-    entityId: 'input_datetime.kitchenmembranefilterservice',
+    entityId: Entities.inputDateTime.kitchenMembraneFilterService,
     interval: 485,
     warningThreshold: 5,
   },
   {
     label: 'mineralization water filter',
-    entityId: 'input_datetime.kitchenfinalfilterservice',
+    entityId: Entities.inputDateTime.kitchenFinalFilterService,
     interval: 365,
     warningThreshold: 5,
   },
   {
     label: 'car insurance',
-    entityId: 'input_datetime.carinsurance',
+    entityId: Entities.inputDateTime.carInsurance,
     interval: 365,
     warningThreshold: 12,
   },
   {
     label: 'car technical inspection',
-    entityId: 'input_datetime.cartechnicalinspection',
+    entityId: Entities.inputDateTime.carTechnicalInspection,
     interval: 365,
     warningThreshold: 12,
   },
   {
     label: 'coffee machine cleaning',
-    entityId: 'input_datetime.coffeemachinecleaning',
+    entityId: Entities.inputDateTime.coffeeMachineCleaning,
     interval: 10,
     warningThreshold: 1,
   },

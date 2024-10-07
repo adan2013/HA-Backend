@@ -18,14 +18,14 @@ describe('BalconyController', () => {
     expect(serviceCallMock).toBeCalledWith({
       domain: 'switch',
       service: 'turn_on',
-      entityId: 'switch.balconylight',
+      entityId: Entities.switch.balconyLightPlug,
     })
     balconyController.switchBalconyLight(false)
     expect(serviceCallMock).toBeCalledTimes(2)
     expect(serviceCallMock).toBeCalledWith({
       domain: 'switch',
       service: 'turn_off',
-      entityId: 'switch.balconylight',
+      entityId: Entities.switch.balconyLightPlug,
     })
   })
 
@@ -39,7 +39,7 @@ describe('BalconyController', () => {
   })
 
   it('should not switch the balcony plug if auto switch toggle is off', () => {
-    mockEntity('input_boolean.balconylightautoswitch', 'off')
+    mockEntity(Entities.inputBoolean.balconyLightAutoSwitch, 'off')
     const serviceCallMock = jest.fn()
     serviceCall.on(serviceCallMock)
     const balconyController = new BalconyController()

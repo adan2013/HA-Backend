@@ -12,11 +12,11 @@ const devices: DeviceMetadata[] = [
     name: `${wls.name} - water leak`,
   })),
   {
-    entityId: Entities.binarySensor.mainDoorDeadboltSensor,
+    entityId: Entities.binarySensor.contact.mainDoorDeadbolt,
     name: 'Main door deadbolt',
   },
   {
-    entityId: Entities.light.dashNodeTabletNotificationLights,
+    entityId: Entities.light.dashNode.tabletLight,
     name: 'Dash node',
   },
 ]

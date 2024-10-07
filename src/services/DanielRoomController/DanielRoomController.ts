@@ -11,7 +11,7 @@ const daylightNormalBrightness = 175
 const daylightMaxBrightness = 255
 
 class DanielRoomController extends Service {
-  private bedRemote = Entity.tuyaRemote(Entities.sensor.danielRoom.bedRemote)
+  private bedRemote = Entity.tuyaRemote(Entities.sensor.remote.danielBed)
   private bedLight = Entity.cctLight(Entities.light.danielRoom.bedLamp)
 
   constructor() {

@@ -19,7 +19,7 @@ class NotificationsService extends Service {
     Entities.inputBoolean.notifications.dndAtNight,
   )
   private notificationLight = Entity.rgbLight(
-    Entities.light.dashNodeTabletNotificationLights,
+    Entities.light.dashNode.tabletLight,
   )
   private activeNotifications: NotificationPayload[] = []
   private DND_START_AT = 22

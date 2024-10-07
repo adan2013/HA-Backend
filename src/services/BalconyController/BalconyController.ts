@@ -7,9 +7,9 @@ class BalconyController extends Service {
   private readonly TURN_ON_AT = 16
   private readonly TURN_OFF_AT = 22
   private autoToggle = Entity.toggle(
-    Entities.inputBoolean.balconyLightAutoSwitch,
+    Entities.inputBoolean.automations.balconyAutoLights,
   )
-  private balconyLightPlug = Entity.switch(Entities.switch.balconyLightPlug)
+  private balconyLightPlug = Entity.switch(Entities.switch.plug.balconyLights)
 
   constructor() {
     super('balconyController')

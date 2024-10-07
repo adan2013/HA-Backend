@@ -32,15 +32,15 @@ const togglePayload = (id: string): ServiceCallPayload => ({
 })
 
 const ids = {
-  remote: Entities.sensor.kitchen.remote,
-  light: Entities.sensor.kitchen.lightSensor,
-  motion: Entities.binarySensor.kitchen.motionSensor,
+  remote: Entities.sensor.remote.kitchen,
+  light: Entities.sensor.light.kitchen,
+  motion: Entities.binarySensor.motion.kitchen,
   leftLight: Entities.light.kitchen.leftSide,
   rightLight: Entities.light.kitchen.rightSide,
-  autoLights: Entities.inputBoolean.kitchenAutoLights,
-  ignoreSun: Entities.inputBoolean.kitchenIgnoreSunPosition,
-  leftToggle: Entities.inputBoolean.kitchenLeftLightOn,
-  rightToggle: Entities.inputBoolean.kitchenRightLightOn,
+  autoLights: Entities.inputBoolean.kitchenLights.autoLights,
+  ignoreSun: Entities.inputBoolean.kitchenLights.ignoreSunPosition,
+  leftToggle: Entities.inputBoolean.kitchenLights.leftLightOn,
+  rightToggle: Entities.inputBoolean.kitchenLights.rightLightOn,
 }
 
 const pressButton = (btn: string) => {

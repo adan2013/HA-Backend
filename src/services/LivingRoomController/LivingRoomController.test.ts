@@ -11,8 +11,8 @@ const setLight = (id: string, lvl: number) => {
 }
 
 const pressButton = (v: string) => {
-  emitStateUpdate(Entities.sensor.livingRoom.remote, v)
-  emitStateUpdate(Entities.sensor.livingRoom.remote, 'None')
+  emitStateUpdate(Entities.sensor.remote.livingRoom, v)
+  emitStateUpdate(Entities.sensor.remote.livingRoom, 'None')
 }
 
 const offPayload = (id: string | string[]): ServiceCallPayload => ({
@@ -39,11 +39,11 @@ const init = () => {
 
 describe('LivingRoomController', () => {
   beforeEach(() => {
-    mockEntity(Entities.sensor.livingRoom.remote, 'None')
+    mockEntity(Entities.sensor.remote.livingRoom, 'None')
     mockEntity(lrLights.table, 'off')
     mockEntity(lrLights.tv, 'off')
-    mockEntity(lrLights.backCeilingSection, 'off')
-    mockEntity(lrLights.frontCeilingSection, 'off')
+    mockEntity(lrLights.ceilingBackSection, 'off')
+    mockEntity(lrLights.ceilingFrontSection, 'off')
   })
 
   afterEach(() => {
@@ -58,8 +58,8 @@ describe('LivingRoomController', () => {
       offPayload([
         lrLights.table,
         lrLights.tv,
-        lrLights.backCeilingSection,
-        lrLights.frontCeilingSection,
+        lrLights.ceilingBackSection,
+        lrLights.ceilingFrontSection,
         lrLights.cabinet,
       ]),
     )
@@ -70,10 +70,10 @@ describe('LivingRoomController', () => {
     pressButton('button_1_single')
     expect(serviceCallMock).toHaveBeenCalledTimes(2)
     expect(serviceCallMock).toBeCalledWith(
-      onPayload([lrLights.backCeilingSection], 160),
+      onPayload([lrLights.ceilingBackSection], 160),
     )
     expect(serviceCallMock).toBeCalledWith(
-      offPayload([lrLights.frontCeilingSection]),
+      offPayload([lrLights.ceilingFrontSection]),
     )
   })
 
@@ -83,7 +83,7 @@ describe('LivingRoomController', () => {
     expect(serviceCallMock).toHaveBeenCalledTimes(1)
     expect(serviceCallMock).toBeCalledWith(
       onPayload(
-        [lrLights.frontCeilingSection, lrLights.backCeilingSection],
+        [lrLights.ceilingFrontSection, lrLights.ceilingBackSection],
         160,
       ),
     )
@@ -131,24 +131,24 @@ describe('LivingRoomController', () => {
     pressButton('button_2_single')
     expect(serviceCallMock).toHaveBeenLastCalledWith(
       onPayload(
-        [lrLights.frontCeilingSection, lrLights.backCeilingSection],
+        [lrLights.ceilingFrontSection, lrLights.ceilingBackSection],
         160,
       ),
     )
-    setLight(lrLights.frontCeilingSection, 159)
-    setLight(lrLights.backCeilingSection, 161)
+    setLight(lrLights.ceilingFrontSection, 159)
+    setLight(lrLights.ceilingBackSection, 161)
     pressButton('button_2_double')
     expect(serviceCallMock).toHaveBeenLastCalledWith(
       onPayload(
-        [lrLights.frontCeilingSection, lrLights.backCeilingSection],
+        [lrLights.ceilingFrontSection, lrLights.ceilingBackSection],
         80,
       ),
     )
-    setLight(lrLights.frontCeilingSection, 79)
-    setLight(lrLights.backCeilingSection, 80)
+    setLight(lrLights.ceilingFrontSection, 79)
+    setLight(lrLights.ceilingBackSection, 80)
     pressButton('button_2_double')
     expect(serviceCallMock).toHaveBeenLastCalledWith(
-      offPayload([lrLights.frontCeilingSection, lrLights.backCeilingSection]),
+      offPayload([lrLights.ceilingFrontSection, lrLights.ceilingBackSection]),
     )
   })
 
@@ -156,30 +156,30 @@ describe('LivingRoomController', () => {
     const serviceCallMock = init()
     pressButton('button_1_single')
     expect(serviceCallMock).toHaveBeenCalledWith(
-      onPayload([lrLights.backCeilingSection], 160),
+      onPayload([lrLights.ceilingBackSection], 160),
     )
     expect(serviceCallMock).toHaveBeenCalledWith(
-      offPayload([lrLights.frontCeilingSection]),
+      offPayload([lrLights.ceilingFrontSection]),
     )
-    setLight(lrLights.backCeilingSection, 161)
+    setLight(lrLights.ceilingBackSection, 161)
     pressButton('button_2_single')
     expect(serviceCallMock).toHaveBeenLastCalledWith(
       onPayload(
-        [lrLights.frontCeilingSection, lrLights.backCeilingSection],
+        [lrLights.ceilingFrontSection, lrLights.ceilingBackSection],
         160,
       ),
     )
-    setLight(lrLights.frontCeilingSection, 159)
-    setLight(lrLights.backCeilingSection, 161)
+    setLight(lrLights.ceilingFrontSection, 159)
+    setLight(lrLights.ceilingBackSection, 161)
     serviceCallMock.mockReset()
     pressButton('button_1_single')
     // turn on back and turn off front section even if the back section has correct brightness level
     expect(serviceCallMock).toHaveBeenCalledTimes(2)
     expect(serviceCallMock).toHaveBeenCalledWith(
-      onPayload([lrLights.backCeilingSection], 160),
+      onPayload([lrLights.ceilingBackSection], 160),
     )
     expect(serviceCallMock).toHaveBeenCalledWith(
-      offPayload([lrLights.frontCeilingSection]),
+      offPayload([lrLights.ceilingFrontSection]),
     )
   })
 })

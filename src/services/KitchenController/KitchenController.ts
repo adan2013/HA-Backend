@@ -20,24 +20,22 @@ class KitchenController extends Service {
   private readonly DIMMING_BRIGHTNESS = 130
   private readonly AUTO_BRIGHTNESS = 255
   private readonly MANUAL_BRIGHTNESS = 255
-  private remote = Entity.aqaraOppleRemote(Entities.sensor.kitchen.remote)
-  private lightSensor = Entity.general(Entities.sensor.kitchen.lightSensor)
-  private motionSensor = Entity.general(
-    Entities.binarySensor.kitchen.motionSensor,
-  )
+  private remote = Entity.aqaraOppleRemote(Entities.sensor.remote.kitchen)
+  private lightSensor = Entity.general(Entities.sensor.light.kitchen)
+  private motionSensor = Entity.general(Entities.binarySensor.motion.kitchen)
   private leftLight = Entity.monoLight(Entities.light.kitchen.leftSide)
   private rightLight = Entity.monoLight(Entities.light.kitchen.rightSide)
   private autoLightsToggle = Entity.toggle(
-    Entities.inputBoolean.kitchenAutoLights,
+    Entities.inputBoolean.kitchenLights.autoLights,
   )
   private ignoreSunToggle = Entity.toggle(
-    Entities.inputBoolean.kitchenIgnoreSunPosition,
+    Entities.inputBoolean.kitchenLights.ignoreSunPosition,
   )
   private leftLightToggle = Entity.toggle(
-    Entities.inputBoolean.kitchenLeftLightOn,
+    Entities.inputBoolean.kitchenLights.leftLightOn,
   )
   private rightLightToggle = Entity.toggle(
-    Entities.inputBoolean.kitchenRightLightOn,
+    Entities.inputBoolean.kitchenLights.rightLightOn,
   )
   public state: StateMachine<KitchenLightsState>
   public dayNightToggle: DoubleThresholdToggle

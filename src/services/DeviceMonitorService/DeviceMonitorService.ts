@@ -19,10 +19,10 @@ class DeviceMonitorService extends Service {
   private readonly SIGNAL_LOW_THRESHOLD = 20
   detectedDevices: DetectedDeviceMetadata[] = []
   private batteryLevelAlertToggle = Entity.toggle(
-    Entities.inputBoolean.alertBatteryLevel,
+    Entities.inputBoolean.system.alertBatteryLevel,
   )
   private selfDiagnosticAlertToggle = Entity.toggle(
-    Entities.inputBoolean.alertSelfDiagnostic,
+    Entities.inputBoolean.system.alertSelfDiagnostic,
   )
 
   constructor() {

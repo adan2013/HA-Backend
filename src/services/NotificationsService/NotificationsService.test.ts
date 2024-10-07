@@ -15,7 +15,7 @@ describe('NotificationsService', () => {
     mockEntity(Entities.inputBoolean.notifications.tabletLight, 'on')
     mockEntity(Entities.inputBoolean.notifications.soundOn, 'on')
     mockEntity(Entities.inputBoolean.notifications.dndAtNight, 'on')
-    mockEntity(Entities.light.dashNodeTabletNotificationLights, 'off')
+    mockEntity(Entities.light.dashNode.tabletLight, 'off')
   })
 
   afterEach(() => {
@@ -36,7 +36,7 @@ describe('NotificationsService', () => {
       },
     })
     expect(serviceCallMock).toHaveBeenCalledWith({
-      entityId: Entities.light.dashNodeTabletNotificationLights,
+      entityId: Entities.light.dashNode.tabletLight,
       domain: 'light',
       service: 'turn_off',
     })
@@ -227,7 +227,7 @@ describe('NotificationsService', () => {
 
   it('should turn on notification light only if light toggle is on', () => {
     const servicePayload = {
-      entityId: Entities.light.dashNodeTabletNotificationLights,
+      entityId: Entities.light.dashNode.tabletLight,
       domain: 'light',
       service: 'turn_on',
       data: {

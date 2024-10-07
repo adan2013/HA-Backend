@@ -2,7 +2,8 @@ import Entity from '../../../../entities/Entity'
 import ReminderService from '../../ReminderService'
 import Entities from '../../../../configs/entities.config'
 
-export const automationToggleId = Entities.inputBoolean.printerAutoOff
+export const automationToggleId =
+  Entities.inputBoolean.automations.printerAutoOff
 export const printerPlugId = Entities.switch.plug.bambuLabPrinter
 export const printerStatusId = Entities.sensor.bambuLabPrinter.printStatus
 export const nozzleTempId = Entities.sensor.bambuLabPrinter.nozzleTemperature

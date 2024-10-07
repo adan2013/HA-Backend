@@ -8,11 +8,11 @@ type WaterLeakSensor = {
 
 const waterLeakSensors: WaterLeakSensor[] = [
   {
-    entityId: Entities.binarySensor.waterFilterLeakSensor,
+    entityId: Entities.binarySensor.waterLeak.waterFilter,
     name: 'Water filter',
   },
   {
-    entityId: Entities.binarySensor.washingMachineLeakSensor,
+    entityId: Entities.binarySensor.waterLeak.washingMachine,
     name: 'Washing machine',
   },
 ]

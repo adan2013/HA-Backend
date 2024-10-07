@@ -5,7 +5,7 @@ import { notifications } from '../../../../events/events'
 import Entities from '../../../../configs/entities.config'
 
 export const washingMachinePlugPowerId =
-  Entities.sensor.washingMachinePlug.power
+  Entities.sensor.power.washingMachine.power
 
 export const initWashingMachineWatchdog = (
   reminderService: ReminderService,

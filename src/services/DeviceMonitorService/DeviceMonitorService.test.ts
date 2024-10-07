@@ -42,8 +42,8 @@ const emitTestEntityUpdates = () => {
 
 describe('Device monitor service', () => {
   beforeEach(() => {
-    mockEntity(Entities.inputBoolean.alertBatteryLevel, 'on')
-    mockEntity(Entities.inputBoolean.alertSelfDiagnostic, 'on')
+    mockEntity(Entities.inputBoolean.system.alertBatteryLevel, 'on')
+    mockEntity(Entities.inputBoolean.system.alertSelfDiagnostic, 'on')
   })
 
   it('should initialize service with correct status', () => {
@@ -166,8 +166,8 @@ describe('Device monitor service', () => {
 
   it('should not trigger any notification if the alerts are disabled', () => {
     const service = new DeviceMonitorService()
-    emitStateUpdate(Entities.inputBoolean.alertBatteryLevel, 'off')
-    emitStateUpdate(Entities.inputBoolean.alertSelfDiagnostic, 'off')
+    emitStateUpdate(Entities.inputBoolean.system.alertBatteryLevel, 'off')
+    emitStateUpdate(Entities.inputBoolean.system.alertSelfDiagnostic, 'off')
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
     emitTestEntityUpdates()

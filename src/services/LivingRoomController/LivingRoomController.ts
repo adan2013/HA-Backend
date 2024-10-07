@@ -10,15 +10,15 @@ class LivingRoomController extends Service {
   private readonly tvLevels: BrightnessLevels = [255, 255, 255]
   private readonly backSectionLevels: BrightnessLevels = [160, 70, 220]
   private readonly frontSectionLevels: BrightnessLevels = [160, 80, 255]
-  private remote = Entity.aqaraOppleRemote(Entities.sensor.livingRoom.remote)
+  private remote = Entity.aqaraOppleRemote(Entities.sensor.remote.livingRoom)
   private cabinetLight = Entity.monoLight(Entities.light.livingRoom.cabinet)
   private tableLight = Entity.monoLight(Entities.light.livingRoom.table)
   private tvLight = Entity.monoLight(Entities.light.livingRoom.tv)
   private backSection = Entity.monoLight(
-    Entities.light.livingRoom.backCeilingSection,
+    Entities.light.livingRoom.ceilingBackSection,
   )
   private frontSection = Entity.monoLight(
-    Entities.light.livingRoom.frontCeilingSection,
+    Entities.light.livingRoom.ceilingFrontSection,
   )
 
   constructor() {

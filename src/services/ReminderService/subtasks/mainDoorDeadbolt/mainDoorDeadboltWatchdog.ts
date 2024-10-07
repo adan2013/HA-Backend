@@ -9,7 +9,7 @@ type MainDoorState = 'closed' | 'open' | 'openAlert'
 const ALERT_DELAY = 90000
 
 export const alertToggleId = Entities.inputBoolean.security.deadboltMonitoring
-export const deadboltSensorId = Entities.binarySensor.mainDoorDeadboltSensor
+export const deadboltSensorId = Entities.binarySensor.contact.mainDoorDeadbolt
 
 export const initMainDoorDeadboltWatchdog = (
   reminderService: ReminderService,

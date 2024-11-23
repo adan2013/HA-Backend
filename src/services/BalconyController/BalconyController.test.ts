@@ -5,8 +5,8 @@ import { mockEntity } from '../../utils/testUtils'
 import Entities from '../../configs/entities.config'
 
 jest.useFakeTimers().setSystemTime(new Date('2023-05-15T12:00:00Z'))
-mockEntity(Entities.inputBoolean.automations.balconyAutoLights, 'on')
-mockEntity(Entities.switch.plug.balconyLights, 'off')
+mockEntity(Entities.inputBoolean.automations.balconyCircuitAutoSwitch, 'on')
+mockEntity(Entities.switch.circuit.balcony, 'off')
 
 describe('BalconyController', () => {
   it('should switch on and off the balcony plug', () => {
@@ -18,14 +18,14 @@ describe('BalconyController', () => {
     expect(serviceCallMock).toBeCalledWith({
       domain: 'switch',
       service: 'turn_on',
-      entityId: Entities.switch.plug.balconyLights,
+      entityId: Entities.switch.circuit.balcony,
     })
     balconyController.switchBalconyLight(false)
     expect(serviceCallMock).toBeCalledTimes(2)
     expect(serviceCallMock).toBeCalledWith({
       domain: 'switch',
       service: 'turn_off',
-      entityId: Entities.switch.plug.balconyLights,
+      entityId: Entities.switch.circuit.balcony,
     })
   })
 
@@ -39,7 +39,10 @@ describe('BalconyController', () => {
   })
 
   it('should not switch the balcony plug if auto switch toggle is off', () => {
-    mockEntity(Entities.inputBoolean.automations.balconyAutoLights, 'off')
+    mockEntity(
+      Entities.inputBoolean.automations.balconyCircuitAutoSwitch,
+      'off',
+    )
     const serviceCallMock = jest.fn()
     serviceCall.on(serviceCallMock)
     const balconyController = new BalconyController()

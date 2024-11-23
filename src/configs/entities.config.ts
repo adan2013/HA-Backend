@@ -13,7 +13,7 @@ const Entities = {
   },
   inputBoolean: {
     automations: {
-      balconyAutoLights: 'input_boolean.balconylightautoswitch',
+      balconyCircuitAutoSwitch: 'input_boolean.balconycircuitautoswitch',
       printerAutoOff: 'input_boolean.printerautooff',
     },
     kitchenLights: {
@@ -72,9 +72,9 @@ const Entities = {
       kitchen: 'sensor.kitchenmotionsensor_illuminance_lux',
     },
     power: {
-      airconditioner: {
-        power: 'sensor.airconditionerbreaker_power',
-        energy: 'sensor.airconditionerbreaker_energy',
+      balcony: {
+        power: 'sensor.balconycircuitswitch_power',
+        energy: 'sensor.balconycircuitswitch_energy',
       },
       bambuLabPrinter: {
         power: 'sensor.bambulabprinterplug_power',
@@ -92,8 +92,10 @@ const Entities = {
     },
   },
   switch: {
+    circuit: {
+      balcony: 'switch.balconycircuitswitch',
+    },
     plug: {
-      balconyLights: 'switch.balconylight',
       bambuLabPrinter: 'switch.bambulabprinterplug',
     },
   },

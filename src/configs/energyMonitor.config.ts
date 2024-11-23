@@ -11,10 +11,10 @@ type EnergyMonitorConfig = {
 
 const monitors: EnergyMonitorConfig[] = [
   {
-    currentPowerEntityId: Entities.sensor.power.airconditioner.power,
-    totalEnergyEntityId: Entities.sensor.power.airconditioner.energy,
-    deviceName: 'greeAirConditioner',
-    runtimePowerThreshold: 10,
+    currentPowerEntityId: Entities.sensor.power.balcony.power,
+    totalEnergyEntityId: Entities.sensor.power.balcony.energy,
+    deviceName: 'balconyCircuit',
+    runtimePowerThreshold: 100,
     runtimeOnDelay: 10,
     runtimeOffDelay: 300,
   },

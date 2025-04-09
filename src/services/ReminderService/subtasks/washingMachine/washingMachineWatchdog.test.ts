@@ -19,7 +19,7 @@ describe('washing machine watchdog', () => {
       enabled: false,
     })
     emitStateUpdate(washingMachinePlugPowerId, '40')
-    jest.advanceTimersByTime(65000)
+    jest.advanceTimersByTime(310000)
     expect(notificationMock).toHaveBeenLastCalledWith({
       id: 'loadedWashingMachine',
       enabled: false,

@@ -18,7 +18,7 @@ export const init3dPrinterWatchdog = (reminderService: ReminderService) => {
 
   const debounced3dPrinterState = new DebouncedNumericToggle({
     name: '3dPrinter',
-    threshold: 40,
+    threshold: 25,
     onDelay: 120000,
     offDelay: 120000,
     onToggleOn: () => setPrinterNotification(false),

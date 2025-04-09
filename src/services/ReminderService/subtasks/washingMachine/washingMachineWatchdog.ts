@@ -22,7 +22,7 @@ export const initWashingMachineWatchdog = (
   const debouncedWashingMachineState = new DebouncedNumericToggle({
     name: 'washingMachine',
     threshold: 10,
-    onDelay: 60000,
+    onDelay: 300000,
     offDelay: 300000,
     onToggleOn: () => setWashingMachineNotification(false),
     onToggleOff: () => setWashingMachineNotification(true),

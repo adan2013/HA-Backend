@@ -69,7 +69,7 @@ const Entities = {
       nozzleTemperature: 'sensor.p1s_01p00a453001011_nozzle_temperature',
     },
     light: {
-      kitchen: 'sensor.kitchenmotionsensor_illuminance_lux',
+      kitchen: 'sensor.kitchenmotionsensor_illuminance',
     },
     power: {
       balcony: {

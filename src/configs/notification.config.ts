@@ -123,6 +123,20 @@ const notificationConfig: NotificationConfig[] = [
     priorityOrder: 'low',
     canBeDismissed: true,
   },
+  {
+    id: 'broadcastDeviceCamera',
+    title: 'Camera is in use',
+    description: 'One of the device is using the camera',
+    light: 'yellow',
+    ignoreDND: true,
+  },
+  {
+    id: 'broadcastDeviceMicrophone',
+    title: 'Microphone is in use',
+    description: 'One of the device is using the microphone',
+    light: 'green',
+    ignoreDND: true,
+  },
 ]
 
 export default notificationConfig

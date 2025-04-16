@@ -16,6 +16,7 @@ import WaterLeakService from './services/WaterLeakService/WaterLeakService'
 import DeviceMonitorService from './services/DeviceMonitorService/DeviceMonitorService'
 import EnergyMonitorService from './services/EnergyMonitorService/EnergyMonitorService'
 import DanielRoomController from './services/DanielRoomController/DanielRoomController'
+import BroadcastDeviceService from './services/BroadcastDeviceService/BroadcastDeviceService'
 
 checkEnvironmentVariables([
   'ENV',
@@ -60,6 +61,7 @@ homeAssistantSync.once(() => {
   sm.registerService(new DeviceMonitorService())
   sm.registerService(new EnergyMonitorService())
   sm.registerService(new DanielRoomController())
+  sm.registerService(new BroadcastDeviceService())
 
   notifications.emit({
     id: 'backendStarted',

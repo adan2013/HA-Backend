@@ -3,6 +3,12 @@ const Entities = {
     contact: {
       mainDoorDeadbolt: 'binary_sensor.maindoordeadboltsensor_contact',
     },
+    device: {
+      danielMacbookPro: {
+        microphone: 'binary_sensor.daniels_macbook_pro_audio_input_in_use',
+        camera: 'binary_sensor.daniels_macbook_pro_camera_in_use',
+      },
+    },
     motion: {
       kitchen: 'binary_sensor.kitchenmotionsensor_occupancy',
     },

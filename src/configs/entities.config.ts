@@ -71,8 +71,12 @@ const Entities = {
   },
   sensor: {
     bambuLabPrinter: {
-      printStatus: 'sensor.p1s_01p00a453001011_print_status',
+      currentLayer: 'sensor.p1s_01p00a453001011_current_layer',
       nozzleTemperature: 'sensor.p1s_01p00a453001011_nozzle_temperature',
+      printStatus: 'sensor.p1s_01p00a453001011_print_status',
+      progressPercentage: 'sensor.p1s_01p00a453001011_print_progress',
+      remainingTime: 'sensor.p1s_01p00a453001011_remaining_time',
+      totalLayerCount: 'sensor.p1s_01p00a453001011_total_layer_count',
     },
     light: {
       kitchen: 'sensor.kitchenmotionsensor_illuminance',

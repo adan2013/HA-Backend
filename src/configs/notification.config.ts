@@ -50,8 +50,27 @@ const notificationConfig: NotificationConfig[] = [
     title: '3D print finished',
     description:
       'The 3D print has been finished. Remove the print from the printer',
-    light: 'green',
     canBeDismissed: true,
+  },
+  {
+    id: '3dPrintPaused',
+    title: '3D print paused',
+    description: 'The 3D print has been paused. Resume the print to continue',
+    canBeDismissed: true,
+    light: 'blueFlashing',
+  },
+  {
+    id: '3dPrintFailed',
+    title: '3D print failed',
+    description: 'The 3D print has failed. Check the printer and the print',
+    canBeDismissed: true,
+    light: 'red',
+  },
+  {
+    id: '3dPrintStatus',
+    title: '3D print in progress',
+    description: '',
+    priorityOrder: 'low',
   },
   {
     id: 'deadlineWarning',

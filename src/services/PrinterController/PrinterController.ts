@@ -48,6 +48,17 @@ class PrinterController extends Service {
     this.listenOnPrinterStatus()
   }
 
+  private formatRemainingTime(timeInMinutes: string | undefined) {
+    if (!timeInMinutes) return 'unknown time remaining'
+    const hours = Math.floor(Number(timeInMinutes) / 60)
+    const minutes = Math.floor(Number(timeInMinutes) % 60)
+    return `${hours}h ${minutes}m remaining`
+  }
+
+  private getPrintingStatus(): PrinterStatus {
+    return this.printerStatus.state?.state as PrinterStatus
+  }
+
   private listenOnNozzleTemp() {
     this.nozzleTemp.onAnyStateUpdate((newTempState) => {
       if (this.isDisabled) return
@@ -55,7 +66,7 @@ class PrinterController extends Service {
       if (Number.isNaN(nozzleTemp)) return
       if (this.autoOffToggle.isOn) {
         const nozzleIsCold = nozzleTemp <= this.nozzleTempThreshold
-        const printIsFinished = this.printerStatus.state?.state === 'finish'
+        const printIsFinished = this.getPrintingStatus() === 'finish'
         const printerIsOn = this.printerPlug.isOn
         if (nozzleIsCold && printIsFinished && printerIsOn) {
           this.printerPlug.turnOff()
@@ -80,13 +91,6 @@ class PrinterController extends Service {
     })
   }
 
-  private formatRemainingTime(timeInMinutes: string | undefined) {
-    if (!timeInMinutes) return 'unknown time remaining'
-    const hours = Math.floor(Number(timeInMinutes) / 60)
-    const minutes = Math.floor(Number(timeInMinutes) % 60)
-    return `${hours}h ${minutes}m remaining`
-  }
-
   private setStatusNotification() {
     if (this.isDisabled) return
 
@@ -101,7 +105,7 @@ class PrinterController extends Service {
       : '0'
     notifications.emit({
       id: '3dPrintStatus',
-      enabled: this.printerStatus.state?.state === 'running',
+      enabled: this.getPrintingStatus() === 'running',
       extraInfo: `[${percentage}] ${currentLayer} / ${totalLayerCount}, ${this.formatRemainingTime(
         this.remainingTime.state?.state,
       )}`,
@@ -111,12 +115,12 @@ class PrinterController extends Service {
   private setOtherNotifications() {
     notifications.emit({
       id: '3dPrintPaused',
-      enabled: this.printerStatus.state?.state === 'pause',
+      enabled: this.getPrintingStatus() === 'pause',
     })
 
     notifications.emit({
       id: '3dPrintFailed',
-      enabled: this.printerStatus.state?.state === 'failed',
+      enabled: this.getPrintingStatus() === 'failed',
     })
   }
 }

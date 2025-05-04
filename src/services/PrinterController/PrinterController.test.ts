@@ -168,7 +168,6 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: false,
-        extraInfo: '[0%] 1 / 300, 1h 4m remaining',
       })
     })
   })

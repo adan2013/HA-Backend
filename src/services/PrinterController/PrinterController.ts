@@ -94,6 +94,14 @@ class PrinterController extends Service {
   private setStatusNotification() {
     if (this.isDisabled) return
 
+    if (this.getPrintingStatus() !== 'running') {
+      notifications.emit({
+        id: '3dPrintStatus',
+        enabled: false,
+      })
+      return
+    }
+
     const percentage = this.progressPercentage.state
       ? `${this.progressPercentage.state.state}%`
       : '0%'
@@ -103,9 +111,10 @@ class PrinterController extends Service {
     const totalLayerCount = this.totalLayerCount.state
       ? `${this.totalLayerCount.state.state}`
       : '0'
+
     notifications.emit({
       id: '3dPrintStatus',
-      enabled: this.getPrintingStatus() === 'running',
+      enabled: true,
       extraInfo: `[${percentage}] ${currentLayer} / ${totalLayerCount}, ${this.formatRemainingTime(
         this.remainingTime.state?.state,
       )}`,

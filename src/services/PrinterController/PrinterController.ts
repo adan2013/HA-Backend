@@ -17,6 +17,19 @@ export const printerCurrentLayerId =
 export const printerTotalLayerCountId =
   Entities.sensor.bambuLabPrinter.totalLayerCount
 
+export type PrinterStatus =
+  | 'failed'
+  | 'finish'
+  | 'idle'
+  | 'init'
+  | 'offline'
+  | 'pause'
+  | 'prepare'
+  | 'running'
+  | 'slicing'
+  | 'unknown'
+  | 'offline'
+
 class PrinterController extends Service {
   private readonly nozzleTempThreshold = 45
   private autoOffToggle = Entity.toggle(autoOffToggleId)
@@ -32,6 +45,7 @@ class PrinterController extends Service {
     super('printerController')
     this.listenOnNozzleTemp()
     this.listenOnPrinterProgress()
+    this.listenOnPrinterStatus()
   }
 
   private listenOnNozzleTemp() {
@@ -53,10 +67,16 @@ class PrinterController extends Service {
 
   private listenOnPrinterProgress() {
     this.printerStatus.onAnyStateUpdate(() => {
-      this.setPrinterStatusNotification()
+      this.setStatusNotification()
     })
     this.currentLayer.onAnyStateUpdate(() => {
-      this.setPrinterStatusNotification()
+      this.setStatusNotification()
+    })
+  }
+
+  private listenOnPrinterStatus() {
+    this.printerStatus.onAnyStateUpdate(() => {
+      this.setOtherNotifications()
     })
   }
 
@@ -67,7 +87,7 @@ class PrinterController extends Service {
     return `${hours}h ${minutes}m remaining`
   }
 
-  private setPrinterStatusNotification() {
+  private setStatusNotification() {
     if (this.isDisabled) return
 
     const percentage = this.progressPercentage.state
@@ -85,6 +105,18 @@ class PrinterController extends Service {
       extraInfo: `[${percentage}] ${currentLayer} / ${totalLayerCount}, ${this.formatRemainingTime(
         this.remainingTime.state?.state,
       )}`,
+    })
+  }
+
+  private setOtherNotifications() {
+    notifications.emit({
+      id: '3dPrintPaused',
+      enabled: this.printerStatus.state?.state === 'pause',
+    })
+
+    notifications.emit({
+      id: '3dPrintFailed',
+      enabled: this.printerStatus.state?.state === 'failed',
     })
   }
 }

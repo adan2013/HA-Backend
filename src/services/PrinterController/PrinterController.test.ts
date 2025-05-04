@@ -7,6 +7,7 @@ import PrinterController, {
   printerPlugId,
   printerProgressPercentageId,
   printerRemainingTimeId,
+  PrinterStatus,
   printerStatusId,
   printerTotalLayerCountId,
 } from './PrinterController'
@@ -16,7 +17,7 @@ type TestConfig = {
   serviceEnabled?: boolean
   automationToggle?: boolean
   printerPlugIsOn: boolean
-  printerStatus: string
+  printerStatus: PrinterStatus
   progressPercentage?: number
   currentLayer?: number
   totalLayerCount?: number
@@ -95,7 +96,7 @@ describe('PrinterController', () => {
     it('should not turn off printer when print is not finished', () => {
       const { serviceCall } = initService({
         printerPlugIsOn: true,
-        printerStatus: 'printing',
+        printerStatus: 'running',
         nozzleTemp: '41',
       })
       expect(serviceCall).not.toHaveBeenCalled()
@@ -168,6 +169,56 @@ describe('PrinterController', () => {
         id: '3dPrintStatus',
         enabled: false,
         extraInfo: '[0%] 1 / 300, 1h 4m remaining',
+      })
+    })
+  })
+
+  describe('other notifications', () => {
+    it('should enable paused notification when printer is paused', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'pause',
+        nozzleTemp: '41',
+      })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintPaused',
+        enabled: true,
+      })
+    })
+
+    it('should disable paused notification when printer is not paused', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'running',
+        nozzleTemp: '41',
+      })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintPaused',
+        enabled: false,
+      })
+    })
+
+    it('should enable failed notification when printer is failed', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'failed',
+        nozzleTemp: '41',
+      })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintFailed',
+        enabled: true,
+      })
+    })
+
+    it('should disable failed notification when printer is not failed', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'running',
+        nozzleTemp: '41',
+      })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintFailed',
+        enabled: false,
       })
     })
   })

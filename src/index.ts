@@ -17,6 +17,7 @@ import DeviceMonitorService from './services/DeviceMonitorService/DeviceMonitorS
 import EnergyMonitorService from './services/EnergyMonitorService/EnergyMonitorService'
 import DanielRoomController from './services/DanielRoomController/DanielRoomController'
 import BroadcastDeviceService from './services/BroadcastDeviceService/BroadcastDeviceService'
+import PrinterController from './services/PrinterController/PrinterController'
 
 checkEnvironmentVariables([
   'ENV',
@@ -62,7 +63,7 @@ homeAssistantSync.once(() => {
   sm.registerService(new EnergyMonitorService())
   sm.registerService(new DanielRoomController())
   sm.registerService(new BroadcastDeviceService())
-
+  sm.registerService(new PrinterController())
   notifications.emit({
     id: 'backendStarted',
     enabled: true,

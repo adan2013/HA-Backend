@@ -58,6 +58,7 @@ const notificationConfig: NotificationConfig[] = [
     description: 'The 3D print has been paused. Resume the print to continue',
     canBeDismissed: true,
     light: 'blueFlashing',
+    sound: 'doubleBeep',
   },
   {
     id: '3dPrintFailed',
@@ -65,6 +66,7 @@ const notificationConfig: NotificationConfig[] = [
     description: 'The 3D print has failed. Check the printer and the print',
     canBeDismissed: true,
     light: 'red',
+    sound: 'doubleBeep',
   },
   {
     id: '3dPrintStatus',

@@ -49,7 +49,7 @@ class PrinterController extends Service {
   }
 
   private formatRemainingTime(timeInMinutes: string | undefined) {
-    if (!timeInMinutes) return 'unknown time remaining'
+    if (!timeInMinutes || Number(timeInMinutes) === 0) return undefined
     const hours = Math.floor(Number(timeInMinutes) / 60)
     const minutes = Math.floor(Number(timeInMinutes) % 60)
     return `${hours}h ${minutes}m remaining`
@@ -111,13 +111,16 @@ class PrinterController extends Service {
     const totalLayerCount = this.totalLayerCount.state
       ? `${this.totalLayerCount.state.state}`
       : '0'
+    const remainingTime = this.formatRemainingTime(
+      this.remainingTime.state?.state,
+    )
 
     notifications.emit({
       id: '3dPrintStatus',
       enabled: true,
-      extraInfo: `[${percentage}] ${currentLayer} / ${totalLayerCount}, ${this.formatRemainingTime(
-        this.remainingTime.state?.state,
-      )}`,
+      extraInfo: `[${percentage}] ${currentLayer} / ${totalLayerCount}${
+        remainingTime ? `, ${remainingTime}` : ''
+      }`,
     })
   }
 
@@ -126,10 +129,13 @@ class PrinterController extends Service {
       id: '3dPrintPaused',
       enabled: this.getPrintingStatus() === 'pause',
     })
-
     notifications.emit({
       id: '3dPrintFailed',
       enabled: this.getPrintingStatus() === 'failed',
+    })
+    notifications.emit({
+      id: '3dPrintFinished',
+      enabled: this.getPrintingStatus() === 'finish',
     })
   }
 }

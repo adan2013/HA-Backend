@@ -159,6 +159,23 @@ describe('PrinterController', () => {
       })
     })
 
+    it('should hide remaining time when it is 0', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'running',
+        remainingTime: 0,
+        nozzleTemp: '230',
+        progressPercentage: 10,
+        currentLayer: 14,
+        totalLayerCount: 200,
+      })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintStatus',
+        enabled: true,
+        extraInfo: '[10%] 14 / 200',
+      })
+    })
+
     it('should disable status notification when printer is not printing', () => {
       const { notification } = initService({
         printerPlugIsOn: true,
@@ -217,6 +234,30 @@ describe('PrinterController', () => {
       })
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintFailed',
+        enabled: false,
+      })
+    })
+
+    it('should enable finished notification when printer is finished', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'finish',
+        nozzleTemp: '41',
+      })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintFinished',
+        enabled: true,
+      })
+    })
+
+    it('should disable finished notification when printer is not finished', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'running',
+        nozzleTemp: '41',
+      })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintFinished',
         enabled: false,
       })
     })

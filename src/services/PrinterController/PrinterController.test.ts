@@ -176,6 +176,21 @@ describe('PrinterController', () => {
       })
     })
 
+    it('should show preparing to print when current layer or total layer count is 0', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'running',
+        currentLayer: 0,
+        totalLayerCount: 0,
+        nozzleTemp: '230',
+      })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintStatus',
+        enabled: true,
+        extraInfo: 'Preparing to print...',
+      })
+    })
+
     it('should disable status notification when printer is not printing', () => {
       const { notification } = initService({
         printerPlugIsOn: true,

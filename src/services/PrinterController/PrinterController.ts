@@ -115,13 +115,21 @@ class PrinterController extends Service {
       this.remainingTime.state?.state,
     )
 
-    notifications.emit({
-      id: '3dPrintStatus',
-      enabled: true,
-      extraInfo: `[${percentage}] ${currentLayer} / ${totalLayerCount}${
-        remainingTime ? `, ${remainingTime}` : ''
-      }`,
-    })
+    if (currentLayer === '0' || totalLayerCount === '0') {
+      notifications.emit({
+        id: '3dPrintStatus',
+        enabled: true,
+        extraInfo: `Preparing to print...`,
+      })
+    } else {
+      notifications.emit({
+        id: '3dPrintStatus',
+        enabled: true,
+        extraInfo: `[${percentage}] ${currentLayer} / ${totalLayerCount}${
+          remainingTime ? `, ${remainingTime}` : ''
+        }`,
+      })
+    }
   }
 
   private setOtherNotifications() {

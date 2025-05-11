@@ -41,7 +41,11 @@ if (process.env['ENV'] === 'dev') {
 
 const sm = new ServiceManager()
 new WebSocketServerConnector()
-new HomeAssistantConnector(process.env['HA_HOST'], process.env['HA_TOKEN'])
+new HomeAssistantConnector(
+  process.env['HA_HOST'],
+  process.env['HA_TOKEN'],
+  process.env['HA_REQUIRED_ENTITIES'],
+)
 
 homeAssistantSync.once(() => {
   sm.registerService(new NotificationsService())

@@ -10,9 +10,13 @@ import {
   anyEntityUpdate,
 } from '../events/events'
 
+const RECONNECT_INTERVAL = 10000
+const ENTITIES_PROBE_INTERVAL = 60000
+
 class HomeAssistantConnector {
   private readonly host: string
   private readonly token: string
+  private readonly requiredEntities: number
   private msgId = 1
   private socket: WebSocket | undefined
 
@@ -33,20 +37,21 @@ class HomeAssistantConnector {
     this.socket.onmessage = (e) => this.onReceive(e)
     this.socket.onclose = () => {
       console.error('Connection to Home Assistant closed!')
-      setTimeout(() => this.connectToHomeAssistant(), 6000)
+      setTimeout(() => this.connectToHomeAssistant(), RECONNECT_INTERVAL)
     }
     this.socket.onerror = (err) => {
       console.error('HA websocket error', err)
     }
   }
 
-  public constructor(host?: string, token?: string) {
+  public constructor(host?: string, token?: string, requiredEntities?: string) {
     if (!host || !token) {
       console.error('Missing HA_HOST or HA_TOKEN env variable!')
       throw new Error('Missing basic env variables')
     }
     this.host = host
     this.token = token
+    this.requiredEntities = Number(requiredEntities) || 0
     this.connectToHomeAssistant()
     entityStateRequest.on(({ entityId, callback }) => {
       const entityState = this.entities.find((e) => e.id === entityId)
@@ -61,22 +66,45 @@ class HomeAssistantConnector {
     })
   }
 
-  private syncWithHomeAssistant() {
+  private probeEntities() {
+    console.log(`Probing entities for required count: ${this.requiredEntities}`)
+    this.getAllEntities((entities) => {
+      if (entities.length < this.requiredEntities) {
+        console.warn(
+          `WARN: Found ${entities.length} entities; Next probe in ${
+            ENTITIES_PROBE_INTERVAL / 1000
+          } seconds...`,
+        )
+        setTimeout(() => this.probeEntities(), ENTITIES_PROBE_INTERVAL)
+      } else {
+        console.log(`Found ${entities.length} entities; Starting backend...`)
+        this.syncWithHomeAssistant()
+      }
+    })
+  }
+
+  private getAllEntities(callback: (entities: EntityState[]) => void) {
     this.sendMsg(
       'get_states',
       {},
       {
         resultCallback: (resp) => {
-          this.entities = resp.result.map(HomeAssistantConnector.mapEntityState)
-          console.log(
-            `Synced with Home Assistant! Count of entities: ${this.entities.length}`,
-          )
-          homeAssistantSync.emit({
-            entitiesCount: this.entities.length,
-          })
+          callback(resp.result.map(HomeAssistantConnector.mapEntityState))
         },
       },
     )
+  }
+
+  private syncWithHomeAssistant() {
+    this.getAllEntities((entities) => {
+      this.entities = entities
+      console.log(
+        `Backend initialized successfully with ${this.entities.length} entities`,
+      )
+      homeAssistantSync.emit({
+        entitiesCount: this.entities.length,
+      })
+    })
     this.sendMsg(
       'subscribe_events',
       { event_type: 'state_changed' },
@@ -109,6 +137,7 @@ class HomeAssistantConnector {
       const msg = JSON.parse(e.data.toString())
       switch (msg.type) {
         case 'auth_required':
+          console.log('Connected to Home Assistant. Authenticating...')
           this.sendMsg(
             'auth',
             { access_token: this.token },
@@ -123,7 +152,12 @@ class HomeAssistantConnector {
           )
           return
         case 'auth_ok':
-          this.syncWithHomeAssistant()
+          if (this.requiredEntities === 0) {
+            console.log('No required entities count set, skipping probe')
+            this.syncWithHomeAssistant()
+          } else {
+            this.probeEntities()
+          }
           return
         case 'result':
           if (msg['success']) {

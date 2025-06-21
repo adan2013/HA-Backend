@@ -56,6 +56,7 @@ const initService = ({
   notifications.on(notificationMock)
   emitStateUpdate(printerNozzleTempId, nozzleTemp)
   emitStateUpdate(printerStatusId, printerStatus)
+  emitStateUpdate(printerRemainingTimeId, remainingTime.toString())
   return { serviceCall: serviceCallMock, notification: notificationMock }
 }
 
@@ -79,6 +80,7 @@ describe('PrinterController', () => {
         printerStatus: 'finish',
         nozzleTemp: '41',
       })
+      emitStateUpdate(printerPlugId, 'off')
       expect(serviceCall).toHaveBeenCalledTimes(2)
       expect(serviceCall).toHaveBeenCalledWith(turnOffPrinterServiceCall)
       expect(serviceCall).toHaveBeenCalledWith(turnOffAutomationServiceCall)

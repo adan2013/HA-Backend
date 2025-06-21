@@ -46,6 +46,7 @@ class PrinterController extends Service {
     this.listenOnNozzleTemp()
     this.listenOnPrinterProgress()
     this.listenOnPrinterStatus()
+    this.listenOnPrinterPlugState()
   }
 
   private formatRemainingTime(timeInMinutes: string | undefined) {
@@ -70,17 +71,13 @@ class PrinterController extends Service {
         const printerIsOn = this.printerPlug.isOn
         if (nozzleIsCold && printIsFinished && printerIsOn) {
           this.printerPlug.turnOff()
-          this.autoOffToggle.turnOff()
         }
       }
     })
   }
 
   private listenOnPrinterProgress() {
-    this.printerStatus.onAnyStateUpdate(() => {
-      this.setStatusNotification()
-    })
-    this.currentLayer.onAnyStateUpdate(() => {
+    this.remainingTime.onAnyStateUpdate(() => {
       this.setStatusNotification()
     })
   }
@@ -88,6 +85,18 @@ class PrinterController extends Service {
   private listenOnPrinterStatus() {
     this.printerStatus.onAnyStateUpdate(() => {
       this.setOtherNotifications()
+    })
+  }
+
+  private listenOnPrinterPlugState() {
+    // Toggle off auto switch after printer is turned off
+    // This prevents the kill switch from turning off the printer
+    // immediately after it is turned on and status is still set to "finish"
+    // (normal behavior of the integration plugin)
+    this.printerPlug.onStateValue('off', () => {
+      if (this.autoOffToggle.isOn) {
+        this.autoOffToggle.turnOff()
+      }
     })
   }
 

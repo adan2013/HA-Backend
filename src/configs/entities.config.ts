@@ -51,6 +51,9 @@ const Entities = {
     kitchenMembraneFilterService: 'input_datetime.kitchenmembranefilterservice',
   },
   light: {
+    aniaRoom: {
+      bedLamp: 'light.aniabedlamp',
+    },
     danielRoom: {
       bedLamp: 'light.danielbedlamp',
     },
@@ -96,6 +99,7 @@ const Entities = {
       },
     },
     remote: {
+      aniaBed: 'sensor.aniabedremote_action',
       danielBed: 'sensor.danielbedremote_action',
       kitchen: 'sensor.kitchenremote_action',
       livingRoom: 'sensor.livingroomremote_action',

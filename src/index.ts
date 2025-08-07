@@ -15,6 +15,7 @@ import { checkEnvironmentVariables } from './utils/envVariables'
 import WaterLeakService from './services/WaterLeakService/WaterLeakService'
 import DeviceMonitorService from './services/DeviceMonitorService/DeviceMonitorService'
 import EnergyMonitorService from './services/EnergyMonitorService/EnergyMonitorService'
+import AniaRoomController from './services/AniaRoomController/AniaRoomController'
 import DanielRoomController from './services/DanielRoomController/DanielRoomController'
 import BroadcastDeviceService from './services/BroadcastDeviceService/BroadcastDeviceService'
 import PrinterController from './services/PrinterController/PrinterController'
@@ -65,6 +66,7 @@ homeAssistantSync.once(() => {
   sm.registerService(new WaterLeakService())
   sm.registerService(new DeviceMonitorService())
   sm.registerService(new EnergyMonitorService())
+  sm.registerService(new AniaRoomController())
   sm.registerService(new DanielRoomController())
   sm.registerService(new BroadcastDeviceService())
   sm.registerService(new PrinterController())

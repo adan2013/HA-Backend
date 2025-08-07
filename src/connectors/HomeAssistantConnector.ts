@@ -192,7 +192,7 @@ class HomeAssistantConnector {
       const payloadKeys = Object.keys(data)
       console.log(
         `CALL > ${domain}.${service}; entity: ${entityId}; payload: ${
-          payloadKeys.length > 0 ? payloadKeys.join(',') : '(empty)'
+          payloadKeys.length > 0 ? JSON.stringify(data) : '(empty)'
         }`,
       )
       return

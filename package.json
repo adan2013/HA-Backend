@@ -1,6 +1,6 @@
 {
   "name": "ha-backend",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "Node backend for Home Assistant",
   "main": "index.js",
   "scripts": {

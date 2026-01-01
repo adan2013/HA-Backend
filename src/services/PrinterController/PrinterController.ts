@@ -84,6 +84,7 @@ class PrinterController extends Service {
 
   private listenOnPrinterStatus() {
     this.printerStatus.onAnyStateUpdate(() => {
+      this.setStatusNotification()
       this.setOtherNotifications()
     })
   }
@@ -97,13 +98,19 @@ class PrinterController extends Service {
       if (this.autoOffToggle.isOn) {
         this.autoOffToggle.turnOff()
       }
+      this.setStatusNotification()
+    })
+    this.printerPlug.onStateValue('on', () => {
+      this.setStatusNotification()
     })
   }
 
   private setStatusNotification() {
     if (this.isDisabled) return
 
-    if (this.getPrintingStatus() !== 'running') {
+    const status = this.getPrintingStatus()
+    const printerIsOn = this.printerPlug.isOn
+    if (!printerIsOn || status !== 'running') {
       notifications.emit({
         id: '3dPrintStatus',
         enabled: false,

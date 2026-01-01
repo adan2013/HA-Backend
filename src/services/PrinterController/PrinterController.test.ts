@@ -204,6 +204,85 @@ describe('PrinterController', () => {
         enabled: false,
       })
     })
+
+    it('should disable status notification when printer is off, even if status is running', () => {
+      const { notification } = initService({
+        printerPlugIsOn: false,
+        printerStatus: 'running',
+        progressPercentage: 97,
+        currentLayer: 201,
+        totalLayerCount: 204,
+        remainingTime: 5,
+        nozzleTemp: '230',
+      })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintStatus',
+        enabled: false,
+      })
+    })
+
+    it('should disable status notification when printer is turned off', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'running',
+        progressPercentage: 97,
+        currentLayer: 201,
+        totalLayerCount: 204,
+        remainingTime: 5,
+        nozzleTemp: '230',
+      })
+      notification.mockClear()
+      emitStateUpdate(printerPlugId, 'off')
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintStatus',
+        enabled: false,
+      })
+    })
+
+    it('should disable status notification when status changes to finish', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'running',
+        progressPercentage: 97,
+        currentLayer: 201,
+        totalLayerCount: 204,
+        remainingTime: 5,
+        nozzleTemp: '230',
+      })
+      notification.mockClear()
+      emitStateUpdate(printerStatusId, 'finish')
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintStatus',
+        enabled: false,
+      })
+    })
+
+    it('should not show both status and finished notifications at the same time', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'finish',
+        progressPercentage: 97,
+        currentLayer: 201,
+        totalLayerCount: 204,
+        remainingTime: 5,
+        nozzleTemp: '41',
+      })
+      // Check that status notification is disabled
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintStatus',
+        enabled: false,
+      })
+      // Check that finished notification is enabled
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintFinished',
+        enabled: true,
+      })
+      // Verify status notification was never enabled
+      expect(notification).not.toHaveBeenCalledWith({
+        id: '3dPrintStatus',
+        enabled: true,
+      })
+    })
   })
 
   describe('other notifications', () => {

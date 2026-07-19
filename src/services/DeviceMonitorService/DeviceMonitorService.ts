@@ -15,8 +15,8 @@ type DetectedDeviceMetadata = {
 }
 
 class DeviceMonitorService extends Service {
-  private readonly BATTERY_LOW_THRESHOLD = 16
-  private readonly SIGNAL_LOW_THRESHOLD = 20
+  private readonly BATTERY_LOW_THRESHOLD = 35
+  private readonly SIGNAL_LOW_THRESHOLD = 60
   detectedDevices: DetectedDeviceMetadata[] = []
   private batteryLevelAlertToggle = Entity.toggle(
     Entities.inputBoolean.system.alertBatteryLevel,

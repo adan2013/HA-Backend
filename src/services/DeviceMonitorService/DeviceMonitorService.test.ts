@@ -133,6 +133,14 @@ describe('Device monitor service', () => {
     emitTestEntityUpdates()
     expect(service.detectedDevices).toEqual([
       {
+        entityId: 'standard3',
+        name: 'standard3',
+        lowBattery: true,
+        lowSignal: true,
+        offline: false,
+        monitored: false,
+      },
+      {
         entityId: 'standard4',
         name: 'standard4',
         lowBattery: true,
@@ -158,7 +166,7 @@ describe('Device monitor service', () => {
       },
     ])
     expect(service.getServiceStatus().status).toEqual({
-      message: 'Low batteries: 2; Low signal: 1; Offline: 1; On watchlist: 3',
+      message: 'Low batteries: 3; Low signal: 2; Offline: 1; On watchlist: 3',
       color: 'yellow',
       enabled: true,
     })
@@ -171,9 +179,9 @@ describe('Device monitor service', () => {
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
     emitTestEntityUpdates()
-    expect(service.detectedDevices).toHaveLength(3)
+    expect(service.detectedDevices).toHaveLength(4)
     expect(service.getServiceStatus().status).toEqual({
-      message: 'Low batteries: 2; Low signal: 1; Offline: 1; On watchlist: 3',
+      message: 'Low batteries: 3; Low signal: 2; Offline: 1; On watchlist: 3',
       color: 'yellow',
       enabled: true,
     })

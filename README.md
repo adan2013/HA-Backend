@@ -1,6 +1,14 @@
 # Home Assistant backend
 
-This is the Home Assistant backend, which is responsible for my smart home setup. Previously, I was using Node-RED for this purpose, but I decided to switch to a custom Node backend because it is more flexible and clear for me as a JavaScript developer.
+This is the Home Assistant backend, which is responsible for my smart home
+setup and is the only Home Assistant integration point used by the dashboard.
+Dashboard clients authenticate over WebSocket, subscribe to entity updates and
+send commands through this backend. Home Assistant credentials remain on the
+backend.
+
+Previously, I was using Node-RED for this purpose, but I decided to switch to a
+custom Node backend because it is more flexible and clear for me as a
+JavaScript developer.
 
 Before, I reached a point where I did not know how to create a desired automation using the Node-RED blocks, but I knew how I would program it with normal code. I began to use the function blocks more and more often, so the idea of no-code stopped mattering to me, and I decided to move all my automations to code.
 
@@ -12,7 +20,7 @@ The dedicated frontend for this backend is [here](https://github.com/adan2013/HA
 
 | COMMAND           | DESCRIPTION                                         |
 |-------------------|-----------------------------------------------------|
-| yarn start        | start a developer server (HA service calls blocked) |
+| yarn start        | start a developer server                            |
 | yarn build        | build a production build                            |
 | yarn start:prod   | start a developer server in production mode         |
 | yarn start:build  | run a production build                              |
@@ -28,11 +36,21 @@ The dedicated frontend for this backend is [here](https://github.com/adan2013/HA
 | TZ              | timezone ID                           |
 | HA_HOST         | IP address of Home Assistant instance |
 | HA_TOKEN        | access token for Home Assistant       |
+| DASHBOARD_ACCESS_TOKEN | shared access token required by dashboard clients |
 | AQI_API_KEY     | access token for AQICN API            |
 | AQI_STATION     | ID of the AQICN air quality station   |
 | WEATHER_API_KEY | access token for OpenWeatherMap API   |
 | LOCATION_LAT    | house location - latitude             |
 | LOCATION_LON    | house location - longitude            |
+
+`HA_TOKEN` and `DASHBOARD_ACCESS_TOKEN` are runtime-only secrets. The Docker
+image does not require either value while it is being built; pass them when the
+container starts, for example with `docker run --env-file .env`.
+
+The backend refuses to start without `DASHBOARD_ACCESS_TOKEN`. A dashboard must
+send this token as its first WebSocket message. In development mode, automatic
+HA service calls originating inside the backend are logged and blocked, while
+explicit `callService` commands from the dashboard are executed.
 
 ## Helpers
 

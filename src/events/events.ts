@@ -7,6 +7,7 @@ import {
   EntityStatePayload,
   NotificationsPayload,
   HomeAssistantSyncPayload,
+  HomeAssistantStatusPayload,
 } from './eventPayloads'
 import { EntityState } from '../connectors/types'
 
@@ -20,6 +21,9 @@ export const webSocketMessage = (topic: string) =>
 export const homeAssistantSync = new TypedEvent<HomeAssistantSyncPayload>(
   'ha/sync',
 )
+
+export const homeAssistantStatusUpdate =
+  new TypedEvent<HomeAssistantStatusPayload>('ha/status')
 
 export const homeAssistantEvent = (msgId: number) =>
   new TypedEvent<HomeAssistantCallbackPayload>('ha/event', msgId.toString())

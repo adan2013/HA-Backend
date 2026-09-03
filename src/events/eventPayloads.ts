@@ -2,6 +2,14 @@ import { EntityState } from '../connectors/types'
 
 export type WebSocketIncomingMessagePayload = {
   message: {
+    accessToken?: string
+    requestId?: string
+    subscriptionId?: string
+    entityId?: string | string[]
+    domain?: string
+    service?: string
+    data?: object
+    attribute?: string
     notificationId?: string
     serviceName?: string
     enabled?: boolean
@@ -18,6 +26,10 @@ export type ServiceDataUpdatePayload = {
 
 export type HomeAssistantSyncPayload = {
   entitiesCount: number
+}
+
+export type HomeAssistantStatusPayload = {
+  status: 'synced' | 'authorized' | 'connected' | 'disconnected' | 'authError'
 }
 
 export type HomeAssistantCallbackPayload = (payload: any) => void

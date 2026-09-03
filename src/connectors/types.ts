@@ -26,3 +26,16 @@ export type EntityState = {
   lastUpdated: string
   attributes: EntityAttributeInterface
 }
+
+export type HomeAssistantConnectionState =
+  | 'synced'
+  | 'authorized'
+  | 'connected'
+  | 'disconnected'
+  | 'authError'
+
+export type SensorHistoryItem = {
+  id: number
+  time: string
+  value: number
+}

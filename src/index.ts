@@ -24,6 +24,7 @@ checkEnvironmentVariables([
   'ENV',
   'HA_HOST',
   'HA_TOKEN',
+  'DASHBOARD_ACCESS_TOKEN',
   'AQI_API_KEY',
   'AQI_STATION',
   'WEATHER_API_KEY',
@@ -41,11 +42,14 @@ if (process.env['ENV'] === 'dev') {
 }
 
 const sm = new ServiceManager()
-new WebSocketServerConnector()
-new HomeAssistantConnector(
+const homeAssistant = new HomeAssistantConnector(
   process.env['HA_HOST'],
   process.env['HA_TOKEN'],
   process.env['HA_REQUIRED_ENTITIES'],
+)
+new WebSocketServerConnector(
+  process.env['DASHBOARD_ACCESS_TOKEN'] as string,
+  homeAssistant,
 )
 
 homeAssistantSync.once(() => {

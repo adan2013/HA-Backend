@@ -1,5 +1,12 @@
 import { MessageEvent, WebSocket } from 'ws'
-import { EntityState, MessageOptions, SocketMessageInterface } from './types'
+import axios from 'axios'
+import {
+  EntityState,
+  HomeAssistantConnectionState,
+  MessageOptions,
+  SensorHistoryItem,
+  SocketMessageInterface,
+} from './types'
 import {
   homeAssistantEvent,
   homeAssistantResult,
@@ -8,6 +15,7 @@ import {
   homeAssistantSync,
   entityStateRequest,
   anyEntityUpdate,
+  homeAssistantStatusUpdate,
 } from '../events/events'
 
 const RECONNECT_INTERVAL = 10000
@@ -19,8 +27,18 @@ class HomeAssistantConnector {
   private readonly requiredEntities: number
   private msgId = 1
   private socket: WebSocket | undefined
+  private status: HomeAssistantConnectionState = 'disconnected'
 
   entities: EntityState[] = []
+
+  public get connectionState(): HomeAssistantConnectionState {
+    return this.status
+  }
+
+  private changeStatus(status: HomeAssistantConnectionState) {
+    this.status = status
+    homeAssistantStatusUpdate.emit({ status })
+  }
 
   static mapEntityState(haEntity: never): EntityState {
     return {
@@ -34,8 +52,10 @@ class HomeAssistantConnector {
 
   private connectToHomeAssistant() {
     this.socket = new WebSocket(`ws://${this.host}/api/websocket`)
+    this.socket.onopen = () => this.changeStatus('connected')
     this.socket.onmessage = (e) => this.onReceive(e)
     this.socket.onclose = () => {
+      this.changeStatus('disconnected')
       console.error('Connection to Home Assistant closed!')
       setTimeout(() => this.connectToHomeAssistant(), RECONNECT_INTERVAL)
     }
@@ -62,7 +82,12 @@ class HomeAssistantConnector {
       }
     })
     serviceCall.on(({ domain, service, entityId, data }) => {
-      this.callService(entityId, domain, service, data)
+      void this.callService(entityId, domain, service, data).catch((error) => {
+        console.error(
+          `Failed to call service ${domain}.${service} for entity ${entityId}`,
+          error,
+        )
+      })
     })
   }
 
@@ -104,6 +129,7 @@ class HomeAssistantConnector {
       homeAssistantSync.emit({
         entitiesCount: this.entities.length,
       })
+      this.changeStatus('synced')
     })
     this.sendMsg(
       'subscribe_events',
@@ -125,6 +151,13 @@ class HomeAssistantConnector {
               this.entities[changedEntityIndex] = updatedState
               entityUpdate(updatedState.id).emit(updatedState)
               anyEntityUpdate.emit(updatedState)
+            } else {
+              const newEntity = HomeAssistantConnector.mapEntityState(
+                newState as never,
+              )
+              this.entities.push(newEntity)
+              entityUpdate(newEntity.id).emit(newEntity)
+              anyEntityUpdate.emit(newEntity)
             }
           }
         },
@@ -147,11 +180,13 @@ class HomeAssistantConnector {
           )
           return
         case 'auth_invalid':
+          this.changeStatus('authError')
           console.error(
             '"auth_invalid" message received from HA - check your access token',
           )
           return
         case 'auth_ok':
+          this.changeStatus('authorized')
           if (this.requiredEntities === 0) {
             console.log('No required entities count set, skipping probe')
             this.syncWithHomeAssistant()
@@ -160,9 +195,8 @@ class HomeAssistantConnector {
           }
           return
         case 'result':
-          if (msg['success']) {
-            homeAssistantResult(msg.id).emit(msg)
-          } else {
+          homeAssistantResult(msg.id).emit(msg)
+          if (!msg['success']) {
             console.warn('Result message not successful', msg.error)
           }
           break
@@ -187,35 +221,97 @@ class HomeAssistantConnector {
     domain: string,
     service: string,
     data: object = {},
-  ) {
-    if (process.env['ENV'] === 'dev') {
+    options: { executeInDev?: boolean } = {},
+  ): Promise<unknown> {
+    if (process.env['ENV'] === 'dev' && !options.executeInDev) {
       const payloadKeys = Object.keys(data)
       console.log(
         `CALL > ${domain}.${service}; entity: ${entityId}; payload: ${
           payloadKeys.length > 0 ? JSON.stringify(data) : '(empty)'
         }`,
       )
-      return
+      return Promise.resolve(undefined)
     }
-    this.sendMsg(
-      'call_service',
-      {
-        domain,
-        service,
-        service_data: data,
-        target: {
-          entity_id: entityId,
+    if (
+      this.status !== 'synced' ||
+      this.socket?.readyState !== WebSocket.OPEN
+    ) {
+      return Promise.reject(new Error('Home Assistant is not connected'))
+    }
+    return new Promise((resolve, reject) => {
+      this.sendMsg(
+        'call_service',
+        {
+          domain,
+          service,
+          service_data: data,
+          target: {
+            entity_id: entityId,
+          },
         },
-      },
-      {
-        resultCallback: (resp) => {
-          if (!resp['success']) {
-            console.error(
-              `Failed to call service ${domain}.${service} for entity ${entityId}!`,
+        {
+          resultCallback: (resp) => {
+            if (resp['success']) {
+              resolve(resp['result'])
+              return
+            }
+            reject(
+              new Error(
+                resp['error']?.message ||
+                  'Home Assistant rejected the service call',
+              ),
             )
-          }
+          },
+        },
+      )
+    })
+  }
+
+  public getEntityState(entityId: string): EntityState | undefined {
+    return this.entities.find((entity) => entity.id === entityId)
+  }
+
+  public getEntities(attribute?: string): EntityState[] {
+    if (!attribute) return [...this.entities]
+    return this.entities.filter(
+      (entity) =>
+        entity.attributes[attribute as keyof typeof entity.attributes] !==
+        undefined,
+    )
+  }
+
+  public async getEntityHistory(
+    entityId: string,
+    historyLength = 0,
+  ): Promise<SensorHistoryItem[]> {
+    let timestamp = ''
+    if (historyLength > 0) {
+      const date = new Date()
+      date.setMinutes(date.getMinutes() - historyLength)
+      timestamp = `/${date.toISOString()}`
+    }
+    const currentTimestamp = new Date().toISOString()
+    const response = await axios.get(
+      `http://${this.host}/api/history/period${timestamp}`,
+      {
+        headers: {
+          authorization: `Bearer ${this.token}`,
+          'Content-Type': 'application/json',
+        },
+        params: {
+          filter_entity_id: entityId,
+          no_attributes: true,
+          end_time: currentTimestamp,
         },
       },
+    )
+    const data = response?.data?.[0] || []
+    return data.map(
+      (item: { last_updated: string; state: string }, index: number) => ({
+        id: index,
+        time: item.last_updated,
+        value: Number.parseFloat(item.state),
+      }),
     )
   }
 

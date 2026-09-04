@@ -126,10 +126,10 @@ class HomeAssistantConnector {
       console.log(
         `Backend initialized successfully with ${this.entities.length} entities`,
       )
+      this.changeStatus('synced')
       homeAssistantSync.emit({
         entitiesCount: this.entities.length,
       })
-      this.changeStatus('synced')
     })
     this.sendMsg(
       'subscribe_events',

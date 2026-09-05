@@ -19,18 +19,6 @@ class BroadcastDeviceService extends Service {
   }
 
   private checkBroadcastDevices() {
-    if (this.isDisabled) {
-      notifications.emit({
-        id: 'broadcastDeviceCamera',
-        enabled: false,
-      })
-      notifications.emit({
-        id: 'broadcastDeviceMicrophone',
-        enabled: false,
-      })
-      this.setServiceStatus('Service is disabled', 'none')
-      return
-    }
     const detectedCameras: string[] = []
     const detectedMicrophones: string[] = []
     broadcastDevices.forEach((sensor) => {

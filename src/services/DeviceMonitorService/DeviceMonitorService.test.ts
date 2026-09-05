@@ -51,7 +51,6 @@ describe('Device monitor service', () => {
     expect(service.getServiceStatus().status).toEqual({
       message: 'Low batteries: 0; Low signal: 0; Offline: 0; On watchlist: 3',
       color: 'green',
-      enabled: true,
     })
   })
 
@@ -66,7 +65,6 @@ describe('Device monitor service', () => {
     expect(service.getServiceStatus().status).toEqual({
       message: 'Low batteries: 1; Low signal: 0; Offline: 0; On watchlist: 3',
       color: 'yellow',
-      enabled: true,
     })
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'lowBattery',
@@ -87,7 +85,6 @@ describe('Device monitor service', () => {
     expect(service.getServiceStatus().status).toEqual({
       message: 'Low batteries: 0; Low signal: 0; Offline: 1; On watchlist: 3',
       color: 'yellow',
-      enabled: true,
     })
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'offlineSensor',
@@ -107,24 +104,11 @@ describe('Device monitor service', () => {
     expect(service.getServiceStatus().status).toEqual({
       message: 'Low batteries: 0; Low signal: 1; Offline: 0; On watchlist: 3',
       color: 'yellow',
-      enabled: true,
     })
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'weakSignal',
       enabled: true,
       extraInfo: 'name3',
-    })
-  })
-
-  it('should not detect anything if the service is disabled', () => {
-    const service = new DeviceMonitorService()
-    service.setServiceEnabled(false)
-    emitTestEntityUpdates()
-    expect(service.detectedDevices).toHaveLength(0)
-    expect(service.getServiceStatus().status).toEqual({
-      message: 'Low batteries: 0; Low signal: 0; Offline: 0; On watchlist: 3',
-      color: 'green',
-      enabled: false,
     })
   })
 
@@ -168,7 +152,6 @@ describe('Device monitor service', () => {
     expect(service.getServiceStatus().status).toEqual({
       message: 'Low batteries: 3; Low signal: 2; Offline: 1; On watchlist: 3',
       color: 'yellow',
-      enabled: true,
     })
   })
 
@@ -183,7 +166,6 @@ describe('Device monitor service', () => {
     expect(service.getServiceStatus().status).toEqual({
       message: 'Low batteries: 3; Low signal: 2; Offline: 1; On watchlist: 3',
       color: 'yellow',
-      enabled: true,
     })
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'lowBattery',

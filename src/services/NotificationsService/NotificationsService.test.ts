@@ -32,7 +32,6 @@ describe('NotificationsService', () => {
       status: {
         color: 'green',
         message: 'Active notifications: 0, DND mode: OFF',
-        enabled: true,
       },
     })
     expect(serviceCallMock).toHaveBeenCalledWith({
@@ -82,7 +81,6 @@ describe('NotificationsService', () => {
       status: {
         color: 'green',
         message: 'Active notifications: 1, DND mode: OFF',
-        enabled: true,
       },
     })
   })
@@ -109,28 +107,6 @@ describe('NotificationsService', () => {
       },
     })
     expect(service.count).toBe(0)
-  })
-
-  it('should add or remove notification only if service is enabled', () => {
-    const service = new NotificationsSerivce()
-    service.setServiceEnabled(false)
-    notifications.emit({
-      id: 'test3',
-      enabled: true,
-    })
-    expect(service.count).toBe(0)
-    service.setServiceEnabled(true)
-    notifications.emit({
-      id: 'test3',
-      enabled: true,
-    })
-    expect(service.count).toBe(1)
-    service.setServiceEnabled(false)
-    notifications.emit({
-      id: 'test3',
-      enabled: false,
-    })
-    expect(service.count).toBe(1)
   })
 
   it('should not create any duplicated notification type', () => {
@@ -262,7 +238,6 @@ describe('NotificationsService', () => {
       status: {
         color: 'green',
         message: 'Active notifications: 0, DND mode: ON',
-        enabled: true,
       },
     })
     jest.setSystemTime(new Date('2023-05-15T07:34:00Z'))

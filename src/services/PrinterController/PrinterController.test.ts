@@ -14,7 +14,6 @@ import PrinterController, {
 import { ServiceCallPayload } from '../../events/eventPayloads'
 
 type TestConfig = {
-  serviceEnabled?: boolean
   automationToggle?: boolean
   printerPlugIsOn: boolean
   printerStatus: PrinterStatus
@@ -26,7 +25,6 @@ type TestConfig = {
 }
 
 const initService = ({
-  serviceEnabled = true,
   automationToggle = true,
   printerPlugIsOn,
   printerStatus,
@@ -48,8 +46,7 @@ const initService = ({
   mockEntity(printerCurrentLayerId, currentLayer.toString())
   mockEntity(printerTotalLayerCountId, totalLayerCount.toString())
   mockEntity(printerRemainingTimeId, remainingTime.toString())
-  const printerController = new PrinterController()
-  printerController.setServiceEnabled(serviceEnabled)
+  new PrinterController()
   const serviceCallMock = jest.fn()
   const notificationMock = jest.fn()
   serviceCall.on(serviceCallMock)
@@ -116,16 +113,6 @@ describe('PrinterController', () => {
     it('should not turn off printer when automation is off', () => {
       const { serviceCall } = initService({
         automationToggle: false,
-        printerPlugIsOn: true,
-        printerStatus: 'finish',
-        nozzleTemp: '41',
-      })
-      expect(serviceCall).not.toHaveBeenCalled()
-    })
-
-    it('should not turn off printer when service is disabled', () => {
-      const { serviceCall } = initService({
-        serviceEnabled: false,
         printerPlugIsOn: true,
         printerStatus: 'finish',
         nozzleTemp: '41',

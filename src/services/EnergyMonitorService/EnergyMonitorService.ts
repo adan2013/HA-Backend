@@ -60,12 +60,12 @@ class EnergyMonitorService extends Service {
       this.registerHelper(debouncedDeviceState)
 
       powerEntity.onAnyStateUpdate((powerState) => {
-        if (powerEntity.isUnavailable || this.isDisabled) return
+        if (powerEntity.isUnavailable) return
         debouncedDeviceState.inputValue(Number(powerState.state))
       })
 
       energyEntity.onAnyStateUpdate((energyState) => {
-        if (energyEntity.isUnavailable || this.isDisabled) return
+        if (energyEntity.isUnavailable) return
         const consumedTotalEnergy = Number(energyState.state || 0)
         if (consumedTotalEnergy > 0) {
           monitorState.consumedEnergy = {

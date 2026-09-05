@@ -12,7 +12,6 @@ export const initWashingMachineWatchdog = (
 ) => {
   const washingMachinePower = Entity.general(washingMachinePlugPowerId)
   const setWashingMachineNotification = (show: boolean) => {
-    if (reminderService.isDisabled) return
     notifications.emit({
       id: 'loadedWashingMachine',
       enabled: show,
@@ -31,7 +30,7 @@ export const initWashingMachineWatchdog = (
   setWashingMachineNotification(false)
 
   washingMachinePower.onAnyStateUpdate((powerState) => {
-    if (washingMachinePower.isUnavailable || reminderService.isDisabled) return
+    if (washingMachinePower.isUnavailable) return
     debouncedWashingMachineState.inputValue(Number(powerState.state))
   })
 }

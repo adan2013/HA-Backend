@@ -30,7 +30,6 @@ const correctStatus: ServiceManagerStatus = {
         },
       },
       status: {
-        enabled: true,
         color: 'green',
         message: 'Ready',
       },
@@ -38,7 +37,6 @@ const correctStatus: ServiceManagerStatus = {
     testService2: {
       helpers: {},
       status: {
-        enabled: true,
         color: 'green',
         message: 'Ready',
       },
@@ -89,20 +87,5 @@ describe('ServiceManager', () => {
       WS_CMD.outgoing.STATUS_UPDATE,
       correctStatus,
     )
-  })
-
-  it('should switch the service off and return status update', () => {
-    initializeTestServiceManager()
-    const sendResponse = jest.fn()
-    webSocketMessage(WS_CMD.incoming.SWITCH_SERVICE).emit({
-      message: {
-        serviceName: 'testService',
-        enabled: false,
-      },
-      sendResponse,
-    })
-    const status = JSON.parse(JSON.stringify(correctStatus))
-    status.services.testService.status.enabled = false
-    expect(sendResponse).toBeCalledWith(WS_CMD.outgoing.STATUS_UPDATE, status)
   })
 })

@@ -29,15 +29,6 @@ describe('BalconyController', () => {
     })
   })
 
-  it('should not switch the balcony plug if service is disabled', () => {
-    const serviceCallMock = jest.fn()
-    serviceCall.on(serviceCallMock)
-    const balconyController = new BalconyController()
-    balconyController.setServiceEnabled(false)
-    balconyController.switchBalconyLight(true)
-    expect(serviceCallMock).not.toBeCalled()
-  })
-
   it('should not switch the balcony plug if auto switch toggle is off', () => {
     mockEntity(
       Entities.inputBoolean.automations.balconyCircuitAutoSwitch,

@@ -31,19 +31,4 @@ describe('washing machine watchdog', () => {
       enabled: true,
     })
   })
-
-  it('should not trigger notification if service is disabled', () => {
-    const notificationMock = jest.fn()
-    const service = new ReminderService()
-    notifications.on(notificationMock)
-    service.setServiceEnabled(false)
-
-    emitStateUpdate(washingMachinePlugPowerId, '40')
-    jest.advanceTimersByTime(65000)
-
-    emitStateUpdate(washingMachinePlugPowerId, '1')
-    jest.advanceTimersByTime(310000)
-
-    expect(notificationMock).not.toHaveBeenCalled()
-  })
 })

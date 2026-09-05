@@ -1,12 +1,14 @@
 {
   "name": "ha-backend",
-  "version": "6.0.1",
+  "version": "6.1.0",
+  "packageManager": "yarn@1.22.22",
   "description": "Node backend for Home Assistant",
   "main": "index.js",
   "scripts": {
+    "preinstall": "node ./scripts/enforce-yarn.js",
     "build": "rimraf ./build && tsc",
-    "start": "ENV=dev npx nodemon",
-    "start:prod": "ENV=production npx nodemon",
+    "dev": "ENV=dev nodemon",
+    "start:prod": "ENV=production nodemon",
     "start:build": "ENV=production node build/index.js",
     "lint": "eslint . --ext .ts",
     "prettier-format": "run-script-os",
@@ -26,7 +28,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run test && npm run prettier-format && npm run lint"
+      "pre-commit": "yarn test && yarn prettier-format && yarn lint"
     }
   },
   "keywords": [],

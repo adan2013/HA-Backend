@@ -51,14 +51,7 @@ class WeatherService extends Service {
     this.aqiStationId = aqiStation || ''
     this.lat = locationLat || ''
     this.lon = locationLon || ''
-    if (
-      !this.apiKey ||
-      !this.aqiApiKey ||
-      !this.aqiStationId ||
-      !this.lat ||
-      !this.lon
-    ) {
-      this.setServiceEnabled(false)
+    if (!this.hasValidConfig()) {
       this.setServiceStatus('Bad config', 'red')
     } else {
       setInterval(() => {
@@ -66,6 +59,16 @@ class WeatherService extends Service {
       }, 60000 * this.refetchIntervalMinutes)
       this.fetchWeather()
     }
+  }
+
+  private hasValidConfig() {
+    return Boolean(
+      this.apiKey &&
+        this.aqiApiKey &&
+        this.aqiStationId &&
+        this.lat &&
+        this.lon,
+    )
   }
 
   private buildApiUrl(endpointTemplate: string) {
@@ -176,7 +179,7 @@ class WeatherService extends Service {
   }
 
   fetchWeather() {
-    if (this.isDisabled) {
+    if (!this.hasValidConfig()) {
       return Promise.resolve()
     }
     const weatherUrl = this.buildApiUrl(this.weatherEndpoint)

@@ -25,7 +25,6 @@ class WaterLeakService extends Service {
   }
 
   private checkWaterLeaks() {
-    if (this.isDisabled) return
     const currentlyDetectedNames: string[] = []
     waterLeakSensors.forEach((sensor) => {
       const entity = this.sensorEntities.find(

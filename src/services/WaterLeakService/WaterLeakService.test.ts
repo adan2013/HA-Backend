@@ -21,7 +21,6 @@ const checkServiceStatus = (
 ) => {
   const status = service.getServiceStatus().status
   expect(status).toEqual({
-    enabled: true,
     message: msg,
     color,
   })

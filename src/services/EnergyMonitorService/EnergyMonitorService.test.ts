@@ -34,7 +34,6 @@ describe('Energy monitor service', () => {
     expect(service.getServiceStatus().status).toEqual({
       message: 'On watchlist: 1',
       color: 'green',
-      enabled: true,
     })
     expect(getMonitorState(service)).toEqual({
       deviceName: 'Smart plug',
@@ -150,26 +149,5 @@ describe('Energy monitor service', () => {
     updateEnergyValue(101.23)
     expect(getMonitorState(service).consumedEnergy.runtime).toBe(1.23)
     expect(getMonitorState(service).initialValues.inThisRuntime).toBe(100)
-  })
-
-  it('should ignore entity updates when the service is disabled', () => {
-    const service = new EnergyMonitorService()
-    service.setServiceEnabled(false)
-    updatePowerValue(20)
-    updateEnergyValue(100)
-    expect(getMonitorState(service)).toEqual({
-      deviceName: 'Smart plug',
-      consumedEnergy: {
-        total: 42.05,
-        monthly: 0,
-        daily: 0,
-        runtime: 0,
-      },
-      initialValues: {
-        inThisMonth: 42.05,
-        inThisDay: 42.05,
-        inThisRuntime: 42.05,
-      },
-    })
   })
 })

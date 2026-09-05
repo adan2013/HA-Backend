@@ -29,7 +29,6 @@ class DeviceMonitorService extends Service {
     super('deviceMonitor')
     this.updateServiceStatus()
     anyEntityUpdate.on((state) => {
-      if (this.isDisabled) return
       const metadata = this.checkDevice(state)
       const reportThisDevice =
         metadata.lowBattery ||

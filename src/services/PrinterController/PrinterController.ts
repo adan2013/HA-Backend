@@ -62,7 +62,6 @@ class PrinterController extends Service {
 
   private listenOnNozzleTemp() {
     this.nozzleTemp.onAnyStateUpdate((newTempState) => {
-      if (this.isDisabled) return
       const nozzleTemp = Number(newTempState.state)
       if (Number.isNaN(nozzleTemp)) return
       if (this.autoOffToggle.isOn) {
@@ -106,8 +105,6 @@ class PrinterController extends Service {
   }
 
   private setStatusNotification() {
-    if (this.isDisabled) return
-
     const status = this.getPrintingStatus()
     const printerIsOn = this.printerPlug.isOn
     if (!printerIsOn || status !== 'running') {

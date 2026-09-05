@@ -144,6 +144,24 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
+        extraInfo: '[10%] 14 / 200, 1h 4m remaining [AUTO OFF]',
+      })
+    })
+
+    it('should hide auto off info when the feature is disabled', () => {
+      const { notification } = initService({
+        automationToggle: false,
+        printerPlugIsOn: true,
+        printerStatus: 'running',
+        progressPercentage: 10,
+        currentLayer: 14,
+        totalLayerCount: 200,
+        remainingTime: 64,
+        nozzleTemp: '230',
+      })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintStatus',
+        enabled: true,
         extraInfo: '[10%] 14 / 200, 1h 4m remaining',
       })
     })
@@ -161,7 +179,7 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: '[10%] 14 / 200',
+        extraInfo: '[10%] 14 / 200 [AUTO OFF]',
       })
     })
 
@@ -176,7 +194,7 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: 'Preparing to print...',
+        extraInfo: 'Preparing to print... [AUTO OFF]',
       })
     })
 
@@ -263,6 +281,7 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintFinished',
         enabled: true,
+        extraInfo: 'Auto off enabled',
       })
       // Verify status notification was never enabled
       expect(notification).not.toHaveBeenCalledWith({
@@ -323,6 +342,20 @@ describe('PrinterController', () => {
 
     it('should enable finished notification when printer is finished', () => {
       const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'finish',
+        nozzleTemp: '41',
+      })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintFinished',
+        enabled: true,
+        extraInfo: 'Auto off enabled',
+      })
+    })
+
+    it('should hide auto off info in finished notification when the feature is disabled', () => {
+      const { notification } = initService({
+        automationToggle: false,
         printerPlugIsOn: true,
         printerStatus: 'finish',
         nozzleTemp: '41',

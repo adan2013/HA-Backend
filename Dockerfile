@@ -2,6 +2,7 @@ FROM node:22-alpine AS builder
 
 WORKDIR /opt/app
 COPY package.json yarn.lock tsconfig.json ./
+COPY scripts/enforce-yarn.js ./scripts/enforce-yarn.js
 RUN yarn install --frozen-lockfile
 COPY src ./src
 RUN yarn build
@@ -10,6 +11,7 @@ FROM node:22-alpine AS production-dependencies
 
 WORKDIR /opt/app
 COPY package.json yarn.lock ./
+COPY scripts/enforce-yarn.js ./scripts/enforce-yarn.js
 RUN yarn install --frozen-lockfile --production && yarn cache clean
 
 FROM node:22-alpine

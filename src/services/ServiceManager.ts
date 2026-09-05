@@ -23,18 +23,6 @@ class ServiceManager {
     webSocketMessage(WS_CMD.incoming.GET_STATUS).on(({ sendResponse }) => {
       sendResponse(WS_CMD.outgoing.STATUS_UPDATE, this.getManagerStatus())
     })
-    webSocketMessage(WS_CMD.incoming.SWITCH_SERVICE).on(
-      ({ sendResponse, message }) => {
-        const { serviceName, enabled } = message
-        if (serviceName && enabled !== undefined) {
-          const service = this.services.find((s) => s.name === serviceName)
-          if (service) {
-            service.setServiceEnabled(enabled)
-            sendResponse(WS_CMD.outgoing.STATUS_UPDATE, this.getManagerStatus())
-          }
-        }
-      },
-    )
   }
 
   public registerService(service: Service) {

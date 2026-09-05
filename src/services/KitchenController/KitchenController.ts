@@ -108,12 +108,10 @@ class KitchenController extends Service {
   }
 
   private switchAllLights(brightnessLvl: number) {
-    if (this.isDisabled) return
     this.leftLight.setBrightness(brightnessLvl, [this.rightLight.entityId])
   }
 
   private switchManualLights() {
-    if (this.isDisabled) return
     this.leftLight.setBrightness(
       this.leftLightToggle.isOn ? this.MANUAL_BRIGHTNESS : 0,
     )
@@ -127,7 +125,6 @@ class KitchenController extends Service {
   }
 
   private turnOffAllManualToggles() {
-    if (this.isDisabled) return
     this.leftLightToggle.turnOff()
     this.rightLightToggle.turnOff()
   }

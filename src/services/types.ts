@@ -3,7 +3,6 @@ export type StatusColor = 'none' | 'red' | 'yellow' | 'green' | 'blue'
 export type Status = {
   color: StatusColor
   message: string
-  enabled?: boolean
 }
 
 export type ServiceStatus = {

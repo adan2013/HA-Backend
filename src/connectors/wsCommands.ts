@@ -8,7 +8,6 @@ const WS_CMD = {
     GET_ENTITIES: 'getEntities',
     SYNC_DATA: 'syncData',
     GET_STATUS: 'getStatus',
-    SWITCH_SERVICE: 'switchService',
     TRIGGER_NOTIFICATION: 'triggerNotification',
     DISMISS_NOTIFICATION: 'dismissNotification',
     REMOTE_CONTROL: 'remoteControl',

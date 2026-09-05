@@ -20,7 +20,7 @@ The dedicated frontend for this backend is [here](https://github.com/adan2013/HA
 
 | COMMAND           | DESCRIPTION                                         |
 |-------------------|-----------------------------------------------------|
-| yarn start        | start a developer server                            |
+| yarn dev          | start a developer server                            |
 | yarn build        | build a production build                            |
 | yarn start:prod   | start a developer server in production mode         |
 | yarn start:build  | run a production build                              |

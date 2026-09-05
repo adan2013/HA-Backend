@@ -27,7 +27,6 @@ export const initMainDoorDeadboltWatchdog = (
       },
     ],
     onStateChange: (newState) => {
-      if (reminderService.isDisabled) return
       notifications.emit({
         id: 'mainDoorOpen',
         enabled: newState === 'open',
@@ -40,7 +39,6 @@ export const initMainDoorDeadboltWatchdog = (
   })
   reminderService.registerHelper(stateMachine)
   const checkDoorState = () => {
-    if (reminderService.isDisabled) return
     const isOpen = deadboltSensor.isOn && alertToggle.isOn
     stateMachine.setState(isOpen ? 'open' : 'closed')
   }

@@ -19,11 +19,9 @@ const checkServiceStatus = (
   service: BroadcastDeviceService,
   msg: string,
   color: string,
-  enabled = true,
 ) => {
   const status = service.getServiceStatus().status
   expect(status).toEqual({
-    enabled,
     message: msg,
     color,
   })
@@ -136,28 +134,6 @@ describe('BroadcastDeviceService', () => {
     expect(notificationMock).toBeCalledWith({
       id: 'broadcastDeviceCamera',
       enabled: false,
-    })
-  })
-
-  it('should ignore all the devices when the service is disabled', () => {
-    const service = new BroadcastDeviceService()
-    service.setServiceEnabled(false)
-
-    const notificationMock = jest.fn()
-    notifications.on(notificationMock)
-
-    emitStateUpdate('microphoneId', 'on')
-    emitStateUpdate('cameraId', 'on')
-    checkServiceStatus(service, 'Service is disabled', 'none', false)
-    expect(notificationMock).not.toHaveBeenCalledWith({
-      id: 'broadcastDeviceMicrophone',
-      enabled: true,
-      extraInfo: 'Microphone sensor',
-    })
-    expect(notificationMock).not.toHaveBeenCalledWith({
-      id: 'broadcastDeviceCamera',
-      enabled: true,
-      extraInfo: 'Camera sensor',
     })
   })
 })

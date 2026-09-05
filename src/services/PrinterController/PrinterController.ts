@@ -62,7 +62,6 @@ class PrinterController extends Service {
 
   private listenOnNozzleTemp() {
     this.nozzleTemp.onAnyStateUpdate((newTempState) => {
-      if (this.isDisabled) return
       const nozzleTemp = Number(newTempState.state)
       if (Number.isNaN(nozzleTemp)) return
       if (this.autoOffToggle.isOn) {
@@ -106,8 +105,6 @@ class PrinterController extends Service {
   }
 
   private setStatusNotification() {
-    if (this.isDisabled) return
-
     const status = this.getPrintingStatus()
     const printerIsOn = this.printerPlug.isOn
     if (!printerIsOn || status !== 'running') {
@@ -130,12 +127,13 @@ class PrinterController extends Service {
     const remainingTime = this.formatRemainingTime(
       this.remainingTime.state?.state,
     )
+    const autoOffInfo = this.autoOffToggle.isOn ? ' [AUTO OFF]' : ''
 
     if (currentLayer === '0' || totalLayerCount === '0') {
       notifications.emit({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: `Preparing to print...`,
+        extraInfo: `Preparing to print...${autoOffInfo}`,
       })
     } else {
       notifications.emit({
@@ -143,12 +141,13 @@ class PrinterController extends Service {
         enabled: true,
         extraInfo: `[${percentage}] ${currentLayer} / ${totalLayerCount}${
           remainingTime ? `, ${remainingTime}` : ''
-        }`,
+        }${autoOffInfo}`,
       })
     }
   }
 
   private setOtherNotifications() {
+    const printIsFinished = this.getPrintingStatus() === 'finish'
     notifications.emit({
       id: '3dPrintPaused',
       enabled: this.getPrintingStatus() === 'pause',
@@ -159,7 +158,10 @@ class PrinterController extends Service {
     })
     notifications.emit({
       id: '3dPrintFinished',
-      enabled: this.getPrintingStatus() === 'finish',
+      enabled: printIsFinished,
+      ...(printIsFinished && this.autoOffToggle.isOn
+        ? { extraInfo: 'Auto off enabled' }
+        : {}),
     })
   }
 }

@@ -1,4 +1,3 @@
-import ReminderService from '../../ReminderService'
 import HomeAssistantEntity from '../../../../entities/HomeAssistantEntity'
 import Entity from '../../../../entities/Entity'
 import { notifications } from '../../../../events/events'
@@ -6,12 +5,11 @@ import Timer from '../../../../Timer'
 import { getDaysToDeadline } from './utils'
 import deadlines from '../../../../configs/deadline.config'
 
-export const initDeadlinesWatchdog = (reminderService: ReminderService) => {
+export const initDeadlinesWatchdog = () => {
   const entites: HomeAssistantEntity[] = deadlines.map((dl) =>
     Entity.general(dl.entityId),
   )
   const checkDeadlines = () => {
-    if (reminderService.isDisabled) return
     const warningLabels: string[] = []
     deadlines.forEach((deadline) => {
       const entity = entites.find((e) => e.entityId === deadline.entityId)

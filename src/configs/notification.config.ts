@@ -129,6 +129,15 @@ const notificationConfig: NotificationConfig[] = [
     canBeDismissed: true,
   },
   {
+    id: 'noSensorUpdate',
+    title: 'Sensor is not reporting',
+    description:
+      'One of your monitored sensors has not reported an update within the configured time. Check the sensor and its battery level',
+    priorityOrder: 'low',
+    light: 'blue',
+    canBeDismissed: true,
+  },
+  {
     id: 'weakSignal',
     title: 'Weak sensor signal',
     description:

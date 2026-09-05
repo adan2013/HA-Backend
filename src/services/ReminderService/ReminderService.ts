@@ -7,7 +7,7 @@ class ReminderService extends Service {
   constructor() {
     super('reminder')
     initWashingMachineWatchdog(this)
-    initDeadlinesWatchdog(this)
+    initDeadlinesWatchdog()
     initMainDoorDeadboltWatchdog(this)
   }
 }

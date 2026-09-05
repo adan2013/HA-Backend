@@ -14,7 +14,6 @@ import PrinterController, {
 import { ServiceCallPayload } from '../../events/eventPayloads'
 
 type TestConfig = {
-  serviceEnabled?: boolean
   automationToggle?: boolean
   printerPlugIsOn: boolean
   printerStatus: PrinterStatus
@@ -26,7 +25,6 @@ type TestConfig = {
 }
 
 const initService = ({
-  serviceEnabled = true,
   automationToggle = true,
   printerPlugIsOn,
   printerStatus,
@@ -48,8 +46,7 @@ const initService = ({
   mockEntity(printerCurrentLayerId, currentLayer.toString())
   mockEntity(printerTotalLayerCountId, totalLayerCount.toString())
   mockEntity(printerRemainingTimeId, remainingTime.toString())
-  const printerController = new PrinterController()
-  printerController.setServiceEnabled(serviceEnabled)
+  new PrinterController()
   const serviceCallMock = jest.fn()
   const notificationMock = jest.fn()
   serviceCall.on(serviceCallMock)
@@ -123,16 +120,6 @@ describe('PrinterController', () => {
       expect(serviceCall).not.toHaveBeenCalled()
     })
 
-    it('should not turn off printer when service is disabled', () => {
-      const { serviceCall } = initService({
-        serviceEnabled: false,
-        printerPlugIsOn: true,
-        printerStatus: 'finish',
-        nozzleTemp: '41',
-      })
-      expect(serviceCall).not.toHaveBeenCalled()
-    })
-
     it('should not turn off printer when nozzle temp is not a number', () => {
       const { serviceCall } = initService({
         printerPlugIsOn: true,
@@ -146,6 +133,24 @@ describe('PrinterController', () => {
   describe('printer status notification', () => {
     it('should enable status notification when printer is printing', () => {
       const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'running',
+        progressPercentage: 10,
+        currentLayer: 14,
+        totalLayerCount: 200,
+        remainingTime: 64,
+        nozzleTemp: '230',
+      })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintStatus',
+        enabled: true,
+        extraInfo: '[10%] 14 / 200, 1h 4m remaining [AUTO OFF]',
+      })
+    })
+
+    it('should hide auto off info when the feature is disabled', () => {
+      const { notification } = initService({
+        automationToggle: false,
         printerPlugIsOn: true,
         printerStatus: 'running',
         progressPercentage: 10,
@@ -174,7 +179,7 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: '[10%] 14 / 200',
+        extraInfo: '[10%] 14 / 200 [AUTO OFF]',
       })
     })
 
@@ -189,7 +194,7 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: 'Preparing to print...',
+        extraInfo: 'Preparing to print... [AUTO OFF]',
       })
     })
 
@@ -276,6 +281,7 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintFinished',
         enabled: true,
+        extraInfo: 'Auto off enabled',
       })
       // Verify status notification was never enabled
       expect(notification).not.toHaveBeenCalledWith({
@@ -336,6 +342,20 @@ describe('PrinterController', () => {
 
     it('should enable finished notification when printer is finished', () => {
       const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'finish',
+        nozzleTemp: '41',
+      })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintFinished',
+        enabled: true,
+        extraInfo: 'Auto off enabled',
+      })
+    })
+
+    it('should hide auto off info in finished notification when the feature is disabled', () => {
+      const { notification } = initService({
+        automationToggle: false,
         printerPlugIsOn: true,
         printerStatus: 'finish',
         nozzleTemp: '41',

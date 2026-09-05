@@ -8,16 +8,11 @@ class Service {
   private helpers: Helper[] = []
   protected publicData: object | null = null
 
-  get isDisabled() {
-    return !this.status.enabled
-  }
-
   constructor(name: string) {
     this.name = name
     this.status = {
       color: 'green',
       message: 'Ready',
-      enabled: true,
     }
   }
 
@@ -28,10 +23,6 @@ class Service {
   protected setServiceStatus(msg: string, color: StatusColor = 'green') {
     this.status.message = msg
     this.status.color = color
-  }
-
-  public setServiceEnabled(enabled: boolean) {
-    this.status.enabled = enabled
   }
 
   public getServiceStatus(): ServiceStatus {

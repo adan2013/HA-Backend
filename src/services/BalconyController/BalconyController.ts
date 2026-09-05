@@ -18,7 +18,6 @@ class BalconyController extends Service {
   }
 
   public switchBalconyLight(on: boolean) {
-    if (this.isDisabled) return
     if (this.autoToggle.isOn) {
       if (on) {
         this.balconySwitch.turnOn()

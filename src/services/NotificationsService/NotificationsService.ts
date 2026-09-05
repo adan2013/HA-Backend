@@ -141,7 +141,6 @@ class NotificationsService extends Service {
     extraInfo?: string,
     alwaysCanBeDismissed = false,
   ) {
-    if (this.isDisabled) return
     const existingNotification = this.activeNotifications.find(
       (n) => n.id === id,
     )
@@ -180,7 +179,6 @@ class NotificationsService extends Service {
   }
 
   private removeNotification(id: string) {
-    if (this.isDisabled) return
     const initialCount = this.count
     this.activeNotifications = this.activeNotifications.filter(
       (n) => n.id !== id,

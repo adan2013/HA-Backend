@@ -1,6 +1,6 @@
 {
   "name": "ha-backend",
-  "version": "7.0.0",
+  "version": "7.0.1",
   "packageManager": "yarn@1.22.22",
   "description": "Node backend for Home Assistant",
   "main": "index.js",

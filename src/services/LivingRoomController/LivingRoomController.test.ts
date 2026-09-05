@@ -103,6 +103,16 @@ describe('LivingRoomController', () => {
     expect(serviceCallMock).toBeCalledWith(onPayload([lrLights.table], 90))
   })
 
+  it('should turn on an off light when its stale brightness matches the requested level', () => {
+    const serviceCallMock = init()
+    emitStateUpdate(lrLights.table, 'off', { brightness: 90 })
+
+    pressButton('button_4_single')
+
+    expect(serviceCallMock).toHaveBeenCalledTimes(1)
+    expect(serviceCallMock).toBeCalledWith(onPayload([lrLights.table], 90))
+  })
+
   it('should switch table light between levels and turn off if is already on this level', () => {
     const serviceCallMock = init()
     pressButton('button_4_single')

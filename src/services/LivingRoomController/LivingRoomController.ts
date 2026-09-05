@@ -65,7 +65,8 @@ class LivingRoomController extends Service {
     toTurnOff: LightEntity[] = [],
   ) {
     const lightsToTurnOnAlreadySet = toTurnOn.every(
-      (entity) => Math.abs(entity.brightness - brightnessLevel) <= 3,
+      (entity) =>
+        entity.isOn && Math.abs(entity.brightness - brightnessLevel) <= 3,
     )
     const lightsToTurnOffAlreadySet = toTurnOff.every(
       (entity) => entity.state?.state === 'off',

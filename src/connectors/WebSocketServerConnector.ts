@@ -22,7 +22,6 @@ type IncomingMessage = {
   service?: string
   data?: object
   historyLength?: number
-  attribute?: string
   [key: string]: unknown
 }
 
@@ -117,8 +116,8 @@ class WebSocketServerConnector {
       case WS_CMD.incoming.GET_ENTITY_HISTORY:
         void this.getEntityHistory(ws, message)
         break
-      case WS_CMD.incoming.GET_ENTITIES:
-        this.getEntities(ws, message)
+      case WS_CMD.incoming.GET_BATTERY_ENTITIES:
+        this.getBatteryEntities(ws, message)
         break
       default:
         webSocketMessage(message.type || 'unknown').emit({
@@ -233,11 +232,8 @@ class WebSocketServerConnector {
     }
   }
 
-  private getEntities(ws: WebSocket, message: IncomingMessage) {
-    if (
-      typeof message.requestId !== 'string' ||
-      (message.attribute !== undefined && typeof message.attribute !== 'string')
-    ) {
+  private getBatteryEntities(ws: WebSocket, message: IncomingMessage) {
+    if (typeof message.requestId !== 'string') {
       this.sendCommandResult(
         ws,
         message.requestId,
@@ -248,9 +244,9 @@ class WebSocketServerConnector {
       return
     }
     this.send(ws, {
-      type: WS_CMD.outgoing.ENTITIES_RESULT,
+      type: WS_CMD.outgoing.BATTERY_ENTITIES_RESULT,
       requestId: message.requestId,
-      data: this.homeAssistant.getEntities(message.attribute),
+      data: this.homeAssistant.getBatteryEntities(),
     })
   }
 

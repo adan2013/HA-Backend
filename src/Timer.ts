@@ -37,6 +37,11 @@ class Timer {
     return new CronJob(time, callback, null, true)
   }
 
+  public static onEveryHour(callback: TickCallback): CronJob {
+    const time = this.getCronTime('*', 0)
+    return new CronJob(time, callback, null, true)
+  }
+
   public static onDayOfWeek(day: DayOfWeek, callback: TickCallback): CronJob {
     const time = this.getCronTime('0', '0', '*', '*', day)
     return new CronJob(time, callback, null, true)

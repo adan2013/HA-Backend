@@ -17,6 +17,7 @@ export const mockEntity = (
         state,
         lastChanged: '',
         lastUpdated: '',
+        lastReported: new Date().toISOString(),
         attributes: {
           friendly_name: `${entityId}_name`,
           ...attributes,
@@ -36,6 +37,7 @@ export const emitStateUpdate = (
     state,
     lastChanged: '',
     lastUpdated: '',
+    lastReported: new Date().toISOString(),
     attributes: {
       friendly_name: `${entityId}_name`,
       ...attributes,

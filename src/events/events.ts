@@ -36,6 +36,8 @@ export const entityUpdate = (entityId: string) =>
 
 export const anyEntityUpdate = new TypedEvent<EntityState>('ha/any-entity')
 
+export const entityReported = new TypedEvent<EntityState>('ha/entity-reported')
+
 export const entityStateRequest = new TypedEvent<EntityStatePayload>('ha/state')
 
 export const serviceCall = new TypedEvent<ServiceCallPayload>('ha/service')

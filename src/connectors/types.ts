@@ -8,9 +8,7 @@ export interface EntityAttributeInterface {
   color_temp_kelvin?: number
   min_color_temp_kelvin?: number
   max_color_temp_kelvin?: number
-  battery?: number
-  friendly_name: string
-  linkquality?: number
+  friendly_name?: string
 }
 
 export type MessageOptions = {
@@ -24,6 +22,7 @@ export type EntityState = {
   state: string
   lastChanged: string
   lastUpdated: string
+  lastReported: string
   attributes: EntityAttributeInterface
 }
 

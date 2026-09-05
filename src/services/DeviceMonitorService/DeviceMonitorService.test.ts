@@ -2,6 +2,7 @@ import DeviceMonitorService from './DeviceMonitorService'
 import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
 import {
   anyEntityUpdate,
+  entityReported,
   entityStateRequest,
   entityUpdate,
   notifications,
@@ -9,48 +10,34 @@ import {
 import Entities from '../../configs/entities.config'
 
 jest.mock('../../configs/deviceMonitor.config', () => [
-  {
-    entityId: 'important1',
-    name: 'name1',
-    maxHoursWithoutUpdate: 3,
-  },
-  {
-    entityId: 'important2',
-    name: 'name2',
-    maxHoursWithoutUpdate: 3,
-  },
-  {
-    entityId: 'important3',
-    name: 'name3',
-  },
+  { entityId: 'important1', name: 'name1', maxHoursWithoutUpdate: 3 },
+  { entityId: 'important2', name: 'name2', maxHoursWithoutUpdate: 3 },
+  { entityId: 'important3', name: 'name3' },
 ])
 
 const emitTestEntityUpdates = () => {
-  const emit = (id: string, bat: number, sig: number, state = 'on') => {
-    emitStateUpdate(id, state, {
-      battery: bat,
-      linkquality: sig,
+  const emit = (id: string, battery: number, state = battery.toString()) =>
+    emitStateUpdate(`sensor.${id}_battery`, state, {
+      friendly_name: `${id}_name Battery`,
     })
-  }
-  emit('standard1', 100, 255)
-  emit('standard2', 40, 78)
-  emit('standard3', 30, 30)
-  emit('standard4', 15, 100)
-  emit('standard5', 50, 14)
-  emit('standard6', 5, 5)
-  emit('standard6', 100, 5)
-  emit('standard7', 100, 5, 'unavailable')
-  emit('standard7', 5, 50, 'unavailable')
-  emit('important1', 10, 5)
-  emit('important2', 60, 200)
-  emit('important2', 15, 50, 'unknown')
-  emit('important3', 60, 150)
+  emit('standard1', 100)
+  emit('standard2', 40)
+  emit('standard3', 30)
+  emit('standard4', 15)
+  emit('standard6', 5)
+  emit('standard6', 100)
+  emit('standard7', 100, 'unavailable')
+  emit('standard7', 5, 'unavailable')
+  emit('important1', 10)
+  emit('important2', 60)
+  emitStateUpdate('important2', 'unknown')
 }
 
 describe('Device monitor service', () => {
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date('2026-09-05T12:00:00Z'))
     anyEntityUpdate.resetListeners()
+    entityReported.resetListeners()
     entityStateRequest.resetListeners()
     entityUpdate(
       Entities.inputBoolean.system.alertBatteryLevel,
@@ -63,15 +50,13 @@ describe('Device monitor service', () => {
     mockEntity(Entities.inputBoolean.system.alertSelfDiagnostic, 'on')
   })
 
-  afterEach(() => {
-    jest.clearAllTimers()
-  })
+  afterEach(() => jest.clearAllTimers())
 
   it('should initialize service with correct status', () => {
     const service = new DeviceMonitorService()
     expect(service.getServiceStatus().status).toEqual({
       message:
-        'Low batteries: 0; Low signal: 0; Offline: 0; No update: 0; On watchlist: 3',
+        'Low batteries: 0; Offline: 0; No update: 0; On watchlist: 3',
       color: 'green',
     })
   })
@@ -80,34 +65,31 @@ describe('Device monitor service', () => {
     const service = new DeviceMonitorService()
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
-    emitStateUpdate('sensor', 'off', {
-      battery: 12,
-      linkquality: 200,
+    emitStateUpdate('sensor.remote_battery', '12', {
+      friendly_name: 'Living room remote Battery',
     })
+
     expect(service.getServiceStatus().status).toEqual({
       message:
-        'Low batteries: 1; Low signal: 0; Offline: 0; No update: 0; On watchlist: 3',
+        'Low batteries: 1; Offline: 0; No update: 0; On watchlist: 3',
       color: 'yellow',
     })
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'lowBattery',
       enabled: true,
-      extraInfo: 'sensor',
+      extraInfo: 'Living room remote',
     })
   })
 
-  it('should trigger offline sensor notification', () => {
+  it('should trigger offline notification only for the watchlist', () => {
     const service = new DeviceMonitorService()
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
+    emitStateUpdate('important3', 'unknown')
 
-    emitStateUpdate('important3', 'unknown', {
-      battery: 50,
-      linkquality: 100,
-    })
     expect(service.getServiceStatus().status).toEqual({
       message:
-        'Low batteries: 0; Low signal: 0; Offline: 1; No update: 0; On watchlist: 3',
+        'Low batteries: 0; Offline: 1; No update: 0; On watchlist: 3',
       color: 'yellow',
     })
     expect(notificationMock).toHaveBeenCalledWith({
@@ -117,62 +99,39 @@ describe('Device monitor service', () => {
     })
   })
 
-  it('should trigger weak signal sensor notification', () => {
-    const service = new DeviceMonitorService()
-    const notificationMock = jest.fn()
-    notifications.on(notificationMock)
-    emitStateUpdate('important3', 'off', {
-      battery: 50,
-      linkquality: 10,
-    })
-    expect(service.getServiceStatus().status).toEqual({
-      message:
-        'Low batteries: 0; Low signal: 1; Offline: 0; No update: 0; On watchlist: 3',
-      color: 'yellow',
-    })
-    expect(notificationMock).toHaveBeenCalledWith({
-      id: 'weakSignal',
-      enabled: true,
-      extraInfo: 'name3',
-    })
-  })
-
-  it('should detect all devices with low battery level and signal quality', () => {
+  it('should detect low batteries and monitored offline devices', () => {
     const service = new DeviceMonitorService()
     emitTestEntityUpdates()
+
     expect(service.detectedDevices).toEqual([
       {
-        entityId: 'standard3',
-        name: 'standard3',
+        entityId: 'sensor.standard3_battery',
+        name: 'standard3_name',
         lowBattery: true,
-        lowSignal: true,
         offline: false,
         noUpdate: false,
         monitored: false,
       },
       {
-        entityId: 'standard4',
-        name: 'standard4',
+        entityId: 'sensor.standard4_battery',
+        name: 'standard4_name',
         lowBattery: true,
-        lowSignal: false,
         offline: false,
         noUpdate: false,
         monitored: false,
       },
       {
-        entityId: 'important1',
-        name: 'name1',
+        entityId: 'sensor.important1_battery',
+        name: 'important1_name',
         lowBattery: true,
-        lowSignal: true,
         offline: false,
         noUpdate: false,
-        monitored: true,
+        monitored: false,
       },
       {
         entityId: 'important2',
         name: 'name2',
         lowBattery: false,
-        lowSignal: false,
         offline: true,
         noUpdate: false,
         monitored: true,
@@ -180,30 +139,21 @@ describe('Device monitor service', () => {
     ])
     expect(service.getServiceStatus().status).toEqual({
       message:
-        'Low batteries: 3; Low signal: 2; Offline: 1; No update: 0; On watchlist: 3',
+        'Low batteries: 3; Offline: 1; No update: 0; On watchlist: 3',
       color: 'yellow',
     })
   })
 
-  it('should not trigger any notification if the alerts are disabled', () => {
-    const service = new DeviceMonitorService()
+  it('should not trigger notifications if alerts are disabled', () => {
+    new DeviceMonitorService()
     emitStateUpdate(Entities.inputBoolean.system.alertBatteryLevel, 'off')
     emitStateUpdate(Entities.inputBoolean.system.alertSelfDiagnostic, 'off')
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
     emitTestEntityUpdates()
-    expect(service.detectedDevices).toHaveLength(4)
-    expect(service.getServiceStatus().status).toEqual({
-      message:
-        'Low batteries: 3; Low signal: 2; Offline: 1; No update: 0; On watchlist: 3',
-      color: 'yellow',
-    })
+
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'lowBattery',
-      enabled: false,
-    })
-    expect(notificationMock).toHaveBeenCalledWith({
-      id: 'weakSignal',
       enabled: false,
     })
     expect(notificationMock).toHaveBeenCalledWith({
@@ -216,14 +166,11 @@ describe('Device monitor service', () => {
     })
   })
 
-  it('should notify when a configured sensor has not updated for three hours', () => {
-    const service = new DeviceMonitorService()
+  it('should notify after three hours without a report', () => {
+    new DeviceMonitorService()
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
-    emitStateUpdate('important1', '21.5', {
-      battery: 50,
-      linkquality: 100,
-    })
+    emitStateUpdate('important1', '21.5')
     notificationMock.mockClear()
 
     jest.advanceTimersByTime(3 * 60 * 60 * 1000 - 60 * 1000)
@@ -232,41 +179,52 @@ describe('Device monitor service', () => {
       enabled: true,
       extraInfo: 'name1',
     })
-
     jest.advanceTimersByTime(60 * 1000)
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'noSensorUpdate',
       enabled: true,
       extraInfo: 'name1',
     })
-    expect(service.getServiceStatus().status).toEqual({
-      message:
-        'Low batteries: 0; Low signal: 0; Offline: 0; No update: 1; On watchlist: 3',
-      color: 'yellow',
-    })
+  })
 
-    emitStateUpdate('important1', '21.6', {
-      battery: 50,
-      linkquality: 100,
+  it('should treat an unchanged state report as device activity', () => {
+    new DeviceMonitorService()
+    const notificationMock = jest.fn()
+    notifications.on(notificationMock)
+    emitStateUpdate('important1', '21.5')
+
+    jest.advanceTimersByTime(2 * 60 * 60 * 1000)
+    entityReported.emit({
+      id: 'important1',
+      state: '21.5',
+      lastChanged: '2026-09-05T12:00:00Z',
+      lastUpdated: '2026-09-05T12:00:00Z',
+      lastReported: '2026-09-05T14:00:00Z',
+      attributes: { friendly_name: 'Important sensor' },
     })
-    expect(notificationMock).toHaveBeenCalledWith({
+    notificationMock.mockClear()
+
+    jest.advanceTimersByTime(2 * 60 * 60 * 1000)
+    expect(notificationMock).not.toHaveBeenCalledWith({
       id: 'noSensorUpdate',
-      enabled: false,
+      enabled: true,
+      extraInfo: 'name1',
     })
   })
 
-  it('should detect a missing update from the initial Home Assistant state', () => {
+  it('should not initialize update monitoring from cached entity states', () => {
+    const cachedStateRequest = jest.fn()
     entityStateRequest.on(({ entityId, callback }) => {
       if (entityId === 'important1') {
+        cachedStateRequest()
         callback({
           id: entityId,
           state: '21.5',
-          lastChanged: '2026-09-05T08:59:00Z',
-          lastUpdated: '2026-09-05T08:59:00Z',
+          lastChanged: '2026-09-05T08:00:00Z',
+          lastUpdated: '2026-09-05T08:00:00Z',
+          lastReported: '2026-09-05T11:30:00Z',
           attributes: {
             friendly_name: 'Important sensor',
-            battery: 50,
-            linkquality: 100,
           },
         })
       }
@@ -276,30 +234,27 @@ describe('Device monitor service', () => {
 
     const service = new DeviceMonitorService()
 
-    expect(notificationMock).toHaveBeenCalledWith({
+    jest.advanceTimersByTime(4 * 60 * 60 * 1000)
+
+    expect(cachedStateRequest).not.toHaveBeenCalled()
+    expect(notificationMock).not.toHaveBeenCalledWith({
       id: 'noSensorUpdate',
       enabled: true,
       extraInfo: 'name1',
     })
     expect(service.getServiceStatus().status).toEqual({
       message:
-        'Low batteries: 0; Low signal: 0; Offline: 0; No update: 1; On watchlist: 3',
-      color: 'yellow',
+        'Low batteries: 0; Offline: 0; No update: 0; On watchlist: 3',
+      color: 'green',
     })
   })
 
-  it('should update notification extra info when the stale sensor list changes', () => {
+  it('should update notification details as stale sensors recover', () => {
     new DeviceMonitorService()
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
-    emitStateUpdate('important1', '21.5', {
-      battery: 50,
-      linkquality: 100,
-    })
-    emitStateUpdate('important2', '22.5', {
-      battery: 50,
-      linkquality: 100,
-    })
+    emitStateUpdate('important1', '21.5')
+    emitStateUpdate('important2', '22.5')
     notificationMock.mockClear()
 
     jest.advanceTimersByTime(3 * 60 * 60 * 1000)
@@ -309,10 +264,7 @@ describe('Device monitor service', () => {
       extraInfo: 'name1, name2',
     })
 
-    emitStateUpdate('important1', '21.6', {
-      battery: 50,
-      linkquality: 100,
-    })
+    emitStateUpdate('important1', '21.6')
     expect(notificationMock).toHaveBeenLastCalledWith({
       id: 'noSensorUpdate',
       enabled: true,

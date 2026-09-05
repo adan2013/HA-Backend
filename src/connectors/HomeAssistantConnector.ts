@@ -15,11 +15,14 @@ import {
   homeAssistantSync,
   entityStateRequest,
   anyEntityUpdate,
+  entityReported,
   homeAssistantStatusUpdate,
 } from '../events/events'
+import { parseBatteryReading } from '../utils/batteryUtils'
 
 const RECONNECT_INTERVAL = 10000
 const ENTITIES_PROBE_INTERVAL = 60000
+const ENTITIES_REFRESH_INTERVAL = 60 * 60 * 1000
 
 class HomeAssistantConnector {
   private readonly host: string
@@ -27,6 +30,7 @@ class HomeAssistantConnector {
   private readonly requiredEntities: number
   private msgId = 1
   private socket: WebSocket | undefined
+  private entitiesRefreshTimer: NodeJS.Timeout | undefined
   private status: HomeAssistantConnectionState = 'disconnected'
 
   entities: EntityState[] = []
@@ -46,6 +50,7 @@ class HomeAssistantConnector {
       state: haEntity['state'],
       lastChanged: haEntity['last_changed'],
       lastUpdated: haEntity['last_updated'],
+      lastReported: haEntity['last_reported'] || haEntity['last_updated'],
       attributes: haEntity['attributes'],
     }
   }
@@ -55,6 +60,10 @@ class HomeAssistantConnector {
     this.socket.onopen = () => this.changeStatus('connected')
     this.socket.onmessage = (e) => this.onReceive(e)
     this.socket.onclose = () => {
+      if (this.entitiesRefreshTimer) {
+        clearInterval(this.entitiesRefreshTimer)
+        this.entitiesRefreshTimer = undefined
+      }
       this.changeStatus('disconnected')
       console.error('Connection to Home Assistant closed!')
       setTimeout(() => this.connectToHomeAssistant(), RECONNECT_INTERVAL)
@@ -122,7 +131,7 @@ class HomeAssistantConnector {
 
   private syncWithHomeAssistant() {
     this.getAllEntities((entities) => {
-      this.entities = entities
+      this.replaceEntities(entities)
       console.log(
         `Backend initialized successfully with ${this.entities.length} entities`,
       )
@@ -130,6 +139,7 @@ class HomeAssistantConnector {
       homeAssistantSync.emit({
         entitiesCount: this.entities.length,
       })
+      this.startEntitiesRefresh()
     })
     this.sendMsg(
       'subscribe_events',
@@ -141,28 +151,52 @@ class HomeAssistantConnector {
         eventCallback: (event) => {
           const newState = event.data['new_state']
           if (newState) {
-            const changedEntityIndex = this.entities.findIndex(
-              (e) => e.id === newState.entity_id,
+            const updatedState = HomeAssistantConnector.mapEntityState(
+              newState as never,
             )
-            if (changedEntityIndex >= 0) {
-              const updatedState = HomeAssistantConnector.mapEntityState(
-                newState as never,
-              )
-              this.entities[changedEntityIndex] = updatedState
-              entityUpdate(updatedState.id).emit(updatedState)
-              anyEntityUpdate.emit(updatedState)
-            } else {
-              const newEntity = HomeAssistantConnector.mapEntityState(
-                newState as never,
-              )
-              this.entities.push(newEntity)
-              entityUpdate(newEntity.id).emit(newEntity)
-              anyEntityUpdate.emit(newEntity)
-            }
+            const updatedEntities = this.entities.some(
+              (entity) => entity.id === updatedState.id,
+            )
+              ? this.entities.map((entity) =>
+                  entity.id === updatedState.id ? updatedState : entity,
+                )
+              : [...this.entities, updatedState]
+            this.entities = updatedEntities
+            entityUpdate(updatedState.id).emit(updatedState)
+            anyEntityUpdate.emit(updatedState)
           }
         },
       },
     )
+  }
+
+  private startEntitiesRefresh() {
+    if (this.entitiesRefreshTimer) clearInterval(this.entitiesRefreshTimer)
+    this.entitiesRefreshTimer = setInterval(() => {
+      this.getAllEntities((entities) => this.replaceEntities(entities, true))
+    }, ENTITIES_REFRESH_INTERVAL)
+    this.entitiesRefreshTimer.unref()
+  }
+
+  private replaceEntities(entities: EntityState[], notifyChanges = false) {
+    const previousById = new Map(
+      this.entities.map((entity) => [entity.id, entity]),
+    )
+    this.entities = entities
+    if (!notifyChanges) return
+
+    this.entities.forEach((entity) => {
+      const previous = previousById.get(entity.id)
+      const stateChanged =
+        !previous ||
+        previous.lastUpdated !== entity.lastUpdated
+      if (stateChanged) {
+        entityUpdate(entity.id).emit(entity)
+        anyEntityUpdate.emit(entity)
+      } else if (previous.lastReported !== entity.lastReported) {
+        entityReported.emit(entity)
+      }
+    })
   }
 
   private onReceive(e: MessageEvent) {
@@ -271,13 +305,8 @@ class HomeAssistantConnector {
     return this.entities.find((entity) => entity.id === entityId)
   }
 
-  public getEntities(attribute?: string): EntityState[] {
-    if (!attribute) return [...this.entities]
-    return this.entities.filter(
-      (entity) =>
-        entity.attributes[attribute as keyof typeof entity.attributes] !==
-        undefined,
-    )
+  public getBatteryEntities(): EntityState[] {
+    return this.entities.filter((entity) => parseBatteryReading(entity))
   }
 
   public async getEntityHistory(

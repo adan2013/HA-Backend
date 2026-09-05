@@ -5,10 +5,7 @@ import { entityStateRequest } from '../../events/events'
 describe('HomeAssistantEntity', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockEntity('sensor', 'on', {
-      battery: 53,
-      linkquality: 30,
-    })
+    mockEntity('sensor', 'on')
   })
 
   it('should create an instance add fetch the entity state', () => {
@@ -27,18 +24,11 @@ describe('HomeAssistantEntity', () => {
   ])(
     'should return correct flags with state %s',
     (state, isOn, isOff, isUnavailable) => {
-      mockEntity('sensor', state, {
-        battery: 53,
-        linkquality: 30,
-      })
+      mockEntity('sensor', state)
       const entity = Entity.general('sensor')
       expect(entity.isOn).toBe(isOn)
       expect(entity.isOff).toBe(isOff)
       expect(entity.isUnavailable).toBe(isUnavailable)
-      expect(entity.isBatteryPowered).toBeTruthy()
-      expect(entity.isWireless).toBeTruthy()
-      expect(entity.batteryLevel).toBe(53)
-      expect(entity.linkQuality).toBe(30)
     },
   )
 
@@ -50,6 +40,7 @@ describe('HomeAssistantEntity', () => {
         state: 'customState',
         lastChanged: '',
         lastUpdated: '',
+        lastReported: '',
         attributes: {
           friendly_name: `entityName`,
         },

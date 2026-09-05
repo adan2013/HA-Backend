@@ -138,14 +138,6 @@ const notificationConfig: NotificationConfig[] = [
     canBeDismissed: true,
   },
   {
-    id: 'weakSignal',
-    title: 'Weak sensor signal',
-    description:
-      'One of your important sensors has weak signal. Check the connection and battery level',
-    priorityOrder: 'low',
-    canBeDismissed: true,
-  },
-  {
     id: 'manualKitchenLights',
     title: 'Kitchen lights are on',
     description:

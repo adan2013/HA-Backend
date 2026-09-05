@@ -104,6 +104,11 @@ const Entities = {
       kitchen: 'sensor.kitchenremote_action',
       livingRoom: 'sensor.livingroomremote_action',
     },
+    temperature: {
+      aniaRoom: 'sensor.aniatempsensor_temperature',
+      danielRoom: 'sensor.danieltempsensor_temperature',
+      livingRoom: 'sensor.livingroomtempsensor_temperature',
+    },
   },
   switch: {
     circuit: {

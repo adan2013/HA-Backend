@@ -100,6 +100,15 @@ describe('LightEntity', () => {
     emitStateUpdate('sensor', 'on')
     entities.forEach((e) => e.setTemperature(3000))
     expect(serviceCallMock).toHaveBeenCalledTimes(1)
+    expect(serviceCallMock).toHaveBeenLastCalledWith({
+      entityId: 'sensor',
+      domain: 'light',
+      service: 'turn_on',
+      data: {
+        color_temp_kelvin: 3000,
+        brightness: undefined,
+      },
+    })
     entities.forEach((e) => e.setColor(15, 25, 35))
     expect(serviceCallMock).toHaveBeenCalledTimes(2)
     entities.forEach((e) => e.setEffect('effect'))

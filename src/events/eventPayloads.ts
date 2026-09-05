@@ -9,7 +9,6 @@ export type WebSocketIncomingMessagePayload = {
     domain?: string
     service?: string
     data?: object
-    attribute?: string
     notificationId?: string
     serviceName?: string
     enabled?: boolean

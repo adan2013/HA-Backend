@@ -25,6 +25,7 @@ jest.mock('ws', () => ({
 
 import HomeAssistantConnector from './HomeAssistantConnector'
 import {
+  entityReported,
   entityStateRequest,
   homeAssistantEvent,
   homeAssistantResult,
@@ -37,6 +38,7 @@ describe('HomeAssistantConnector', () => {
   afterEach(() => {
     sentMessages.length = 0
     entityStateRequest.resetListeners()
+    entityReported.resetListeners()
     homeAssistantStatusUpdate.resetListeners()
     homeAssistantSync.resetListeners()
     serviceCall.resetListeners()
@@ -91,5 +93,128 @@ describe('HomeAssistantConnector', () => {
       }),
     })
     await expect(serviceCallResult).resolves.toBeNull()
+  })
+
+  it('should expose and refresh dedicated battery entities without mutating siblings', () => {
+    const connector = new HomeAssistantConnector('home-assistant:8123', 'token')
+    MockWebSocket.instance.onmessage?.({
+      data: JSON.stringify({ type: 'auth_ok' }),
+    })
+    MockWebSocket.instance.onmessage?.({
+      data: JSON.stringify({
+        id: 1,
+        type: 'result',
+        success: true,
+        result: [
+          {
+            entity_id: 'binary_sensor.water_sensor_water_leak',
+            state: 'off',
+            last_changed: '',
+            last_updated: '',
+            last_reported: '',
+            attributes: { friendly_name: 'Water sensor Water leak' },
+          },
+          {
+            entity_id: 'sensor.water_sensor_battery',
+            state: '80',
+            last_changed: '',
+            last_updated: '',
+            last_reported: '',
+            attributes: { friendly_name: 'Water sensor Battery' },
+          },
+        ],
+      }),
+    })
+
+    expect(connector.getBatteryEntities()).toEqual([
+      expect.objectContaining({
+        id: 'sensor.water_sensor_battery',
+        state: '80',
+      }),
+    ])
+    expect(
+      connector.getEntityState('binary_sensor.water_sensor_water_leak')
+        ?.attributes,
+    ).toEqual({ friendly_name: 'Water sensor Water leak' })
+
+    MockWebSocket.instance.onmessage?.({
+      data: JSON.stringify({
+        id: 2,
+        type: 'event',
+        event: {
+          data: {
+            new_state: {
+              entity_id: 'sensor.water_sensor_battery',
+              state: '25',
+              last_changed: '',
+              last_updated: '',
+              last_reported: '',
+              attributes: { friendly_name: 'Water sensor Battery' },
+            },
+          },
+        },
+      }),
+    })
+
+    expect(connector.getBatteryEntities()).toEqual([
+      expect.objectContaining({
+        id: 'sensor.water_sensor_battery',
+        state: '25',
+      }),
+    ])
+  })
+
+  it('should emit activity when lastReported changes without a state change', () => {
+    jest.useFakeTimers()
+    const reportListener = jest.fn()
+    entityReported.on(reportListener)
+    new HomeAssistantConnector('home-assistant:8123', 'token')
+    MockWebSocket.instance.onmessage?.({
+      data: JSON.stringify({ type: 'auth_ok' }),
+    })
+    MockWebSocket.instance.onmessage?.({
+      data: JSON.stringify({
+        id: 1,
+        type: 'result',
+        success: true,
+        result: [
+          {
+            entity_id: 'sensor.temperature',
+            state: '21.5',
+            last_changed: '2026-09-05T10:00:00Z',
+            last_updated: '2026-09-05T10:00:00Z',
+            last_reported: '2026-09-05T10:00:00Z',
+            attributes: { friendly_name: 'Temperature' },
+          },
+        ],
+      }),
+    })
+
+    jest.advanceTimersByTime(60 * 60 * 1000)
+    MockWebSocket.instance.onmessage?.({
+      data: JSON.stringify({
+        id: 3,
+        type: 'result',
+        success: true,
+        result: [
+          {
+            entity_id: 'sensor.temperature',
+            state: '21.5',
+            last_changed: '2026-09-05T10:00:00Z',
+            last_updated: '2026-09-05T10:00:00Z',
+            last_reported: '2026-09-05T11:00:00Z',
+            attributes: { friendly_name: 'Temperature' },
+          },
+        ],
+      }),
+    })
+
+    expect(reportListener).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'sensor.temperature',
+        lastReported: '2026-09-05T11:00:00Z',
+      }),
+    )
+    jest.useRealTimers()
   })
 })

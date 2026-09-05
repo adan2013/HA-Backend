@@ -83,7 +83,7 @@ class LightEntity extends HomeAssistantEntity {
         domain: 'light',
         service: 'turn_on',
         data: {
-          kelvin,
+          color_temp_kelvin: kelvin,
           brightness,
         },
       })

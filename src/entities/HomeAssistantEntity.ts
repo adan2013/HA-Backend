@@ -27,22 +27,6 @@ class HomeAssistantEntity {
     return !this.isUnavailable && this.state?.state === 'off'
   }
 
-  get isWireless(): boolean {
-    return !!this.state?.attributes.linkquality
-  }
-
-  get isBatteryPowered(): boolean {
-    return !!this.state?.attributes.battery
-  }
-
-  get linkQuality(): number {
-    return this.state?.attributes.linkquality || 255
-  }
-
-  get batteryLevel(): number {
-    return this.state?.attributes.battery || 100
-  }
-
   constructor(entityId: string, options?: EntityExtraOptions) {
     this.entityId = entityId
     this.options = {

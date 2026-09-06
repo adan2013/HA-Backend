@@ -47,6 +47,7 @@ class PrinterController extends Service {
     this.listenOnPrinterProgress()
     this.listenOnPrinterStatus()
     this.listenOnPrinterPlugState()
+    this.listenOnAutoOffToggle()
   }
 
   private formatRemainingTime(timeInMinutes: string | undefined) {
@@ -78,6 +79,16 @@ class PrinterController extends Service {
   private listenOnPrinterProgress() {
     this.remainingTime.onAnyStateUpdate(() => {
       this.setStatusNotification()
+    })
+    this.currentLayer.onAnyStateUpdate(() => {
+      this.setStatusNotification()
+    })
+  }
+
+  private listenOnAutoOffToggle() {
+    this.autoOffToggle.onAnyStateUpdate(() => {
+      this.setStatusNotification()
+      this.setOtherNotifications()
     })
   }
 
@@ -127,7 +138,9 @@ class PrinterController extends Service {
     const remainingTime = this.formatRemainingTime(
       this.remainingTime.state?.state,
     )
-    const autoOffInfo = this.autoOffToggle.isOn ? ' [AUTO OFF]' : ''
+    const autoOffInfo = this.autoOffToggle.isOn
+      ? ' (auto off enabled)'
+      : ''
 
     if (currentLayer === '0' || totalLayerCount === '0') {
       notifications.emit({

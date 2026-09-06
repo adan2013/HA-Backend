@@ -144,7 +144,7 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: '[10%] 14 / 200, 1h 4m remaining [AUTO OFF]',
+        extraInfo: '[10%] 14 / 200, 1h 4m remaining (auto off enabled)',
       })
     })
 
@@ -179,7 +179,7 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: '[10%] 14 / 200 [AUTO OFF]',
+        extraInfo: '[10%] 14 / 200 (auto off enabled)',
       })
     })
 
@@ -194,7 +194,49 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: 'Preparing to print... [AUTO OFF]',
+        extraInfo: 'Preparing to print... (auto off enabled)',
+      })
+    })
+
+    it('should refresh status notification when current layer changes', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'running',
+        progressPercentage: 10,
+        currentLayer: 14,
+        totalLayerCount: 200,
+        remainingTime: 64,
+        nozzleTemp: '230',
+      })
+      notification.mockClear()
+
+      emitStateUpdate(printerCurrentLayerId, '15')
+
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintStatus',
+        enabled: true,
+        extraInfo: '[10%] 15 / 200, 1h 4m remaining (auto off enabled)',
+      })
+    })
+
+    it('should refresh status notification when auto off changes', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'running',
+        progressPercentage: 10,
+        currentLayer: 14,
+        totalLayerCount: 200,
+        remainingTime: 64,
+        nozzleTemp: '230',
+      })
+      notification.mockClear()
+
+      emitStateUpdate(autoOffToggleId, 'off')
+
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintStatus',
+        enabled: true,
+        extraInfo: '[10%] 14 / 200, 1h 4m remaining',
       })
     })
 
@@ -360,6 +402,22 @@ describe('PrinterController', () => {
         printerStatus: 'finish',
         nozzleTemp: '41',
       })
+      expect(notification).toHaveBeenCalledWith({
+        id: '3dPrintFinished',
+        enabled: true,
+      })
+    })
+
+    it('should refresh finished notification when auto off changes', () => {
+      const { notification } = initService({
+        printerPlugIsOn: true,
+        printerStatus: 'finish',
+        nozzleTemp: '51',
+      })
+      notification.mockClear()
+
+      emitStateUpdate(autoOffToggleId, 'off')
+
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintFinished',
         enabled: true,

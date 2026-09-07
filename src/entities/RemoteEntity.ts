@@ -1,6 +1,9 @@
 import HomeAssistantEntity from './HomeAssistantEntity'
 import { webSocketMessage } from '../events/events'
 import WS_CMD from '../connectors/wsCommands'
+import { createLogger } from '../logging/logger'
+
+const logger = createLogger('RemoteEntity')
 
 export type ActionType<PressType> = {
   button: number
@@ -47,7 +50,10 @@ class RemoteEntity<PressType> extends HomeAssistantEntity {
   }
 
   public decodeState(state = ''): ActionType<PressType> | null {
-    console.error('remote state decoder not implemented', this.entityId, state)
+    logger.error('Remote state decoder not implemented', {
+      entityId: this.entityId,
+      state,
+    })
     throw new Error('remote state decoder not implemented')
   }
 

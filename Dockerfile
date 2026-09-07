@@ -20,6 +20,8 @@ ENV NODE_ENV=production
 ENV ENV=production
 WORKDIR /opt/app
 
+RUN mkdir -p /opt/app/logs && chown node:node /opt/app/logs
+
 COPY package.json ./
 COPY --from=production-dependencies /opt/app/node_modules ./node_modules
 COPY --from=builder /opt/app/build ./build

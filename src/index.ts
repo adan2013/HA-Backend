@@ -9,6 +9,8 @@ import WeatherService from './services/WeatherService/WeatherService'
 import BalconyController from './services/BalconyController/BalconyController'
 import ReminderService from './services/ReminderService/ReminderService'
 import formatDateTime from './utils/formatDateTime'
+import { createLogger } from './logging/logger'
+import { registerProcessErrorHandlers } from './logging/processErrorHandlers'
 import LivingRoomController from './services/LivingRoomController/LivingRoomController'
 import KitchenController from './services/KitchenController/KitchenController'
 import { checkEnvironmentVariables } from './utils/envVariables'
@@ -19,6 +21,10 @@ import AniaRoomController from './services/AniaRoomController/AniaRoomController
 import DanielRoomController from './services/DanielRoomController/DanielRoomController'
 import BroadcastDeviceService from './services/BroadcastDeviceService/BroadcastDeviceService'
 import PrinterController from './services/PrinterController/PrinterController'
+
+const logger = createLogger('Application')
+
+registerProcessErrorHandlers()
 
 checkEnvironmentVariables([
   'ENV',
@@ -32,11 +38,13 @@ checkEnvironmentVariables([
   'LOCATION_LON',
 ])
 
-console.log(`Timezone: ${process.env['TZ'] || '(default)'}`)
-console.log(`System time: ${formatDateTime()}`)
-console.log(`Running in ${process.env['ENV']?.toUpperCase()} mode`)
+logger.warn('Backend starting', {
+  timezone: process.env['TZ'] || '(default)',
+  systemTime: formatDateTime(),
+  environment: process.env['ENV']?.toUpperCase(),
+})
 if (process.env['ENV'] === 'dev') {
-  console.warn(
+  logger.warn(
     'Dev mode is enabled - all service calls to Home Assistant WILL BE BLOCKED and logged here',
   )
 }

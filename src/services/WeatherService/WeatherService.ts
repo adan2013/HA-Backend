@@ -7,6 +7,9 @@ import {
 import { WeatherServiceData } from './types'
 import DataCollector from '../../helpers/DataCollector'
 import formatDateTime from '../../utils/formatDateTime'
+import { createLogger } from '../../logging/logger'
+
+const logger = createLogger('WeatherService')
 
 class WeatherService extends Service {
   private refetchIntervalMinutes = 30
@@ -197,6 +200,7 @@ class WeatherService extends Service {
         this.setServiceStatus(`Weather updated at ${formatDateTime()}`, 'green')
       })
       .catch((error) => {
+        logger.error('Weather refresh failed', { error })
         this.setServiceStatus(`Error: ${error.message}`, 'red')
       })
   }

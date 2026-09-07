@@ -5,8 +5,11 @@ import { notifications, webSocketMessage } from '../../events/events'
 import Entity from '../../entities/Entity'
 import Timer from '../../Timer'
 import WS_CMD from '../../connectors/wsCommands'
+import { createLogger } from '../../logging/logger'
 import { playSoundAlert, switchNotificationLight } from './notificationUtils'
 import Entities from '../../configs/entities.config'
+
+const logger = createLogger('NotificationsService')
 
 class NotificationsService extends Service {
   private tabletLightToggle = Entity.toggle(
@@ -174,7 +177,7 @@ class NotificationsService extends Service {
         }
       }
     } else {
-      console.error('Unknown notification id:', id)
+      logger.error('Unknown notification id', { id })
     }
   }
 

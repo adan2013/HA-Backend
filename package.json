@@ -1,6 +1,6 @@
 {
   "name": "ha-backend",
-  "version": "7.0.2",
+  "version": "8.0.0",
   "packageManager": "yarn@1.22.22",
   "description": "Node backend for Home Assistant",
   "main": "index.js",
@@ -23,8 +23,8 @@
     "test:dev": "TZ=utc ENV=test jest --watchAll",
     "coverage": "TZ=utc ENV=test jest --coverage",
     "coverage-full": "TZ=utc ENV=test jest --coverage --collectCoverageFrom=src/**/*.ts",
-    "docker-build": "docker build -t ha-backend .",
-    "docker-run": "docker run -d --env-file .env -p 8008:8008 ha-backend"
+    "docker-build": "docker build -t adan2013/ha-backend:latest .",
+    "docker-run": "docker compose up -d"
   },
   "husky": {
     "hooks": {
@@ -60,6 +60,8 @@
     "axios": "^1.6.0",
     "cron": "^3.1.6",
     "dotenv": "^16.3.1",
+    "pino": "^9.13.0",
+    "pino-roll": "^4.0.0",
     "ws": "^8.14.2"
   }
 }

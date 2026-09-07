@@ -6,9 +6,8 @@ export const checkEnvironmentVariables = (names: string[]) => {
     }
   })
   if (missingVariables.length) {
-    console.error(
-      `Missing environment variables! Names: ${missingVariables.join(', ')}`,
+    throw new Error(
+      `Missing environment variables: ${missingVariables.join(', ')}`,
     )
-    process.exit(1)
   }
 }

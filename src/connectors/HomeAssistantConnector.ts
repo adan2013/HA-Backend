@@ -19,10 +19,12 @@ import {
   homeAssistantStatusUpdate,
 } from '../events/events'
 import { parseBatteryReading } from '../utils/batteryUtils'
+import { createLogger } from '../logging/logger'
 
 const RECONNECT_INTERVAL = 10000
 const ENTITIES_PROBE_INTERVAL = 60000
 const ENTITIES_REFRESH_INTERVAL = 60 * 60 * 1000
+const logger = createLogger('HomeAssistantConnector')
 
 class HomeAssistantConnector {
   private readonly host: string
@@ -65,17 +67,17 @@ class HomeAssistantConnector {
         this.entitiesRefreshTimer = undefined
       }
       this.changeStatus('disconnected')
-      console.error('Connection to Home Assistant closed!')
+      logger.error('Connection to Home Assistant closed')
       setTimeout(() => this.connectToHomeAssistant(), RECONNECT_INTERVAL)
     }
     this.socket.onerror = (err) => {
-      console.error('HA websocket error', err)
+      logger.error('Home Assistant WebSocket error', { error: err })
     }
   }
 
   public constructor(host?: string, token?: string, requiredEntities?: string) {
     if (!host || !token) {
-      console.error('Missing HA_HOST or HA_TOKEN env variable!')
+      logger.error('Missing HA_HOST or HA_TOKEN environment variable')
       throw new Error('Missing basic env variables')
     }
     this.host = host
@@ -87,31 +89,37 @@ class HomeAssistantConnector {
       if (entityState) {
         callback(entityState)
       } else {
-        console.warn(`WARN: State request for unknown entity ${entityId}`)
+        logger.warn('State requested for unknown entity', { entityId })
       }
     })
     serviceCall.on(({ domain, service, entityId, data }) => {
       void this.callService(entityId, domain, service, data).catch((error) => {
-        console.error(
-          `Failed to call service ${domain}.${service} for entity ${entityId}`,
+        logger.error('Home Assistant service call failed', {
           error,
-        )
+          domain,
+          service,
+          entityId,
+        })
       })
     })
   }
 
   private probeEntities() {
-    console.log(`Probing entities for required count: ${this.requiredEntities}`)
+    logger.info('Probing Home Assistant entities', {
+      requiredEntities: this.requiredEntities,
+    })
     this.getAllEntities((entities) => {
       if (entities.length < this.requiredEntities) {
-        console.warn(
-          `WARN: Found ${entities.length} entities; Next probe in ${
-            ENTITIES_PROBE_INTERVAL / 1000
-          } seconds...`,
-        )
+        logger.warn('Home Assistant entity probe returned too few entities', {
+          foundEntities: entities.length,
+          requiredEntities: this.requiredEntities,
+          nextProbeSeconds: ENTITIES_PROBE_INTERVAL / 1000,
+        })
         setTimeout(() => this.probeEntities(), ENTITIES_PROBE_INTERVAL)
       } else {
-        console.log(`Found ${entities.length} entities; Starting backend...`)
+        logger.info('Required Home Assistant entities found', {
+          entitiesCount: entities.length,
+        })
         this.syncWithHomeAssistant()
       }
     })
@@ -132,9 +140,9 @@ class HomeAssistantConnector {
   private syncWithHomeAssistant() {
     this.getAllEntities((entities) => {
       this.replaceEntities(entities)
-      console.log(
-        `Backend initialized successfully with ${this.entities.length} entities`,
-      )
+      logger.info('Backend initialized with Home Assistant entities', {
+        entitiesCount: this.entities.length,
+      })
       this.changeStatus('synced')
       homeAssistantSync.emit({
         entitiesCount: this.entities.length,
@@ -146,7 +154,7 @@ class HomeAssistantConnector {
       { event_type: 'state_changed' },
       {
         resultCallback: () => {
-          console.log('Subscribed to state_changed event')
+          logger.info('Subscribed to Home Assistant state changes')
         },
         eventCallback: (event) => {
           const newState = event.data['new_state']
@@ -188,8 +196,7 @@ class HomeAssistantConnector {
     this.entities.forEach((entity) => {
       const previous = previousById.get(entity.id)
       const stateChanged =
-        !previous ||
-        previous.lastUpdated !== entity.lastUpdated
+        !previous || previous.lastUpdated !== entity.lastUpdated
       if (stateChanged) {
         entityUpdate(entity.id).emit(entity)
         anyEntityUpdate.emit(entity)
@@ -204,7 +211,7 @@ class HomeAssistantConnector {
       const msg = JSON.parse(e.data.toString())
       switch (msg.type) {
         case 'auth_required':
-          console.log('Connected to Home Assistant. Authenticating...')
+          logger.info('Connected to Home Assistant; authenticating')
           this.sendMsg(
             'auth',
             { access_token: this.token },
@@ -215,14 +222,12 @@ class HomeAssistantConnector {
           return
         case 'auth_invalid':
           this.changeStatus('authError')
-          console.error(
-            '"auth_invalid" message received from HA - check your access token',
-          )
+          logger.error('Home Assistant authentication rejected')
           return
         case 'auth_ok':
           this.changeStatus('authorized')
           if (this.requiredEntities === 0) {
-            console.log('No required entities count set, skipping probe')
+            logger.info('Skipping Home Assistant entity probe')
             this.syncWithHomeAssistant()
           } else {
             this.probeEntities()
@@ -231,7 +236,9 @@ class HomeAssistantConnector {
         case 'result':
           homeAssistantResult(msg.id).emit(msg)
           if (!msg['success']) {
-            console.warn('Result message not successful', msg.error)
+            logger.warn('Home Assistant returned an unsuccessful result', {
+              error: msg.error,
+            })
           }
           break
         case 'event':
@@ -243,10 +250,15 @@ class HomeAssistantConnector {
         case 'pong':
           break
         default:
-          console.warn('Unhandled message type from HA', msg)
+          logger.warn('Unhandled Home Assistant message type', {
+            message: msg,
+          })
       }
-    } catch {
-      console.error('Error while parsing message from Home Assistant', e.data)
+    } catch (error) {
+      logger.error('Failed to parse Home Assistant message', {
+        error,
+        rawMessage: e.data,
+      })
     }
   }
 
@@ -259,11 +271,9 @@ class HomeAssistantConnector {
   ): Promise<unknown> {
     if (process.env['ENV'] === 'dev' && !options.executeInDev) {
       const payloadKeys = Object.keys(data)
-      console.log(
-        `CALL > ${domain}.${service}; entity: ${entityId}; payload: ${
-          payloadKeys.length > 0 ? JSON.stringify(data) : '(empty)'
-        }`,
-      )
+      logger.info(`CALL > ${domain}.${service}; entity: ${entityId}`, {
+        payload: payloadKeys.length > 0 ? data : '(empty)',
+      })
       return Promise.resolve(undefined)
     }
     if (

@@ -8,9 +8,12 @@ import {
 } from '../events/events'
 import HomeAssistantConnector from './HomeAssistantConnector'
 import WS_CMD from './wsCommands'
+import { createLogger, flushLoggerAsync } from '../logging/logger'
+import { readRecentLogs } from '../logging/logReader'
 
 const AUTH_TIMEOUT = 10000
 const MAX_PAYLOAD_SIZE = 64 * 1024
+const logger = createLogger('WebSocketServerConnector')
 
 type IncomingMessage = {
   type?: string
@@ -39,7 +42,7 @@ class WebSocketServerConnector {
       port: this.PORT,
       maxPayload: MAX_PAYLOAD_SIZE,
     })
-    console.log('WS server listening on port ' + this.PORT)
+    logger.info('WebSocket server listening', { port: this.PORT })
     this.wss.on('connection', (ws) => this.handleConnection(ws))
 
     serviceDataUpdate.on(({ serviceName, data }) => {
@@ -84,6 +87,7 @@ class WebSocketServerConnector {
               status: this.homeAssistant.connectionState,
             })
           } else {
+            logger.warn('Dashboard WebSocket authentication rejected')
             this.send(ws, { type: WS_CMD.outgoing.AUTH_INVALID })
             ws.close(1008, 'Invalid access token')
           }
@@ -94,7 +98,8 @@ class WebSocketServerConnector {
           return
         }
         this.handleAuthenticatedMessage(ws, message)
-      } catch {
+      } catch (error) {
+        logger.warn('Invalid dashboard WebSocket message', { error })
         this.send(ws, { type: 'error', error: 'Invalid message' })
       }
     })
@@ -118,6 +123,9 @@ class WebSocketServerConnector {
         break
       case WS_CMD.incoming.GET_BATTERY_ENTITIES:
         this.getBatteryEntities(ws, message)
+        break
+      case WS_CMD.incoming.GET_BACKEND_LOGS:
+        void this.getBackendLogs(ws, message)
         break
       default:
         webSocketMessage(message.type || 'unknown').emit({
@@ -184,6 +192,12 @@ class WebSocketServerConnector {
       )
       this.sendCommandResult(ws, message.requestId, true, result)
     } catch (error) {
+      logger.error('Dashboard service call failed', {
+        error,
+        domain: message.domain,
+        service: message.service,
+        entityId: message.entityId,
+      })
       this.sendCommandResult(
         ws,
         message.requestId,
@@ -222,6 +236,10 @@ class WebSocketServerConnector {
         data: history,
       })
     } catch (error) {
+      logger.error('Dashboard entity history request failed', {
+        error,
+        entityId: message.entityId,
+      })
       this.sendCommandResult(
         ws,
         message.requestId,
@@ -248,6 +266,37 @@ class WebSocketServerConnector {
       requestId: message.requestId,
       data: this.homeAssistant.getBatteryEntities(),
     })
+  }
+
+  private async getBackendLogs(ws: WebSocket, message: IncomingMessage) {
+    if (typeof message.requestId !== 'string') {
+      this.sendCommandResult(
+        ws,
+        message.requestId,
+        false,
+        undefined,
+        'Invalid backend logs request',
+      )
+      return
+    }
+    try {
+      await flushLoggerAsync()
+      const entries = await readRecentLogs()
+      this.send(ws, {
+        type: WS_CMD.outgoing.BACKEND_LOGS_RESULT,
+        requestId: message.requestId,
+        data: entries,
+      })
+    } catch (error) {
+      logger.error('Failed to read backend logs', { error })
+      this.sendCommandResult(
+        ws,
+        message.requestId,
+        false,
+        undefined,
+        this.errorMessage(error),
+      )
+    }
   }
 
   private sendWelcome(ws: WebSocket) {

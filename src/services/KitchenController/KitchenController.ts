@@ -108,7 +108,9 @@ class KitchenController extends Service {
   }
 
   private switchAllLights(brightnessLvl: number) {
-    this.leftLight.setBrightness(brightnessLvl, [this.rightLight.entityId])
+    this.leftLight.setBrightness(brightnessLvl, {
+      extraEntities: [this.rightLight.entityId],
+    })
   }
 
   private switchManualLights() {

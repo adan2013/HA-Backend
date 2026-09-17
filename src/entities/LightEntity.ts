@@ -3,6 +3,13 @@ import { serviceCall } from '../events/events'
 
 type LightType = 'mono' | 'cct' | 'rgb'
 
+export type LightTurnOnOptions = {
+  extraEntities?: string[]
+  effect?: string
+}
+
+type LightTargetOptions = Pick<LightTurnOnOptions, 'extraEntities'>
+
 class LightEntity extends HomeAssistantEntity {
   readonly lightType: LightType
 
@@ -25,26 +32,34 @@ class LightEntity extends HomeAssistantEntity {
     this.lightType = lightType
   }
 
-  public turnOn(brightness?: number, extraEntities?: string[]) {
+  private target(extraEntities?: string[]) {
+    return extraEntities ? [this.entityId, ...extraEntities] : this.entityId
+  }
+
+  private emitTurnOn(
+    data: Record<string, unknown>,
+    options: LightTurnOnOptions = {},
+  ) {
     if (this.isUnavailable) return
     serviceCall.emit({
-      entityId: extraEntities
-        ? [this.entityId, ...extraEntities]
-        : this.entityId,
+      entityId: this.target(options.extraEntities),
       domain: 'light',
       service: 'turn_on',
       data: {
-        brightness,
+        ...data,
+        ...(options.effect ? { effect: options.effect } : {}),
       },
     })
+  }
+
+  public turnOn(brightness?: number, options: LightTurnOnOptions = {}) {
+    this.emitTurnOn({ brightness }, options)
   }
 
   public turnOff(extraEntities?: string[]) {
     if (this.isUnavailable) return
     serviceCall.emit({
-      entityId: extraEntities
-        ? [this.entityId, ...extraEntities]
-        : this.entityId,
+      entityId: this.target(extraEntities),
       domain: 'light',
       service: 'turn_off',
     })
@@ -53,71 +68,54 @@ class LightEntity extends HomeAssistantEntity {
   public toggle(extraEntities?: string[]) {
     if (this.isUnavailable) return
     serviceCall.emit({
-      entityId: extraEntities
-        ? [this.entityId, ...extraEntities]
-        : this.entityId,
+      entityId: this.target(extraEntities),
       domain: 'light',
       service: 'toggle',
     })
   }
 
-  public setBrightness(brightness: number, extraEntities?: string[]) {
+  public setBrightness(brightness: number, options: LightTurnOnOptions = {}) {
     if (brightness > 0) {
-      this.turnOn(brightness, extraEntities)
+      this.turnOn(brightness, options)
     } else {
-      this.turnOff(extraEntities)
+      this.turnOff(options.extraEntities)
     }
   }
 
   public setTemperature(
     kelvin: number,
     brightness?: number,
-    extraEntities?: string[],
+    options: LightTurnOnOptions = {},
   ) {
-    if (this.isUnavailable) return
     if (this.lightType === 'cct') {
-      serviceCall.emit({
-        entityId: extraEntities
-          ? [this.entityId, ...extraEntities]
-          : this.entityId,
-        domain: 'light',
-        service: 'turn_on',
-        data: {
+      this.emitTurnOn(
+        {
           color_temp_kelvin: kelvin,
           brightness,
         },
-      })
+        options,
+      )
     }
   }
 
-  public setColor(r: number, g: number, b: number, extraEntities?: string[]) {
-    if (this.isUnavailable) return
+  public setColor(
+    r: number,
+    g: number,
+    b: number,
+    options: LightTurnOnOptions = {},
+  ) {
     if (this.lightType === 'rgb') {
-      serviceCall.emit({
-        entityId: extraEntities
-          ? [this.entityId, ...extraEntities]
-          : this.entityId,
-        domain: 'light',
-        service: 'turn_on',
-        data: {
+      this.emitTurnOn(
+        {
           rgb_color: [r, g, b],
         },
-      })
+        options,
+      )
     }
   }
 
-  public setEffect(effect: string, extraEntities?: string[]) {
-    if (this.isUnavailable) return
-    serviceCall.emit({
-      entityId: extraEntities
-        ? [this.entityId, ...extraEntities]
-        : this.entityId,
-      domain: 'light',
-      service: 'turn_on',
-      data: {
-        effect,
-      },
-    })
+  public setEffect(effect: string, options: LightTargetOptions = {}) {
+    this.emitTurnOn({}, { ...options, effect })
   }
 
   public onLightOn(callback: () => void) {

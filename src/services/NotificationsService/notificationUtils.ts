@@ -2,25 +2,27 @@ import LightEntity from '../../entities/LightEntity'
 import { NotificationLight, SoundType } from './types'
 import { serviceCall } from '../../events/events'
 
+const NO_EFFECT = 'None'
+
 export const switchNotificationLight = (
   light: LightEntity,
   type?: NotificationLight,
 ) => {
   switch (type) {
     case 'red':
-      light.setColor(255, 5, 25)
+      light.setColor(255, 5, 25, { effect: NO_EFFECT })
       break
     case 'yellow':
-      light.setColor(255, 182, 0)
+      light.setColor(255, 182, 0, { effect: NO_EFFECT })
       break
     case 'green':
-      light.setColor(25, 255, 0)
+      light.setColor(25, 255, 0, { effect: NO_EFFECT })
       break
     case 'blue':
-      light.setColor(0, 65, 255)
+      light.setColor(0, 65, 255, { effect: NO_EFFECT })
       break
     case 'purple':
-      light.setColor(165, 0, 255)
+      light.setColor(165, 0, 255, { effect: NO_EFFECT })
       break
     case 'redFlashing':
       light.setEffect('Fast red strobe')

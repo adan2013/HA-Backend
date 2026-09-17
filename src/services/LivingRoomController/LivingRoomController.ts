@@ -78,7 +78,9 @@ class LivingRoomController extends Service {
       if (lightsAlreadySet) {
         toTurnOn[0].turnOff(extraIdsToTurnOn)
       } else {
-        toTurnOn[0].turnOn(brightnessLevel, extraIdsToTurnOn)
+        toTurnOn[0].turnOn(brightnessLevel, {
+          extraEntities: extraIdsToTurnOn,
+        })
       }
     }
     if (toTurnOff.length) {

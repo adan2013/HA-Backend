@@ -83,6 +83,59 @@ describe('LightEntity', () => {
     })
   })
 
+  it('should include an optional effect in every turn_on command', () => {
+    const serviceCallMock = jest.fn()
+    serviceCall.on(serviceCallMock)
+    const options = { effect: 'None' }
+    const monoEntity = Entity.monoLight('sensor')
+    const cctEntity = Entity.cctLight('sensor')
+    const rgbEntity = Entity.rgbLight('sensor')
+
+    monoEntity.turnOn(40, options)
+    monoEntity.setBrightness(123, options)
+    cctEntity.setTemperature(3000, 100, options)
+    rgbEntity.setColor(15, 25, 35, options)
+
+    expect(serviceCallMock.mock.calls).toEqual([
+      [
+        {
+          entityId: 'sensor',
+          domain: 'light',
+          service: 'turn_on',
+          data: { brightness: 40, effect: 'None' },
+        },
+      ],
+      [
+        {
+          entityId: 'sensor',
+          domain: 'light',
+          service: 'turn_on',
+          data: { brightness: 123, effect: 'None' },
+        },
+      ],
+      [
+        {
+          entityId: 'sensor',
+          domain: 'light',
+          service: 'turn_on',
+          data: {
+            color_temp_kelvin: 3000,
+            brightness: 100,
+            effect: 'None',
+          },
+        },
+      ],
+      [
+        {
+          entityId: 'sensor',
+          domain: 'light',
+          service: 'turn_on',
+          data: { rgb_color: [15, 25, 35], effect: 'None' },
+        },
+      ],
+    ])
+  })
+
   it('should call correct services depends on the light type', () => {
     const serviceCallMock = jest.fn()
     serviceCall.on(serviceCallMock)
@@ -148,7 +201,7 @@ describe('LightEntity', () => {
     const serviceCallMock = jest.fn()
     serviceCall.on(serviceCallMock)
     const entity = Entity.monoLight('sensor')
-    entity.turnOn(40, extraEntities)
+    entity.turnOn(40, { extraEntities })
     expect(serviceCallMock).toHaveBeenCalledWith({
       entityId: expectedEntities,
       domain: 'light',

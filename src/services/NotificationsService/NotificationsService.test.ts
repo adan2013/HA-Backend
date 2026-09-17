@@ -208,6 +208,7 @@ describe('NotificationsService', () => {
       service: 'turn_on',
       data: {
         rgb_color: [255, 5, 25],
+        effect: 'None',
       },
     }
     const serviceCallMock = jest.fn()
@@ -275,6 +276,36 @@ describe('NotificationsService', () => {
     service.updateDndMode()
     expect(service.dndIsActive).toBe(false)
     expect(service.lastActiveLight).toBe('red')
+  })
+
+  it('should stop a flashing effect when a static notification light resumes', () => {
+    const serviceCallMock = jest.fn()
+    serviceCall.on(serviceCallMock)
+    new NotificationsSerivce()
+    notifications.emit({
+      id: 'test2',
+      enabled: true,
+    })
+    notifications.emit({
+      id: 'waterLeak',
+      enabled: true,
+    })
+
+    serviceCallMock.mockClear()
+    notifications.emit({
+      id: 'waterLeak',
+      enabled: false,
+    })
+
+    expect(serviceCallMock).toHaveBeenLastCalledWith({
+      entityId: Entities.light.dashNode.tabletLight,
+      domain: 'light',
+      service: 'turn_on',
+      data: {
+        rgb_color: [255, 182, 0],
+        effect: 'None',
+      },
+    })
   })
 
   it('should sort active notifications by the priority', () => {

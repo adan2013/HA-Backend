@@ -1,20 +1,22 @@
 import Service from '../Service'
 import Entity from '../../entities/Entity'
-import Timer from '../../Timer'
 import Entities from '../../configs/entities.config'
+import TimeRangeSchedule from '../../scheduling/TimeRangeSchedule'
 
 class BalconyController extends Service {
-  private readonly TURN_ON_AT = 16
-  private readonly TURN_OFF_AT = 22
   private autoToggle = Entity.toggle(
     Entities.inputBoolean.automations.balconyCircuitAutoSwitch,
   )
   private balconySwitch = Entity.switch(Entities.switch.circuit.balcony)
+  private schedule: TimeRangeSchedule
 
   constructor() {
     super('balconyController')
-    Timer.onTime(this.TURN_ON_AT, 0, () => this.switchBalconyLight(true))
-    Timer.onTime(this.TURN_OFF_AT, 0, () => this.switchBalconyLight(false))
+    this.schedule = new TimeRangeSchedule(
+      Entity.inputText(Entities.inputText.schedule.balconyCircuit),
+      () => this.switchBalconyLight(true),
+      () => this.switchBalconyLight(false),
+    )
   }
 
   public switchBalconyLight(on: boolean) {

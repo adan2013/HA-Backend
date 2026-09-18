@@ -7,6 +7,7 @@ import Entities from '../../configs/entities.config'
 jest.useFakeTimers().setSystemTime(new Date('2023-05-15T12:00:00Z'))
 mockEntity(Entities.inputBoolean.automations.balconyCircuitAutoSwitch, 'on')
 mockEntity(Entities.switch.circuit.balcony, 'off')
+mockEntity(Entities.inputText.schedule.balconyCircuit, '16:00-22:00')
 
 describe('BalconyController', () => {
   it('should switch on and off the balcony plug', () => {

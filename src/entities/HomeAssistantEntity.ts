@@ -56,11 +56,11 @@ class HomeAssistantEntity {
   }
 
   public onAnyStateUpdate(callback: (entity: EntityState) => void) {
-    entityUpdate(this.entityId).on(callback)
+    return entityUpdate(this.entityId).on(callback)
   }
 
   public onStateValue(state: string, callback: (entity: EntityState) => void) {
-    this.onAnyStateUpdate((entity) => {
+    return this.onAnyStateUpdate((entity) => {
       if (entity?.state === state) {
         callback(entity)
       }

@@ -8,10 +8,6 @@ export type AqaraOpplePressType =
   | 'release'
 
 class AqaraOppleRemoteEntity extends RemoteEntity<AqaraOpplePressType> {
-  constructor(entityId: string) {
-    super(entityId)
-  }
-
   public override decodeState(
     state = '',
   ): ActionType<AqaraOpplePressType> | null {

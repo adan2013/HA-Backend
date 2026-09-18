@@ -50,6 +50,12 @@ const Entities = {
     kitchenFinalFilterService: 'input_datetime.kitchenfinalfilterservice',
     kitchenMembraneFilterService: 'input_datetime.kitchenmembranefilterservice',
   },
+  inputText: {
+    schedule: {
+      alertDnd: 'input_text.alertdndschedule',
+      balconyCircuit: 'input_text.balconycircuitschedule',
+    },
+  },
   light: {
     aniaRoom: {
       bedLamp: 'light.aniabedlamp',

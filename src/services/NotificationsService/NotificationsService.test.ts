@@ -15,6 +15,7 @@ describe('NotificationsService', () => {
     mockEntity(Entities.inputBoolean.notifications.tabletLight, 'on')
     mockEntity(Entities.inputBoolean.notifications.soundOn, 'on')
     mockEntity(Entities.inputBoolean.notifications.dndAtNight, 'on')
+    mockEntity(Entities.inputText.schedule.alertDnd, '22:00-07:00')
     mockEntity(Entities.light.dashNode.tabletLight, 'off')
   })
 

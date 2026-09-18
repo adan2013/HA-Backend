@@ -9,6 +9,7 @@ class TypedEvent<T> {
 
   public on(callback: (payload: T) => void) {
     ee.on(this.eventName, callback)
+    return () => ee.off(this.eventName, callback)
   }
 
   public once(callback: (payload: T) => void) {

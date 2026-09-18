@@ -7,10 +7,6 @@ class InputDateTimeEntity extends HomeAssistantEntity {
     return new Date(this.state?.state || '')
   }
 
-  constructor(entityId: string) {
-    super(entityId)
-  }
-
   public daysToDeadline(days: number): number {
     const today = new Date()
     const deadline = this.dateValue

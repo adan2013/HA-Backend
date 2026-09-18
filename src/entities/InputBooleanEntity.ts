@@ -2,10 +2,6 @@ import HomeAssistantEntity from './HomeAssistantEntity'
 import { serviceCall } from '../events/events'
 
 class InputBooleanEntity extends HomeAssistantEntity {
-  constructor(entityId: string) {
-    super(entityId)
-  }
-
   public turnOn() {
     if (this.isUnavailable) return
     serviceCall.emit({

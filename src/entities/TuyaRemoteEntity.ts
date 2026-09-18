@@ -3,10 +3,6 @@ import RemoteEntity, { ActionType } from './RemoteEntity'
 export type TuyaPressType = 'single' | 'double' | 'hold'
 
 class TuyaRemoteEntity extends RemoteEntity<TuyaPressType> {
-  constructor(entityId: string) {
-    super(entityId)
-  }
-
   public override decodeState(state = ''): ActionType<TuyaPressType> | null {
     const splited = state.split('_')
     if (splited.length === 2) {

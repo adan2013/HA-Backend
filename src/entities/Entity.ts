@@ -3,6 +3,7 @@ import InputBooleanEntity from './InputBooleanEntity'
 import InputDateTimeEntity from './InputDateTimeEntity'
 import LightEntity from './LightEntity'
 import InputSelectEntity from './InputSelectEntity'
+import InputTextEntity from './InputTextEntity'
 import SwitchEntity from './SwitchEntity'
 import AqaraOppleRemoteEntity from './AqaraOppleRemoteEntity'
 import TuyaRemoteEntity from './TuyaRemoteEntity'
@@ -30,6 +31,10 @@ class Entity {
 
   public static select(entityId: string) {
     return new InputSelectEntity(entityId)
+  }
+
+  public static inputText(entityId: string) {
+    return new InputTextEntity(entityId)
   }
 
   public static monoLight(entityId: string) {

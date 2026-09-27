@@ -30,6 +30,7 @@ const Entities = {
     },
     notifications: {
       dndAtNight: 'input_boolean.alertdndatnight',
+      smsAlerts: 'input_boolean.alertsms',
       soundOn: 'input_boolean.alertsounds',
       tabletLight: 'input_boolean.alerttabletlights',
     },

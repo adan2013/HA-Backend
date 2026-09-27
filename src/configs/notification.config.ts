@@ -111,12 +111,19 @@ const notificationConfig: NotificationConfig[] = [
     ignoreDND: true,
   },
   {
+    id: 'smsFailure',
+    title: 'SMS alert failed',
+    description:
+      'One or more SMS messages could not be sent. Check the SMS service status and backend logs.',
+    light: 'red',
+    canBeDismissed: true,
+  },
+  {
     id: 'lowBattery',
     title: 'Low battery detected',
     description:
       'One of your sensors has low battery. Replace the battery as soon as possible',
     priorityOrder: 'low',
-    light: 'blue',
     canBeDismissed: true,
   },
   {
@@ -125,7 +132,6 @@ const notificationConfig: NotificationConfig[] = [
     description:
       'One of your important sensors is unavailable. Check the connection and battery level',
     priorityOrder: 'low',
-    light: 'blue',
     canBeDismissed: true,
   },
   {
@@ -134,7 +140,6 @@ const notificationConfig: NotificationConfig[] = [
     description:
       'One of your monitored sensors has not reported an update within the configured time. Check the sensor and its battery level',
     priorityOrder: 'low',
-    light: 'blue',
     canBeDismissed: true,
   },
   {

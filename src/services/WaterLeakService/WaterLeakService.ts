@@ -1,7 +1,7 @@
 import Service from '../Service'
 import Entity from '../../entities/Entity'
 import waterLeakSensors from '../../configs/waterLeak.config'
-import { notifications } from '../../events/events'
+import { notifications, smsGateway } from '../../events/events'
 import HomeAssistantEntity from '../../entities/HomeAssistantEntity'
 import Entities from '../../configs/entities.config'
 
@@ -25,6 +25,7 @@ class WaterLeakService extends Service {
   }
 
   private checkWaterLeaks() {
+    const alarmWasActive = this.triggeredSensorNames.length > 0
     const currentlyDetectedNames: string[] = []
     waterLeakSensors.forEach((sensor) => {
       const entity = this.sensorEntities.find(
@@ -39,6 +40,14 @@ class WaterLeakService extends Service {
     }
     if (this.waterLeakToggle.isOff) {
       this.triggeredSensorNames = []
+    }
+    if (!alarmWasActive && this.triggeredSensorNames.length > 0) {
+      smsGateway.emit({
+        source: 'waterLeak',
+        text: `Water leak detected: ${this.triggeredSensorNames.join(
+          ', ',
+        )}.`,
+      })
     }
     notifications.emit({
       id: 'waterLeak',

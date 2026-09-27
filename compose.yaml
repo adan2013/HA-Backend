@@ -17,6 +17,8 @@ services:
       WEATHER_API_KEY: ${WEATHER_API_KEY}
       LOCATION_LAT: ${LOCATION_LAT}
       LOCATION_LON: ${LOCATION_LON}
+      SENDLY_API_KEY: ${SENDLY_API_KEY}
+      SMS_RECIPIENTS: ${SMS_RECIPIENTS}
     volumes:
       - ha-backend-logs:/opt/app/logs
 

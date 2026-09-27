@@ -50,3 +50,8 @@ export type NotificationsPayload = {
   enabled: boolean
   extraInfo?: string
 }
+
+export type SmsPayload = {
+  source: 'waterLeak' | 'mainDoorOpen'
+  text: string
+}

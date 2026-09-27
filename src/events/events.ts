@@ -6,6 +6,7 @@ import {
   ServiceCallPayload,
   EntityStatePayload,
   NotificationsPayload,
+  SmsPayload,
   HomeAssistantSyncPayload,
   HomeAssistantStatusPayload,
 } from './eventPayloads'
@@ -45,3 +46,5 @@ export const serviceCall = new TypedEvent<ServiceCallPayload>('ha/service')
 export const notifications = new TypedEvent<NotificationsPayload>(
   'notifications',
 )
+
+export const smsGateway = new TypedEvent<SmsPayload>('sms')

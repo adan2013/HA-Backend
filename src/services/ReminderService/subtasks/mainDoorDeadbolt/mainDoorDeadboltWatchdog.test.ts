@@ -1,4 +1,4 @@
-import { notifications } from '../../../../events/events'
+import { notifications, smsGateway } from '../../../../events/events'
 import ReminderService from '../../ReminderService'
 import { emitStateUpdate, mockEntity } from '../../../../utils/testUtils'
 import { alertToggleId, deadboltSensorId } from './mainDoorDeadboltWatchdog'
@@ -6,8 +6,46 @@ import { alertToggleId, deadboltSensorId } from './mainDoorDeadboltWatchdog'
 describe('main door deadbolt watchdog', () => {
   beforeEach(() => {
     jest.useFakeTimers()
+    smsGateway.resetListeners()
     mockEntity(alertToggleId, 'on')
     mockEntity(deadboltSensorId, 'off')
+  })
+
+  it('requests one SMS after 30 seconds of red alert without resetting on repeated sensor reports', () => {
+    const smsMock = jest.fn()
+    smsGateway.on(smsMock)
+    new ReminderService()
+    emitStateUpdate(deadboltSensorId, 'on')
+    jest.advanceTimersByTime(60000)
+    emitStateUpdate(deadboltSensorId, 'on')
+    jest.advanceTimersByTime(30000)
+    expect(smsMock).not.toHaveBeenCalled()
+    emitStateUpdate(deadboltSensorId, 'on')
+    jest.advanceTimersByTime(29999)
+    expect(smsMock).not.toHaveBeenCalled()
+    jest.advanceTimersByTime(1)
+    expect(smsMock).toHaveBeenCalledTimes(1)
+    expect(smsMock).toHaveBeenCalledWith({
+      source: 'mainDoorOpen',
+      text: 'The main door is open.',
+    })
+    jest.advanceTimersByTime(120000)
+    expect(smsMock).toHaveBeenCalledTimes(1)
+    emitStateUpdate(deadboltSensorId, 'off')
+    emitStateUpdate(deadboltSensorId, 'on')
+    jest.advanceTimersByTime(120000)
+    expect(smsMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('cancels the SMS countdown when the door closes during the red alert', () => {
+    const smsMock = jest.fn()
+    smsGateway.on(smsMock)
+    new ReminderService()
+    emitStateUpdate(deadboltSensorId, 'on')
+    jest.advanceTimersByTime(110000)
+    emitStateUpdate(deadboltSensorId, 'off')
+    jest.advanceTimersByTime(30000)
+    expect(smsMock).not.toHaveBeenCalled()
   })
 
   const checkNotificationState = (

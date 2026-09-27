@@ -43,9 +43,14 @@ The dedicated frontend for this backend is [here](https://github.com/adan2013/HA
 | LOCATION_LAT           | house location - latitude                                                    |
 | LOCATION_LON           | house location - longitude                                                   |
 | LOG_DIR                | log directory (defaults to `logs` locally and `/opt/app/logs` in production) |
+| SENDLY_API_KEY         | Sendly Link Bearer token                                                     |
+| SMS_RECIPIENTS         | comma-separated 9-11 digit numbers; a leading `+` is accepted                |
 
-`HA_TOKEN` and `DASHBOARD_ACCESS_TOKEN` are runtime-only secrets. The Docker
-image does not require either value while it is being built; pass them when the
+SMS requests omit `from` so Sendly Link uses the account's default `SENDLY`
+sender ID.
+
+`HA_TOKEN`, `DASHBOARD_ACCESS_TOKEN`, and `SENDLY_API_KEY` are runtime-only secrets. The Docker
+image does not require these values while it is being built; pass them when the
 container starts, for example with `docker run --env-file .env`.
 
 The backend refuses to start without `DASHBOARD_ACCESS_TOKEN`. A dashboard must
@@ -76,7 +81,8 @@ To migrate an existing standalone backend container to a Portainer Stack:
    `refs/heads/main` as the reference, and `compose.yaml` as the Compose path.
 4. Add the existing values under **Environment variables** for `TZ`, `HA_HOST`,
    `HA_TOKEN`, `HA_REQUIRED_ENTITIES`, `DASHBOARD_ACCESS_TOKEN`, `AQI_API_KEY`,
-   `AQI_STATION`, `WEATHER_API_KEY`, `LOCATION_LAT`, and `LOCATION_LON`.
+   `AQI_STATION`, `WEATHER_API_KEY`, `LOCATION_LAT`, `LOCATION_LON`,
+   `SENDLY_API_KEY`, and `SMS_RECIPIENTS`.
 5. Stop and remove the old standalone backend container so port `8008` becomes
    available, then deploy the Stack.
 6. Confirm that the Stack created the `ha-backend-logs` named volume and that

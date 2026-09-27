@@ -11,6 +11,7 @@ const WS_CMD = {
     GET_STATUS: 'getStatus',
     TRIGGER_NOTIFICATION: 'triggerNotification',
     DISMISS_NOTIFICATION: 'dismissNotification',
+    TEST_SMS: 'testSms',
     REMOTE_CONTROL: 'remoteControl',
   },
   outgoing: {

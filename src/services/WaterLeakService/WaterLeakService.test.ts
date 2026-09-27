@@ -1,6 +1,6 @@
 import WaterLeakService from './WaterLeakService'
 import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
-import { notifications } from '../../events/events'
+import { notifications, smsGateway } from '../../events/events'
 import Entities from '../../configs/entities.config'
 
 jest.mock('../../configs/waterLeak.config', () => [
@@ -28,9 +28,39 @@ const checkServiceStatus = (
 
 describe('WaterLeakService', () => {
   beforeEach(() => {
+    smsGateway.resetListeners()
     mockEntity(Entities.inputBoolean.security.waterLeakMonitoring, 'on')
     mockEntity('sensor1', 'off')
     mockEntity('sensor2', 'off')
+  })
+
+  it('requests one SMS per alarm episode', () => {
+    const smsMock = jest.fn()
+    smsGateway.on(smsMock)
+    new WaterLeakService()
+    emitStateUpdate('sensor1', 'on')
+    emitStateUpdate('sensor2', 'on')
+    emitStateUpdate('sensor1', 'off')
+    expect(smsMock).toHaveBeenCalledTimes(1)
+    expect(smsMock).toHaveBeenCalledWith({
+      source: 'waterLeak',
+      text: 'Water leak detected: S1.',
+    })
+
+    emitStateUpdate(Entities.inputBoolean.security.waterLeakMonitoring, 'off')
+    emitStateUpdate(Entities.inputBoolean.security.waterLeakMonitoring, 'on')
+    expect(smsMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('requests an SMS when a sensor is already leaking at startup', () => {
+    mockEntity('sensor1', 'on')
+    const smsMock = jest.fn()
+    smsGateway.on(smsMock)
+    new WaterLeakService()
+    expect(smsMock).toHaveBeenCalledWith({
+      source: 'waterLeak',
+      text: 'Water leak detected: S1.',
+    })
   })
 
   it('should init water leak service with correct status', () => {

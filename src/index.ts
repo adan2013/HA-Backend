@@ -21,6 +21,7 @@ import AniaRoomController from './services/AniaRoomController/AniaRoomController
 import DanielRoomController from './services/DanielRoomController/DanielRoomController'
 import BroadcastDeviceService from './services/BroadcastDeviceService/BroadcastDeviceService'
 import PrinterController from './services/PrinterController/PrinterController'
+import SmsService from './services/SmsService/SmsService'
 
 const logger = createLogger('Application')
 
@@ -62,6 +63,7 @@ new WebSocketServerConnector(
 
 homeAssistantSync.once(() => {
   sm.registerService(new NotificationsService())
+  sm.registerService(new SmsService())
   sm.registerService(
     new WeatherService(
       process.env['WEATHER_API_KEY'],

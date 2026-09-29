@@ -22,7 +22,7 @@ const devices: DeviceMetadata[] = [
     maxHoursWithoutUpdate: PASSIVE_SENSOR_MAX_HOURS_WITHOUT_UPDATE,
   },
   {
-    entityId: Entities.light.dashNode.tabletLight,
+    entityId: Entities.sensor.temperature.dashNodeServerRack,
     name: 'Dash node',
     maxHoursWithoutUpdate: ACTIVE_DEVICE_MAX_HOURS_WITHOUT_UPDATE,
   },

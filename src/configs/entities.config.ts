@@ -115,6 +115,7 @@ const Entities = {
       aniaRoom: 'sensor.aniatempsensor_temperature',
       danielRoom: 'sensor.danieltempsensor_temperature',
       livingRoom: 'sensor.livingroomtempsensor_temperature',
+      dashNodeServerRack: 'sensor.dash_node_server_rack_temperature',
     },
   },
   switch: {

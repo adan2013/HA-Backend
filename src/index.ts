@@ -7,7 +7,6 @@ import ServiceManager from './services/ServiceManager'
 import NotificationsService from './services/NotificationsService/NotificationsService'
 import WeatherService from './services/WeatherService/WeatherService'
 import BalconyController from './services/BalconyController/BalconyController'
-import ReminderService from './services/ReminderService/ReminderService'
 import formatDateTime from './utils/formatDateTime'
 import { createLogger } from './logging/logger'
 import { registerProcessErrorHandlers } from './logging/processErrorHandlers'
@@ -22,6 +21,10 @@ import DanielRoomController from './services/DanielRoomController/DanielRoomCont
 import BroadcastDeviceService from './services/BroadcastDeviceService/BroadcastDeviceService'
 import PrinterController from './services/PrinterController/PrinterController'
 import SmsService from './services/SmsService/SmsService'
+import WashingMachineController from './services/WashingMachineController/WashingMachineController'
+import DeadlinesService from './services/DeadlinesService/DeadlinesService'
+import MainDoorService from './services/MainDoorService/MainDoorService'
+import ThermostatController from './services/ThermostatController/ThermostatController'
 
 const logger = createLogger('Application')
 
@@ -76,7 +79,9 @@ homeAssistantSync.once(() => {
   sm.registerService(new BalconyController())
   sm.registerService(new LivingRoomController())
   sm.registerService(new KitchenController())
-  sm.registerService(new ReminderService())
+  sm.registerService(new WashingMachineController())
+  sm.registerService(new DeadlinesService())
+  sm.registerService(new MainDoorService())
   sm.registerService(new WaterLeakService())
   sm.registerService(new DeviceMonitorService())
   sm.registerService(new EnergyMonitorService())
@@ -84,6 +89,7 @@ homeAssistantSync.once(() => {
   sm.registerService(new DanielRoomController())
   sm.registerService(new BroadcastDeviceService())
   sm.registerService(new PrinterController())
+  sm.registerService(new ThermostatController())
   notifications.emit({
     id: 'backendStarted',
     enabled: true,

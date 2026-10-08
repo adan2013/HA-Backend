@@ -1,9 +1,11 @@
-import { notifications, smsGateway } from '../../../../events/events'
-import ReminderService from '../../ReminderService'
-import { emitStateUpdate, mockEntity } from '../../../../utils/testUtils'
-import { alertToggleId, deadboltSensorId } from './mainDoorDeadboltWatchdog'
+import { notifications, smsGateway } from '../../events/events'
+import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
+import MainDoorService, {
+  alertToggleId,
+  deadboltSensorId,
+} from './MainDoorService'
 
-describe('main door deadbolt watchdog', () => {
+describe('MainDoorService', () => {
   beforeEach(() => {
     jest.useFakeTimers()
     smsGateway.resetListeners()
@@ -14,7 +16,7 @@ describe('main door deadbolt watchdog', () => {
   it('requests one SMS after 30 seconds of red alert without resetting on repeated sensor reports', () => {
     const smsMock = jest.fn()
     smsGateway.on(smsMock)
-    new ReminderService()
+    new MainDoorService()
     emitStateUpdate(deadboltSensorId, 'on')
     jest.advanceTimersByTime(60000)
     emitStateUpdate(deadboltSensorId, 'on')
@@ -40,7 +42,7 @@ describe('main door deadbolt watchdog', () => {
   it('cancels the SMS countdown when the door closes during the red alert', () => {
     const smsMock = jest.fn()
     smsGateway.on(smsMock)
-    new ReminderService()
+    new MainDoorService()
     emitStateUpdate(deadboltSensorId, 'on')
     jest.advanceTimersByTime(110000)
     emitStateUpdate(deadboltSensorId, 'off')
@@ -66,7 +68,7 @@ describe('main door deadbolt watchdog', () => {
   it('should show and hide the notification about the open main doors', () => {
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
-    new ReminderService()
+    new MainDoorService()
     checkNotificationState(notificationMock, false, false)
     notificationMock.mockReset()
     emitStateUpdate(deadboltSensorId, 'on')
@@ -85,7 +87,7 @@ describe('main door deadbolt watchdog', () => {
   it('should disable the main door notification if the toggle is off', () => {
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
-    new ReminderService()
+    new MainDoorService()
     emitStateUpdate(deadboltSensorId, 'on')
     checkNotificationState(notificationMock, true, false)
     emitStateUpdate(alertToggleId, 'off')

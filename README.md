@@ -107,19 +107,43 @@ Very useful tool that allows you to convert the numeric value to the toggle with
 
 It is a simple tool that allows you to convert the numeric value to the toggle with the double threshold. I am using it to determine when is bright enough to turn off the auto-lights in the kitchen.
 
+### EntityValueSyncHelper
+
+Passes the numeric state of one entity to a `number` entity in Home Assistant. Its status shows the last synchronized value and time, or an error when the source or target entity is unavailable.
+
 ### StateMachine
 
 Simple state machine implementation with implemented "auto-return" functionality and Type-Script support.
 
 ## Services
 
+### AniaRoomController
+
+Controls the bed lamp in Ania's room with a Tuya remote: daylight and warm light presets and turning the lamp off.
+
 ### BalconyController
 
 The service is using the CRON job to turn on and off the Christmas lights on the balcony.
 
+### BroadcastDeviceService
+
+Shows a notification when a camera or microphone is in use on one of the computers.
+
+### DanielRoomController
+
+Controls the bed lamp in Daniel's room with a Tuya remote. It can also turn on or off the lights in the whole flat by triggering the other remotes.
+
+### DeadlinesService
+
+Tracks recurring deadlines (for example, filter replacements) stored as dates in Home Assistant and shows a warning notification when any of them is close to expiring.
+
 ### DeviceMonitor
 
 The service is responsible for monitoring the devices in the network. It is checking the availability of the devices and the battery levels.
+
+### EnergyMonitorService
+
+Tracks the daily, monthly and per-run energy consumption of the devices plugged into smart plugs and sends this data to the dashboard.
 
 ### KitchenController
 
@@ -129,13 +153,29 @@ Custom logic for my automatic lights in the kitchen. It uses an Aqara motion and
 
 Custom logic for all the lights in the living room. For now, it contains four different light sources and one Aqara Opple remote.
 
+### MainDoorService
+
+Monitors the main door deadbolt sensor. It shows a notification when the door is open, escalates it to an alert after 90 seconds and sends an SMS if the door is still open 30 seconds later.
+
 ### NotificationsService
 
 It is responsible for controlling the active notifications that are displayed on the dashboard. It is also responsible for setting the notification light behind the tablet and playing sound alerts through the buzzer.
 
-### ReminderService
+### PrinterController
 
-It is a group service that contains all the micro-integrations related to reminders - for example: ready laundry or opened main doors.
+Shows the Bambu Lab printer status and progress as notifications. It can also automatically turn off the printer plug after the print is finished and the nozzle has cooled down.
+
+### SmsService
+
+Sends SMS alerts through the Sendly API to the configured recipients when SMS alerts are enabled. It shows a notification when sending fails.
+
+### ThermostatController
+
+Sends the temperature from each room thermometer to the external temperature input of the radiator valve in the same room. Thermometer-valve pairs are defined in `thermostat.config.ts`.
+
+### WashingMachineController
+
+Detects the end of a washing cycle based on the power consumption reported by the smart plug and shows a notification about the ready laundry.
 
 ### WaterLeak
 

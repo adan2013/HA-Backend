@@ -7,6 +7,7 @@ import InputTextEntity from './InputTextEntity'
 import SwitchEntity from './SwitchEntity'
 import AqaraOppleRemoteEntity from './AqaraOppleRemoteEntity'
 import TuyaRemoteEntity from './TuyaRemoteEntity'
+import NumberEntity from './NumberEntity'
 
 class Entity {
   public static general(entityId: string, options?: EntityExtraOptions) {
@@ -35,6 +36,10 @@ class Entity {
 
   public static inputText(entityId: string) {
     return new InputTextEntity(entityId)
+  }
+
+  public static number(entityId: string) {
+    return new NumberEntity(entityId)
   }
 
   public static monoLight(entityId: string) {

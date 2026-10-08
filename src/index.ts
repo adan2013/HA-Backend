@@ -24,6 +24,7 @@ import SmsService from './services/SmsService/SmsService'
 import WashingMachineController from './services/WashingMachineController/WashingMachineController'
 import DeadlinesService from './services/DeadlinesService/DeadlinesService'
 import MainDoorService from './services/MainDoorService/MainDoorService'
+import ThermostatController from './services/ThermostatController/ThermostatController'
 
 const logger = createLogger('Application')
 
@@ -88,6 +89,7 @@ homeAssistantSync.once(() => {
   sm.registerService(new DanielRoomController())
   sm.registerService(new BroadcastDeviceService())
   sm.registerService(new PrinterController())
+  sm.registerService(new ThermostatController())
   notifications.emit({
     id: 'backendStarted',
     enabled: true,

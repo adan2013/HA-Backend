@@ -79,6 +79,26 @@ const Entities = {
       tv: 'light.tvlight',
     },
   },
+  number: {
+    radiatorValve: {
+      aniaRoomExternalTemperature:
+        'number.aniaradiatorvalve_external_temperature_input',
+      danielRoomExternalTemperature:
+        'number.danielradiatorvalve_external_temperature_input',
+      livingRoomExternalTemperature:
+        'number.livingroomradiatorvalve_external_temperature_input',
+    },
+  },
+  select: {
+    radiatorValve: {
+      aniaRoomTemperatureSensor:
+        'select.aniaradiatorvalve_temperature_sensor_select',
+      danielRoomTemperatureSensor:
+        'select.danielradiatorvalve_temperature_sensor_select',
+      livingRoomTemperatureSensor:
+        'select.livingroomradiatorvalve_temperature_sensor_select',
+    },
+  },
   sensor: {
     bambuLabPrinter: {
       currentLayer: 'sensor.p1s_01p00a453001011_current_layer',

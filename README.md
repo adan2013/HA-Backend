@@ -117,6 +117,10 @@ Simple state machine implementation with implemented "auto-return" functionality
 
 The service is using the CRON job to turn on and off the Christmas lights on the balcony.
 
+### DeadlinesService
+
+Tracks recurring deadlines (for example, filter replacements) stored as dates in Home Assistant and shows a warning notification when any of them is close to expiring.
+
 ### DeviceMonitor
 
 The service is responsible for monitoring the devices in the network. It is checking the availability of the devices and the battery levels.
@@ -129,13 +133,17 @@ Custom logic for my automatic lights in the kitchen. It uses an Aqara motion and
 
 Custom logic for all the lights in the living room. For now, it contains four different light sources and one Aqara Opple remote.
 
+### MainDoorService
+
+Monitors the main door deadbolt sensor. It shows a notification when the door is open, escalates it to an alert after 90 seconds and sends an SMS if the door is still open 30 seconds later.
+
 ### NotificationsService
 
 It is responsible for controlling the active notifications that are displayed on the dashboard. It is also responsible for setting the notification light behind the tablet and playing sound alerts through the buzzer.
 
-### ReminderService
+### WashingMachineController
 
-It is a group service that contains all the micro-integrations related to reminders - for example: ready laundry or opened main doors.
+Detects the end of a washing cycle based on the power consumption reported by the smart plug and shows a notification about the ready laundry.
 
 ### WaterLeak
 

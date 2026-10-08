@@ -1,8 +1,8 @@
-import { notifications } from '../../../../events/events'
-import ReminderService from '../../ReminderService'
-import { emitStateUpdate, mockEntity } from '../../../../utils/testUtils'
+import { notifications } from '../../events/events'
+import DeadlinesService from './DeadlinesService'
+import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
 
-jest.mock('../../../../configs/deadline.config', () => [
+jest.mock('../../configs/deadline.config', () => [
   {
     label: 'label1',
     entityId: 'entity1',
@@ -17,7 +17,7 @@ jest.mock('../../../../configs/deadline.config', () => [
   },
 ])
 
-describe('deadlines watchdog', () => {
+describe('DeadlinesService', () => {
   beforeEach(() => {
     jest.useFakeTimers()
     mockEntity('entity1', '2023-02-15')
@@ -28,7 +28,7 @@ describe('deadlines watchdog', () => {
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
     jest.setSystemTime(new Date('2023-02-25'))
-    new ReminderService()
+    new DeadlinesService()
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: false,
@@ -39,7 +39,7 @@ describe('deadlines watchdog', () => {
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
     jest.setSystemTime(new Date('2023-03-20'))
-    new ReminderService()
+    new DeadlinesService()
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,
@@ -51,7 +51,7 @@ describe('deadlines watchdog', () => {
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
     jest.setSystemTime(new Date('2024-05-20'))
-    new ReminderService()
+    new DeadlinesService()
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,
@@ -63,7 +63,7 @@ describe('deadlines watchdog', () => {
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
     jest.setSystemTime(new Date('2023-09-14'))
-    new ReminderService()
+    new DeadlinesService()
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,
@@ -87,7 +87,7 @@ describe('deadlines watchdog', () => {
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
     jest.setSystemTime(new Date('2023-10-14'))
-    new ReminderService()
+    new DeadlinesService()
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,

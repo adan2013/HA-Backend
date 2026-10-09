@@ -107,9 +107,9 @@ Very useful tool that allows you to convert the numeric value to the toggle with
 
 It is a simple tool that allows you to convert the numeric value to the toggle with the double threshold. I am using it to determine when is bright enough to turn off the auto-lights in the kitchen.
 
-### EntityValueSyncHelper
+### RadiatorMonitorHelper
 
-Passes the numeric state of one entity to a `number` entity in Home Assistant. Its status shows the last synchronized value and time, or an error when the source or target entity is unavailable.
+Monitors a radiator's temperature source and synchronizes its external temperature input with the room thermometer. It resends the current temperature after `resendAfterMinutes` without a send; each new temperature send restarts that timeout. Invalid temperatures and unavailable entities pause synchronization. Its status shows the room temperature, radiator input, sensor mode, last sent value and time, and next resend or retry. `external_3` is healthy; `external_2` indicates fallback to the built-in sensor. The newer `remote_temperature`, `remote_source_offline`, and `local_temperature` names are also supported.
 
 ### StateMachine
 
@@ -171,7 +171,7 @@ Sends SMS alerts through the Sendly API to the configured recipients when SMS al
 
 ### ThermostatController
 
-Sends the temperature from each room thermometer to the external temperature input of the radiator valve in the same room. Thermometer-valve pairs are defined in `thermostat.config.ts`.
+Registers one `RadiatorMonitorHelper` per thermometer-valve pair defined in `thermostat.config.ts`. The inactivity resend interval is configured by `TEMPERATURE_RESEND_AFTER_MINUTES` (30 minutes by default) in the controller. Device warnings and errors are reported by each helper; the service status only shows the number of monitored radiators.
 
 ### WashingMachineController
 

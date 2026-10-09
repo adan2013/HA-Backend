@@ -1,7 +1,13 @@
-import ThermostatController from './ThermostatController'
+import ThermostatController, {
+  TEMPERATURE_RESEND_AFTER_MINUTES,
+} from './ThermostatController'
 import thermostatPairs from '../../configs/thermostat.config'
 import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
-import { serviceCall } from '../../events/events'
+import {
+  entityStateRequest,
+  entityUpdate,
+  serviceCall,
+} from '../../events/events'
 import Entities from '../../configs/entities.config'
 
 describe('ThermostatController', () => {
@@ -10,6 +16,14 @@ describe('ThermostatController', () => {
   beforeEach(() => {
     jest.useFakeTimers()
     jest.setSystemTime(new Date('2026-10-08T12:43:00Z'))
+    entityStateRequest.resetListeners()
+    thermostatPairs.forEach((pair) => {
+      entityUpdate(pair.thermometerEntityId).resetListeners()
+      entityUpdate(
+        pair.radiatorValveExternalTemperatureEntityId,
+      ).resetListeners()
+      entityUpdate(pair.radiatorValveTemperatureSensorEntityId).resetListeners()
+    })
     serviceCall.resetListeners()
     serviceCallMock = jest.fn()
     serviceCall.on(serviceCallMock)
@@ -49,62 +63,74 @@ describe('ThermostatController', () => {
     ])
   })
 
-  it('should register a sync helper for every thermostat pair', () => {
-    const service = new ThermostatController()
-    expect(service.getServiceStatus()).toEqual({
-      status: {
-        message: 'Synchronized thermostats: 3',
-        color: 'green',
-      },
-      helpers: {
-        'entityValueSync/aniaRoom': {
-          message: 'Last value: 20.4 | Synced at: 12:43 08-10-2026',
-          color: 'green',
-        },
-        'entityValueSync/danielRoom': {
-          message: 'Last value: 21.4 | Synced at: 12:43 08-10-2026',
-          color: 'green',
-        },
-        'entityValueSync/livingRoom': {
-          message: 'Last value: 22.4 | Synced at: 12:43 08-10-2026',
-          color: 'green',
-        },
-      },
-    })
+  afterEach(() => {
+    jest.clearAllTimers()
+    jest.useRealTimers()
   })
 
-  it('should show a warning status when some radiator valves are not in the external sensor mode', () => {
-    mockEntity(
-      thermostatPairs[0].radiatorValveTemperatureSensorEntityId,
-      'internal',
-    )
-    mockEntity(
-      thermostatPairs[2].radiatorValveTemperatureSensorEntityId,
-      'unavailable',
-    )
+  it('should register a monitor for every thermostat pair', () => {
     const service = new ThermostatController()
-    expect(service.getServiceStatus().status).toEqual({
-      message:
-        'Synchronized thermostats: 3; Not in external sensor mode: aniaRoom, livingRoom',
-      color: 'yellow',
-    })
-  })
-
-  it('should update the status when the sensor mode changes', () => {
-    const service = new ThermostatController()
-    const danielSensorModeId =
-      thermostatPairs[1].radiatorValveTemperatureSensorEntityId
-    emitStateUpdate(danielSensorModeId, 'internal')
-    expect(service.getServiceStatus().status).toEqual({
-      message:
-        'Synchronized thermostats: 3; Not in external sensor mode: danielRoom',
-      color: 'yellow',
-    })
-    emitStateUpdate(danielSensorModeId, 'external')
-    expect(service.getServiceStatus().status).toEqual({
-      message: 'Synchronized thermostats: 3',
+    const { status, helpers } = service.getServiceStatus()
+    expect(status).toEqual({
+      message: 'Monitored radiators: 3',
       color: 'green',
     })
+    expect(Object.keys(helpers)).toEqual([
+      'radiatorMonitor/aniaRoom',
+      'radiatorMonitor/danielRoom',
+      'radiatorMonitor/livingRoom',
+    ])
+    thermostatPairs.forEach((pair, i) => {
+      const helper = helpers[`radiatorMonitor/${pair.name}`]
+      expect(helper.color).toBe('green')
+      expect(helper.message).toContain(`Room: 2${i}.4°C`)
+      expect(helper.message).toContain('Sensor: external (room thermometer)')
+      expect(helper.message).toContain('Next resend: 13:13 08-10-2026')
+    })
+  })
+
+  it('should report sensor warnings only in the relevant helper', () => {
+    const service = new ThermostatController()
+    const modeId = thermostatPairs[1].radiatorValveTemperatureSensorEntityId
+    emitStateUpdate(modeId, 'external_2')
+    const { status, helpers } = service.getServiceStatus()
+    expect(status).toEqual({
+      message: 'Monitored radiators: 3',
+      color: 'green',
+    })
+    expect(helpers['radiatorMonitor/danielRoom'].color).toBe('yellow')
+    expect(helpers['radiatorMonitor/danielRoom'].message).toContain(
+      'fallback to built-in sensor',
+    )
+    expect(helpers['radiatorMonitor/aniaRoom'].color).toBe('green')
+    emitStateUpdate(modeId, 'external_3')
+    expect(
+      service.getServiceStatus().helpers['radiatorMonitor/danielRoom'].color,
+    ).toBe('green')
+    expect(serviceCallMock).toHaveBeenCalledTimes(3)
+  })
+
+  it('should independently renew inactivity timers for each radiator', () => {
+    new ThermostatController()
+    jest.advanceTimersByTime(10 * 60000)
+    emitStateUpdate(thermostatPairs[1].thermometerEntityId, '23')
+    expect(serviceCallMock).toHaveBeenCalledTimes(4)
+    jest.advanceTimersByTime((TEMPERATURE_RESEND_AFTER_MINUTES - 10) * 60000)
+    expect(serviceCallMock).toHaveBeenCalledTimes(6)
+    expect(
+      serviceCallMock.mock.calls.slice(4).map(([call]) => call.entityId),
+    ).toEqual([
+      thermostatPairs[0].radiatorValveExternalTemperatureEntityId,
+      thermostatPairs[2].radiatorValveExternalTemperatureEntityId,
+    ])
+    jest.advanceTimersByTime(10 * 60000)
+    expect(serviceCallMock).toHaveBeenCalledTimes(7)
+    expect(serviceCallMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        entityId: thermostatPairs[1].radiatorValveExternalTemperatureEntityId,
+        data: { value: 23 },
+      }),
+    )
   })
 
   it('should send room temperatures to the external temperature inputs of radiator valves', () => {
@@ -128,11 +154,11 @@ describe('ThermostatController', () => {
       'unavailable',
     )
     const { helpers } = service.getServiceStatus()
-    expect(helpers['entityValueSync/danielRoom']).toEqual({
-      message: 'Target entity is unavailable',
-      color: 'red',
-    })
-    expect(helpers['entityValueSync/aniaRoom'].color).toBe('green')
-    expect(helpers['entityValueSync/livingRoom'].color).toBe('green')
+    expect(helpers['radiatorMonitor/danielRoom'].color).toBe('red')
+    expect(helpers['radiatorMonitor/danielRoom'].message).toContain(
+      'Radiator is unavailable',
+    )
+    expect(helpers['radiatorMonitor/aniaRoom'].color).toBe('green')
+    expect(helpers['radiatorMonitor/livingRoom'].color).toBe('green')
   })
 })

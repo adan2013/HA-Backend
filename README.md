@@ -141,6 +141,18 @@ Tracks recurring deadlines (for example, filter replacements) stored as dates in
 
 The service is responsible for monitoring the devices in the network. It is checking the availability of the devices and the battery levels.
 
+Each device in `src/configs/deviceMonitor.config.ts` selects `monitoring: 'entity'`
+(Home Assistant availability and an optional `maxHoursWithoutUpdate`) or
+`monitoring: 'ping'` (an IPv4 `ipAddress` and `intervalHours`). DashNode uses
+ICMP ping to `192.168.1.5` at startup and every two hours, independently of its
+temperature entity. Each check sends three requests; no replies trigger the
+offline notification, and a successful check clears it. Local ping errors are
+logged without changing the last known device status.
+
+The Docker image includes `iputils-ping`. When running outside Docker, a `ping`
+executable must be available on Linux or macOS. The backend must have network
+access to the device and permission to send ICMP echo requests.
+
 ### EnergyMonitorService
 
 Tracks the daily, monthly and per-run energy consumption of the devices plugged into smart plugs and sends this data to the dashboard.

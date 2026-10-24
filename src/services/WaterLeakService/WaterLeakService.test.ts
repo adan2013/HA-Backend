@@ -86,7 +86,7 @@ describe('WaterLeakService', () => {
     expect(notificationMock).toBeCalledWith({
       id: 'waterLeak',
       enabled: true,
-      extraInfo: 'S2',
+      payload: { sensors: ['S2'] },
     })
 
     notificationMock.mockReset()
@@ -100,7 +100,7 @@ describe('WaterLeakService', () => {
     expect(notificationMock).toBeCalledWith({
       id: 'waterLeak',
       enabled: true,
-      extraInfo: 'S2',
+      payload: { sensors: ['S2'] },
     })
   })
 
@@ -142,7 +142,7 @@ describe('WaterLeakService', () => {
     expect(notificationMock).toBeCalledWith({
       id: 'waterLeak',
       enabled: false,
-      extraInfo: '',
+      payload: { sensors: [] },
     })
   })
 })

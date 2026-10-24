@@ -1,3 +1,4 @@
+import { NotificationPayloadMap } from '../NotificationsService/notificationContract'
 import axios from 'axios'
 import Service from '../Service'
 import Entity from '../../entities/Entity'
@@ -122,7 +123,10 @@ class SmsService extends Service {
     )
   }
 
-  private enqueueSend(text: string, source: string): Promise<SendResult> {
+  private enqueueSend(
+    text: string,
+    source: NotificationPayloadMap['smsFailure']['source'],
+  ): Promise<SendResult> {
     this.sendQueue = this.sendQueue
       .then(() => this.send(text, source))
       .catch((error) => {
@@ -130,7 +134,7 @@ class SmsService extends Service {
         this.lastSendFailed = true
         this.lastOutcome = `Last ${source} send failed: ${reason}`
         this.updateStatus()
-        this.reportFailure(source, reason)
+        this.reportFailure(source, [reason])
         return {
           sent: 0,
           failed: this.recipients.length,
@@ -141,12 +145,15 @@ class SmsService extends Service {
     return this.sendQueue
   }
 
-  private async send(text: string, source: string): Promise<SendResult> {
+  private async send(
+    text: string,
+    source: NotificationPayloadMap['smsFailure']['source'],
+  ): Promise<SendResult> {
     if (this.configError) {
       this.lastSendFailed = true
       this.lastOutcome = `Last attempt failed: ${this.configError}`
       this.updateStatus()
-      this.reportFailure(source, this.configError)
+      this.reportFailure(source, [this.configError])
       return {
         sent: 0,
         failed: this.recipients.length,
@@ -205,7 +212,10 @@ class SmsService extends Service {
     }
     this.updateStatus()
     if (failed > 0) {
-      this.reportFailure(source, `${summary}; ${failureReasons.join(', ')}`)
+      this.reportFailure(source, failureReasons, {
+        sent,
+        total: this.recipients.length,
+      })
     } else {
       notifications.emit({ id: 'smsFailure', enabled: false })
       logger.info('SMS series accepted by Sendly', { source, sent })
@@ -218,12 +228,16 @@ class SmsService extends Service {
     }
   }
 
-  private reportFailure(source: string, reason: string) {
-    logger.error('SMS series failed', { source, reason })
+  private reportFailure(
+    source: NotificationPayloadMap['smsFailure']['source'],
+    errors: string[],
+    delivery?: NotificationPayloadMap['smsFailure']['delivery'],
+  ) {
+    logger.error('SMS series failed', { source, errors, delivery })
     notifications.emit({
       id: 'smsFailure',
       enabled: true,
-      extraInfo: reason,
+      payload: { source, errors, ...(delivery ? { delivery } : {}) },
     })
   }
 }

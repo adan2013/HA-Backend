@@ -85,7 +85,7 @@ class DeviceMonitorService extends Service {
       this.detectedDevices.length > 0 ? 'yellow' : 'green',
     )
     const switchNotification = (
-      id: string,
+      id: 'lowBattery' | 'offlineSensor' | 'noSensorUpdate',
       list: DetectedDeviceMetadata[],
       alertsEnabled = true,
     ) => {
@@ -93,7 +93,7 @@ class DeviceMonitorService extends Service {
       notifications.emit({
         id: id,
         enabled: isOn,
-        extraInfo: isOn ? list.map((d) => d.name).join(', ') : undefined,
+        payload: isOn ? { devices: list.map((d) => d.name) } : undefined,
       })
     }
     switchNotification('lowBattery', bat, this.batteryLevelAlertToggle.isOn)

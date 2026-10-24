@@ -50,11 +50,10 @@ class PrinterController extends Service {
     this.listenOnAutoOffToggle()
   }
 
-  private formatRemainingTime(timeInMinutes: string | undefined) {
-    if (!timeInMinutes || Number(timeInMinutes) === 0) return undefined
-    const hours = Math.floor(Number(timeInMinutes) / 60)
-    const minutes = Math.floor(Number(timeInMinutes) % 60)
-    return `${hours}h ${minutes}m remaining`
+  private readNumber(value: string | undefined): number | null {
+    if (!value?.trim()) return null
+    const number = Number(value)
+    return Number.isFinite(number) && number >= 0 ? number : null
   }
 
   private getPrintingStatus(): PrinterStatus {
@@ -77,11 +76,13 @@ class PrinterController extends Service {
   }
 
   private listenOnPrinterProgress() {
-    this.remainingTime.onAnyStateUpdate(() => {
-      this.setStatusNotification()
-    })
-    this.currentLayer.onAnyStateUpdate(() => {
-      this.setStatusNotification()
+    ;[
+      this.remainingTime,
+      this.currentLayer,
+      this.totalLayerCount,
+      this.progressPercentage,
+    ].forEach((entity) => {
+      entity.onAnyStateUpdate(() => this.setStatusNotification())
     })
   }
 
@@ -126,37 +127,21 @@ class PrinterController extends Service {
       return
     }
 
-    const percentage = this.progressPercentage.state
-      ? `${this.progressPercentage.state.state}%`
-      : '0%'
-    const currentLayer = this.currentLayer.state
-      ? `${this.currentLayer.state.state}`
-      : '0'
-    const totalLayerCount = this.totalLayerCount.state
-      ? `${this.totalLayerCount.state.state}`
-      : '0'
-    const remainingTime = this.formatRemainingTime(
-      this.remainingTime.state?.state,
-    )
-    const autoOffInfo = this.autoOffToggle.isOn
-      ? ' (auto off enabled)'
-      : ''
-
-    if (currentLayer === '0' || totalLayerCount === '0') {
-      notifications.emit({
-        id: '3dPrintStatus',
-        enabled: true,
-        extraInfo: `Preparing to print...${autoOffInfo}`,
-      })
-    } else {
-      notifications.emit({
-        id: '3dPrintStatus',
-        enabled: true,
-        extraInfo: `[${percentage}] ${currentLayer} / ${totalLayerCount}${
-          remainingTime ? `, ${remainingTime}` : ''
-        }${autoOffInfo}`,
-      })
-    }
+    const progress = this.readNumber(this.progressPercentage.state?.state)
+    const currentLayer = this.readNumber(this.currentLayer.state?.state)
+    const totalLayerCount = this.readNumber(this.totalLayerCount.state?.state)
+    notifications.emit({
+      id: '3dPrintStatus',
+      enabled: true,
+      payload: {
+        phase: currentLayer && totalLayerCount ? 'printing' : 'preparing',
+        progressPercentage: progress === null ? null : Math.min(100, progress),
+        currentLayer,
+        totalLayerCount,
+        remainingMinutes: this.readNumber(this.remainingTime.state?.state),
+        autoOffEnabled: this.autoOffToggle.isOn,
+      },
+    })
   }
 
   private setOtherNotifications() {
@@ -172,8 +157,8 @@ class PrinterController extends Service {
     notifications.emit({
       id: '3dPrintFinished',
       enabled: printIsFinished,
-      ...(printIsFinished && this.autoOffToggle.isOn
-        ? { extraInfo: 'Auto off enabled' }
+      ...(printIsFinished
+        ? { payload: { autoOffEnabled: this.autoOffToggle.isOn } }
         : {}),
     })
   }

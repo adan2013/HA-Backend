@@ -1,3 +1,4 @@
+import { NotificationDetails } from '../services/NotificationsService/notificationContract'
 import { EntityState } from '../connectors/types'
 
 export type WebSocketIncomingMessagePayload = {
@@ -45,11 +46,7 @@ export type EntityStatePayload = {
   callback: (state: EntityState) => void
 }
 
-export type NotificationsPayload = {
-  id: string
-  enabled: boolean
-  extraInfo?: string
-}
+export type NotificationsPayload = NotificationDetails & { enabled: boolean }
 
 export type SmsPayload = {
   source: 'waterLeak' | 'mainDoorOpen'

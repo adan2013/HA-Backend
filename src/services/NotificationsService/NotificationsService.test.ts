@@ -53,7 +53,6 @@ describe('NotificationsService', () => {
     notifications.emit({
       id: 'test2',
       enabled: true,
-      extraInfo: 'extra payload',
     })
     expect(service.count).toBe(2)
     expect(service.getNotifications()).toMatchSnapshot()
@@ -75,7 +74,7 @@ describe('NotificationsService', () => {
     expect(service.count).toBe(1)
     const firstNotification = service.getNotifications()[0]
     expect(firstNotification.id).toBe('test3')
-    expect(firstNotification.extraInfo).toBe('Notification triggered manually')
+    expect(firstNotification.payload).toBeUndefined()
     expect(firstNotification.canBeDismissed).toBe(true)
     expect(service.getServiceStatus()).toEqual({
       helpers: {},
@@ -110,33 +109,42 @@ describe('NotificationsService', () => {
     expect(service.count).toBe(0)
   })
 
-  it('should not create any duplicated notification type', () => {
+  it('should update structured payloads without duplicating notifications', () => {
     const service = new NotificationsSerivce()
     notifications.emit({
-      id: 'test3',
+      id: 'deadlineWarning',
       enabled: true,
+      payload: { deadlines: ['First'] },
     })
     notifications.emit({
-      id: 'test3',
+      id: 'deadlineWarning',
       enabled: true,
+      payload: { deadlines: ['Second', 'Third'] },
     })
     expect(service.count).toBe(1)
+    expect(service.getNotifications()[0].payload).toEqual({
+      deadlines: ['Second', 'Third'],
+    })
+  })
+
+  it('should ignore equal payloads even with different property order', () => {
+    const service = new NotificationsSerivce()
     notifications.emit({
-      id: 'test3',
+      id: 'smsFailure',
       enabled: true,
-      extraInfo: 'extra payload',
+      payload: { source: 'waterLeak', errors: ['Failed'] },
     })
-    expect(service.count).toBe(1)
-    expect(service.getNotifications()[0].extraInfo).toBe('extra payload')
+    const previous = service.getNotifications()[0]
+    const serviceCallMock = jest.fn()
+    serviceCall.on(serviceCallMock)
+    jest.advanceTimersByTime(1000)
     notifications.emit({
-      id: 'test3',
+      id: 'smsFailure',
       enabled: true,
-      extraInfo: 'another extra payload',
+      payload: { errors: ['Failed'], source: 'waterLeak' },
     })
-    expect(service.count).toBe(1)
-    expect(service.getNotifications()[0].extraInfo).toBe(
-      'another extra payload',
-    )
+    expect(service.getNotifications()[0]).toBe(previous)
+    expect(serviceCallMock).not.toHaveBeenCalled()
   })
 
   it('should play alert sound only if DND is not active or notification can ignore DND', () => {
@@ -168,11 +176,8 @@ describe('NotificationsService', () => {
     jest.setSystemTime(new Date('2023-05-15T12:00:00Z'))
     service.updateDndMode()
     expect(service.dndIsActive).toBe(false)
-    notifications.emit({
-      id: 'test1',
-      enabled: true,
-      extraInfo: 'second call',
-    })
+    notifications.emit({ id: 'test1', enabled: false })
+    notifications.emit({ id: 'test1', enabled: true })
     expect(serviceCallMock).toHaveBeenCalledWith(soundPayload(test1Sound))
   })
 
@@ -194,11 +199,8 @@ describe('NotificationsService', () => {
     })
     expect(serviceCallMock).not.toBeCalledWith(servicePayload)
     emitStateUpdate(Entities.inputBoolean.notifications.soundOn, 'on')
-    notifications.emit({
-      id: 'test1',
-      enabled: true,
-      extraInfo: 'second call',
-    })
+    notifications.emit({ id: 'test1', enabled: false })
+    notifications.emit({ id: 'test1', enabled: true })
     expect(serviceCallMock).toBeCalledWith(servicePayload)
   })
 
@@ -222,11 +224,8 @@ describe('NotificationsService', () => {
     })
     expect(serviceCallMock).not.toBeCalledWith(servicePayload)
     emitStateUpdate(Entities.inputBoolean.notifications.tabletLight, 'on')
-    notifications.emit({
-      id: 'test1',
-      enabled: true,
-      extraInfo: 'second call',
-    })
+    notifications.emit({ id: 'test1', enabled: false })
+    notifications.emit({ id: 'test1', enabled: true })
     expect(serviceCallMock).toBeCalledWith(servicePayload)
   })
 

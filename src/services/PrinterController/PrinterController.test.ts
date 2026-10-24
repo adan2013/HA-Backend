@@ -144,7 +144,14 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: '[10%] 14 / 200, 1h 4m remaining (auto off enabled)',
+        payload: {
+          phase: 'printing',
+          progressPercentage: 10,
+          currentLayer: 14,
+          totalLayerCount: 200,
+          remainingMinutes: 64,
+          autoOffEnabled: true,
+        },
       })
     })
 
@@ -162,7 +169,14 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: '[10%] 14 / 200, 1h 4m remaining',
+        payload: {
+          phase: 'printing',
+          progressPercentage: 10,
+          currentLayer: 14,
+          totalLayerCount: 200,
+          remainingMinutes: 64,
+          autoOffEnabled: false,
+        },
       })
     })
 
@@ -179,7 +193,14 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: '[10%] 14 / 200 (auto off enabled)',
+        payload: {
+          phase: 'printing',
+          progressPercentage: 10,
+          currentLayer: 14,
+          totalLayerCount: 200,
+          remainingMinutes: 0,
+          autoOffEnabled: true,
+        },
       })
     })
 
@@ -194,7 +215,14 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: 'Preparing to print... (auto off enabled)',
+        payload: {
+          phase: 'preparing',
+          progressPercentage: 0,
+          currentLayer: 0,
+          totalLayerCount: 0,
+          remainingMinutes: 64,
+          autoOffEnabled: true,
+        },
       })
     })
 
@@ -215,7 +243,14 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: '[10%] 15 / 200, 1h 4m remaining (auto off enabled)',
+        payload: {
+          phase: 'printing',
+          progressPercentage: 10,
+          currentLayer: 15,
+          totalLayerCount: 200,
+          remainingMinutes: 64,
+          autoOffEnabled: true,
+        },
       })
     })
 
@@ -236,9 +271,47 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintStatus',
         enabled: true,
-        extraInfo: '[10%] 14 / 200, 1h 4m remaining',
+        payload: {
+          phase: 'printing',
+          progressPercentage: 10,
+          currentLayer: 14,
+          totalLayerCount: 200,
+          remainingMinutes: 64,
+          autoOffEnabled: false,
+        },
       })
     })
+
+    it.each([
+      [printerProgressPercentageId, '42', 'progressPercentage', 42],
+      [printerTotalLayerCountId, '250', 'totalLayerCount', 250],
+      [printerRemainingTimeId, '12', 'remainingMinutes', 12],
+      [printerProgressPercentageId, '150', 'progressPercentage', 100],
+      [printerProgressPercentageId, 'unknown', 'progressPercentage', null],
+      [printerRemainingTimeId, 'unavailable', 'remainingMinutes', null],
+      [printerRemainingTimeId, '-1', 'remainingMinutes', null],
+      [printerCurrentLayerId, '', 'currentLayer', null],
+    ])(
+      'refreshes and normalizes %s = %s',
+      (entityId, state, field, expected) => {
+        const { notification } = initService({
+          printerPlugIsOn: true,
+          printerStatus: 'running',
+          currentLayer: 14,
+          totalLayerCount: 200,
+          nozzleTemp: '230',
+        })
+        notification.mockClear()
+        emitStateUpdate(entityId, state)
+        expect(notification).toHaveBeenCalledWith({
+          id: '3dPrintStatus',
+          enabled: true,
+          payload: expect.objectContaining({ [field]: expected }),
+        })
+        const payload = notification.mock.calls[0][0].payload
+        expect(JSON.parse(JSON.stringify(payload))).toEqual(payload)
+      },
+    )
 
     it('should disable status notification when printer is not printing', () => {
       const { notification } = initService({
@@ -323,7 +396,7 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintFinished',
         enabled: true,
-        extraInfo: 'Auto off enabled',
+        payload: { autoOffEnabled: true },
       })
       // Verify status notification was never enabled
       expect(notification).not.toHaveBeenCalledWith({
@@ -391,7 +464,7 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintFinished',
         enabled: true,
-        extraInfo: 'Auto off enabled',
+        payload: { autoOffEnabled: true },
       })
     })
 
@@ -405,6 +478,7 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintFinished',
         enabled: true,
+        payload: { autoOffEnabled: false },
       })
     })
 
@@ -421,6 +495,7 @@ describe('PrinterController', () => {
       expect(notification).toHaveBeenCalledWith({
         id: '3dPrintFinished',
         enabled: true,
+        payload: { autoOffEnabled: false },
       })
     })
 

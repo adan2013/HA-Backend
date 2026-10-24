@@ -56,7 +56,7 @@ describe('BroadcastDeviceService', () => {
     expect(notificationMock).toBeCalledWith({
       id: 'broadcastDeviceMicrophone',
       enabled: true,
-      extraInfo: 'Microphone sensor',
+      payload: { devices: ['Microphone sensor'] },
     })
 
     notificationMock.mockReset()
@@ -83,7 +83,7 @@ describe('BroadcastDeviceService', () => {
     expect(notificationMock).toBeCalledWith({
       id: 'broadcastDeviceCamera',
       enabled: true,
-      extraInfo: 'Camera sensor',
+      payload: { devices: ['Camera sensor'] },
     })
 
     notificationMock.mockReset()
@@ -112,7 +112,7 @@ describe('BroadcastDeviceService', () => {
     expect(notificationMock).toBeCalledWith({
       id: 'broadcastDeviceCamera',
       enabled: true,
-      extraInfo: 'Camera sensor',
+      payload: { devices: ['Camera sensor'] },
     })
     expect(notificationMock).toBeCalledWith({
       id: 'broadcastDeviceMicrophone',
@@ -129,7 +129,7 @@ describe('BroadcastDeviceService', () => {
     expect(notificationMock).toBeCalledWith({
       id: 'broadcastDeviceMicrophone',
       enabled: true,
-      extraInfo: 'Microphone sensor',
+      payload: { devices: ['Microphone sensor'] },
     })
     expect(notificationMock).toBeCalledWith({
       id: 'broadcastDeviceCamera',

@@ -12,6 +12,10 @@ import Timer from '../../Timer'
 import { parseBatteryReading } from '../../utils/batteryUtils'
 import { pingHost } from '../../utils/pingHost'
 import { createLogger } from '../../logging/logger'
+import {
+  NotificationDetails,
+  OfflineReason,
+} from '../NotificationsService/notificationContract'
 
 const logger = createLogger('DeviceMonitorService')
 
@@ -22,6 +26,9 @@ type DetectedDeviceMetadata = {
   offline: boolean
   noUpdate: boolean
   monitored: boolean
+  batteryPercentage?: number
+  hoursSinceLastReport?: number
+  offlineReason?: OfflineReason
 }
 
 class DeviceMonitorService extends Service {
@@ -74,6 +81,7 @@ class DeviceMonitorService extends Service {
         name: config.name,
         lowBattery: false,
         offline: !reachable,
+        offlineReason: reachable ? undefined : 'pingFailed',
         noUpdate: false,
         monitored: true,
       }
@@ -125,26 +133,57 @@ class DeviceMonitorService extends Service {
       this.detectedDevices.length > 0 ? 'yellow' : 'green',
     )
     const switchNotification = (
-      id: 'lowBattery' | 'offlineSensor' | 'noSensorUpdate',
-      list: DetectedDeviceMetadata[],
-      alertsEnabled = true,
+      details: Extract<
+        NotificationDetails,
+        { id: 'lowBattery' | 'offlineSensor' | 'noSensorUpdate' }
+      >,
+      alertsEnabled: boolean,
     ) => {
-      const isOn = alertsEnabled && list.length > 0
-      notifications.emit({
-        id: id,
-        enabled: isOn,
-        payload: isOn ? { devices: list.map((d) => d.name) } : undefined,
-      })
+      const isOn = alertsEnabled && (details.payload?.devices.length ?? 0) > 0
+      if (isOn) {
+        notifications.emit({ ...details, enabled: true })
+      } else {
+        notifications.emit({
+          id: details.id,
+          enabled: false,
+          payload: undefined,
+        })
+      }
     }
-    switchNotification('lowBattery', bat, this.batteryLevelAlertToggle.isOn)
     switchNotification(
-      'offlineSensor',
-      off,
+      {
+        id: 'lowBattery',
+        payload: {
+          devices: bat.map((d) => ({
+            name: d.name,
+            batteryPercentage: d.batteryPercentage ?? null,
+          })),
+        },
+      },
+      this.batteryLevelAlertToggle.isOn,
+    )
+    switchNotification(
+      {
+        id: 'offlineSensor',
+        payload: {
+          devices: off.map((d) => ({
+            name: d.name,
+            reason: d.offlineReason ?? 'unknown',
+          })),
+        },
+      },
       this.selfDiagnosticAlertToggle.isOn,
     )
     switchNotification(
-      'noSensorUpdate',
-      noUpdate,
+      {
+        id: 'noSensorUpdate',
+        payload: {
+          devices: noUpdate.map((d) => ({
+            name: d.name,
+            hoursSinceLastReport: d.hoursSinceLastReport ?? null,
+          })),
+        },
+      },
       this.selfDiagnosticAlertToggle.isOn,
     )
   }
@@ -198,10 +237,14 @@ class DeviceMonitorService extends Service {
     }
     if (entity.isUnavailable) {
       result.offline = true
+      result.offlineReason =
+        state.state === 'unavailable' ? 'unavailable' : 'unknown'
     } else {
       result.lowBattery =
         battery?.level !== undefined &&
+        battery.level >= 0 &&
         battery.level < this.BATTERY_LOW_THRESHOLD
+      if (result.lowBattery) result.batteryPercentage = battery?.level
       if (
         config?.monitoring === 'entity' &&
         config.maxHoursWithoutUpdate !== undefined
@@ -211,6 +254,11 @@ class DeviceMonitorService extends Service {
           !Number.isNaN(lastReportTimestamp) &&
           Date.now() - lastReportTimestamp >=
             config.maxHoursWithoutUpdate * 60 * 60 * 1000
+        if (result.noUpdate) {
+          result.hoursSinceLastReport = Math.floor(
+            (Date.now() - lastReportTimestamp) / (60 * 60 * 1000),
+          )
+        }
       }
     }
     return result

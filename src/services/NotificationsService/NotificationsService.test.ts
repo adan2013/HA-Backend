@@ -8,6 +8,7 @@ import {
 import { emitStateUpdate, mockEntity } from '../../utils/testUtils'
 import WS_CMD from '../../connectors/wsCommands'
 import Entities from '../../configs/entities.config'
+import notificationConfig from '../../configs/notification.config'
 
 describe('NotificationsService', () => {
   beforeEach(() => {
@@ -85,6 +86,19 @@ describe('NotificationsService', () => {
     })
   })
 
+  it('includes the configured MUI icon for every notification type', () => {
+    const service = new NotificationsSerivce()
+    notificationConfig.forEach((config) => {
+      notifications.emit({ id: config.id, enabled: true })
+      expect(
+        service.getNotifications().find((item) => item.id === config.id),
+      ).toMatchObject({
+        title: config.title,
+        icon: config.icon,
+      })
+    })
+  })
+
   it('should dismiss the notification', () => {
     const service = new NotificationsSerivce()
     webSocketMessage(WS_CMD.incoming.TRIGGER_NOTIFICATION).emit({
@@ -114,16 +128,24 @@ describe('NotificationsService', () => {
     notifications.emit({
       id: 'deadlineWarning',
       enabled: true,
-      payload: { deadlines: ['First'] },
+      payload: { deadlines: [{ label: 'First', daysLeft: 3 }] },
     })
     notifications.emit({
       id: 'deadlineWarning',
       enabled: true,
-      payload: { deadlines: ['Second', 'Third'] },
+      payload: {
+        deadlines: [
+          { label: 'Second', daysLeft: 0 },
+          { label: 'Third', daysLeft: -2 },
+        ],
+      },
     })
     expect(service.count).toBe(1)
     expect(service.getNotifications()[0].payload).toEqual({
-      deadlines: ['Second', 'Third'],
+      deadlines: [
+        { label: 'Second', daysLeft: 0 },
+        { label: 'Third', daysLeft: -2 },
+      ],
     })
   })
 
@@ -277,6 +299,31 @@ describe('NotificationsService', () => {
     expect(service.dndIsActive).toBe(false)
     expect(service.lastActiveLight).toBe('red')
   })
+
+  it.each([
+    ['broadcastDeviceCamera', 'green', [25, 255, 0]],
+    ['broadcastDeviceMicrophone', 'yellow', [255, 182, 0]],
+  ] as const)(
+    'uses the configured privacy indicator color for %s',
+    (id, color, rgb) => {
+      const serviceCallMock = jest.fn()
+      serviceCall.on(serviceCallMock)
+      const service = new NotificationsSerivce()
+      notifications.emit({
+        id,
+        enabled: true,
+        payload: { devices: ['Laptop'] },
+      })
+      expect(service.lastActiveLight).toBe(color)
+      expect(service.getNotifications()[0].light).toBe(color)
+      expect(serviceCallMock).toHaveBeenLastCalledWith({
+        entityId: Entities.light.dashNode.tabletLight,
+        domain: 'light',
+        service: 'turn_on',
+        data: { rgb_color: rgb, effect: 'None' },
+      })
+    },
+  )
 
   it('should stop a flashing effect when a static notification light resumes', () => {
     const serviceCallMock = jest.fn()

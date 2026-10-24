@@ -3,9 +3,8 @@ import { NotificationConfig } from '../services/NotificationsService/types'
 const notificationConfig: NotificationConfig[] = [
   {
     id: 'test1',
+    icon: 'ScienceOutlined',
     title: 'Test notification',
-    description:
-      'This is a test notification with high priority, red light and sound alert',
     priorityOrder: 'high',
     light: 'red',
     sound: 'scaleUp',
@@ -13,9 +12,8 @@ const notificationConfig: NotificationConfig[] = [
   },
   {
     id: 'test2',
+    icon: 'ScienceOutlined',
     title: 'Test notification',
-    description:
-      'This is a test notification with sound alert and yellow light which can ignore DND mode',
     priorityOrder: 'medium',
     light: 'yellow',
     sound: 'doubleBeep',
@@ -24,77 +22,71 @@ const notificationConfig: NotificationConfig[] = [
   },
   {
     id: 'test3',
+    icon: 'ScienceOutlined',
     title: 'Test notification',
-    description:
-      'This is a test notification with low priority and quick action button',
     canBeDismissed: false, // always can be dismissed if triggered manually by the user
   },
   {
     id: 'backendStarted',
+    icon: 'RestartAlt',
     title: 'System restarted',
-    description:
-      'The backend service has been started successfully. If you did not start it, please check the logs and verify the health of the system',
     priorityOrder: 'high',
     light: 'purple',
     canBeDismissed: true,
   },
   {
     id: 'loadedWashingMachine',
+    icon: 'LocalLaundryServiceOutlined',
     title: 'Laundry is ready',
-    description: 'Unload the washing machine and mark the device as empty',
     light: 'green',
     ignoreDND: true,
   },
   {
     id: '3dPrintFinished',
+    icon: 'CheckCircleOutline',
     title: '3D print finished',
-    description:
-      'The 3D print has been finished. Remove the print from the printer',
     canBeDismissed: true,
   },
   {
     id: '3dPrintPaused',
+    icon: 'PauseCircleOutline',
     title: '3D print paused',
-    description: 'The 3D print has been paused. Resume the print to continue',
     canBeDismissed: true,
     light: 'blueFlashing',
     sound: 'doubleBeep',
   },
   {
     id: '3dPrintFailed',
+    icon: 'ErrorOutline',
     title: '3D print failed',
-    description: 'The 3D print has failed. Check the printer and the print',
     canBeDismissed: true,
     light: 'red',
     sound: 'doubleBeep',
   },
   {
     id: '3dPrintStatus',
-    title: '3D print in progress',
-    description: '',
+    icon: 'ViewInArOutlined',
+    title: '3D printer',
     priorityOrder: 'low',
   },
   {
     id: 'deadlineWarning',
+    icon: 'EventOutlined',
     title: 'Upcoming deadline',
-    description:
-      'One of your deadline intervals are coming to and end. Take an action and reset the date',
     canBeDismissed: true,
   },
   {
     id: 'mainDoorOpen',
+    icon: 'MeetingRoomOutlined',
     title: 'The main door is open',
-    description:
-      'Remember to close the main door and use the deadbolt to secure the house',
     priorityOrder: 'medium',
     light: 'yellow',
     ignoreDND: true,
   },
   {
     id: 'mainDoorOpenAlert',
-    title: 'The main door is open',
-    description:
-      'The main door is open too long. Sound alert has been triggered',
+    icon: 'NotificationImportantOutlined',
+    title: 'Main door open too long',
     priorityOrder: 'medium',
     light: 'red',
     sound: 'scaleUp',
@@ -102,9 +94,8 @@ const notificationConfig: NotificationConfig[] = [
   },
   {
     id: 'waterLeak',
+    icon: 'WaterDropOutlined',
     title: 'Water leak detected',
-    description:
-      'One of the water leak sensors has been triggered. Check the source of the leak and turn off the water supply! To reset the alarm, turn off and on the water leak protection toggle',
     priorityOrder: 'high',
     light: 'redFlashing',
     sound: 'alarm',
@@ -112,56 +103,51 @@ const notificationConfig: NotificationConfig[] = [
   },
   {
     id: 'smsFailure',
+    icon: 'SmsFailedOutlined',
     title: 'SMS alert failed',
-    description:
-      'One or more SMS messages could not be sent. Check the SMS service status and backend logs.',
     light: 'red',
     canBeDismissed: true,
   },
   {
     id: 'lowBattery',
+    icon: 'BatteryAlertOutlined',
     title: 'Low battery detected',
-    description:
-      'One of your sensors has low battery. Replace the battery as soon as possible',
     priorityOrder: 'low',
     canBeDismissed: true,
   },
   {
     id: 'offlineSensor',
+    icon: 'WifiOffOutlined',
     title: 'Sensor is offline',
-    description:
-      'One of your important sensors is unavailable. Check the connection and battery level',
     priorityOrder: 'low',
     canBeDismissed: true,
   },
   {
     id: 'noSensorUpdate',
+    icon: 'SensorsOffOutlined',
     title: 'Sensor is not reporting',
-    description:
-      'One of your monitored sensors has not reported an update within the configured time. Check the sensor and its battery level',
     priorityOrder: 'low',
     canBeDismissed: true,
   },
   {
     id: 'manualKitchenLights',
-    title: 'Kitchen lights are on',
-    description:
-      'The kitchen lights are in manual mode. Turn off the lights to go back to automatic mode',
+    icon: 'LightbulbOutlined',
+    title: 'Kitchen lights in manual mode',
     priorityOrder: 'low',
     canBeDismissed: true,
   },
   {
     id: 'broadcastDeviceCamera',
+    icon: 'VideocamOutlined',
     title: 'Camera is in use',
-    description: 'One of the device is using the camera',
-    light: 'yellow',
+    light: 'green',
     ignoreDND: true,
   },
   {
     id: 'broadcastDeviceMicrophone',
+    icon: 'MicOutlined',
     title: 'Microphone is in use',
-    description: 'One of the device is using the microphone',
-    light: 'green',
+    light: 'yellow',
     ignoreDND: true,
   },
 ]

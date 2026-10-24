@@ -35,6 +35,22 @@ describe('DeadlinesService', () => {
     })
   })
 
+  it.each([
+    ['2023-03-21', 1],
+    ['2023-03-22', 0],
+    ['2023-03-23', -1],
+  ])('includes signed day counts on %s', (date, daysLeft) => {
+    const notificationMock = jest.fn()
+    notifications.on(notificationMock)
+    jest.setSystemTime(new Date(date))
+    new DeadlinesService()
+    expect(notificationMock).toHaveBeenLastCalledWith({
+      id: 'deadlineWarning',
+      enabled: true,
+      payload: { deadlines: [{ label: 'label2', daysLeft }] },
+    })
+  })
+
   it('should show deadline notification only for label2', () => {
     const notificationMock = jest.fn()
     notifications.on(notificationMock)
@@ -43,7 +59,7 @@ describe('DeadlinesService', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,
-      payload: { deadlines: ['label2'] },
+      payload: { deadlines: [{ label: 'label2', daysLeft: 2 }] },
     })
   })
 
@@ -55,7 +71,12 @@ describe('DeadlinesService', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,
-      payload: { deadlines: ['label1', 'label2'] },
+      payload: {
+        deadlines: [
+          { label: 'label1', daysLeft: -400 },
+          { label: 'label2', daysLeft: -425 },
+        ],
+      },
     })
   })
 
@@ -67,13 +88,18 @@ describe('DeadlinesService', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,
-      payload: { deadlines: ['label1', 'label2'] },
+      payload: {
+        deadlines: [
+          { label: 'label1', daysLeft: -151 },
+          { label: 'label2', daysLeft: -176 },
+        ],
+      },
     })
     emitStateUpdate('entity1', '2023-09-14')
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,
-      payload: { deadlines: ['label2'] },
+      payload: { deadlines: [{ label: 'label2', daysLeft: -176 }] },
     })
     emitStateUpdate('entity2', '2023-09-14')
     expect(notificationMock).toHaveBeenLastCalledWith({
@@ -91,7 +117,7 @@ describe('DeadlinesService', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,
-      payload: { deadlines: ['label2'] },
+      payload: { deadlines: [{ label: 'label2', daysLeft: -206 }] },
     })
     emitStateUpdate('entity2', 'unavailable')
     expect(notificationMock).toHaveBeenCalledWith({

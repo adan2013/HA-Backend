@@ -111,7 +111,65 @@ describe('Device monitor service', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'lowBattery',
       enabled: true,
-      payload: { devices: ['Living room remote'] },
+      payload: {
+        devices: [{ name: 'Living room remote', batteryPercentage: 12 }],
+      },
+    })
+  })
+
+  it('updates percentages while a battery remains low and clears the alert after recovery', () => {
+    new DeviceMonitorService()
+    const notificationMock = jest.fn()
+    notifications.on(notificationMock)
+    const updateBattery = (value: string) =>
+      emitStateUpdate('sensor.remote_battery', value, {
+        friendly_name: 'Remote Battery',
+      })
+    updateBattery('12')
+    updateBattery('0')
+    expect(notificationMock).toHaveBeenCalledWith({
+      id: 'lowBattery',
+      enabled: true,
+      payload: { devices: [{ name: 'Remote', batteryPercentage: 0 }] },
+    })
+    notificationMock.mockClear()
+    updateBattery('40')
+    expect(notificationMock).toHaveBeenCalledWith({
+      id: 'lowBattery',
+      enabled: false,
+      payload: undefined,
+    })
+  })
+
+  it.each(['-1', '101', 'unknown', 'unavailable', '', 'NaN'])(
+    'does not report an invalid battery percentage: %s',
+    (value) => {
+      new DeviceMonitorService()
+      const notificationMock = jest.fn()
+      notifications.on(notificationMock)
+      emitStateUpdate('sensor.remote_battery', value)
+      expect(notificationMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'lowBattery', enabled: true }),
+      )
+    },
+  )
+
+  it('distinguishes unavailable and unknown entity states', () => {
+    new DeviceMonitorService()
+    const notificationMock = jest.fn()
+    notifications.on(notificationMock)
+    emitStateUpdate('important3', 'unavailable')
+    expect(notificationMock).toHaveBeenCalledWith({
+      id: 'offlineSensor',
+      enabled: true,
+      payload: { devices: [{ name: 'name3', reason: 'unavailable' }] },
+    })
+    notificationMock.mockClear()
+    emitStateUpdate('important3', 'unknown')
+    expect(notificationMock).toHaveBeenCalledWith({
+      id: 'offlineSensor',
+      enabled: true,
+      payload: { devices: [{ name: 'name3', reason: 'unknown' }] },
     })
   })
 
@@ -128,7 +186,7 @@ describe('Device monitor service', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'offlineSensor',
       enabled: true,
-      payload: { devices: ['name3'] },
+      payload: { devices: [{ name: 'name3', reason: 'unknown' }] },
     })
   })
 
@@ -140,6 +198,7 @@ describe('Device monitor service', () => {
       {
         entityId: 'sensor.standard3_battery',
         name: 'standard3_name',
+        batteryPercentage: 30,
         lowBattery: true,
         offline: false,
         noUpdate: false,
@@ -148,6 +207,7 @@ describe('Device monitor service', () => {
       {
         entityId: 'sensor.standard4_battery',
         name: 'standard4_name',
+        batteryPercentage: 15,
         lowBattery: true,
         offline: false,
         noUpdate: false,
@@ -156,6 +216,7 @@ describe('Device monitor service', () => {
       {
         entityId: 'sensor.important1_battery',
         name: 'important1_name',
+        batteryPercentage: 10,
         lowBattery: true,
         offline: false,
         noUpdate: false,
@@ -164,6 +225,7 @@ describe('Device monitor service', () => {
       {
         entityId: 'important2',
         name: 'name2',
+        offlineReason: 'unknown',
         lowBattery: false,
         offline: true,
         noUpdate: false,
@@ -206,16 +268,29 @@ describe('Device monitor service', () => {
     notificationMock.mockClear()
 
     jest.advanceTimersByTime(3 * 60 * 60 * 1000 - 60 * 1000)
-    expect(notificationMock).not.toHaveBeenCalledWith({
-      id: 'noSensorUpdate',
-      enabled: true,
-      payload: { devices: ['name1'] },
-    })
+    expect(notificationMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'noSensorUpdate', enabled: true }),
+    )
     jest.advanceTimersByTime(60 * 1000)
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'noSensorUpdate',
       enabled: true,
-      payload: { devices: ['name1'] },
+      payload: { devices: [{ name: 'name1', hoursSinceLastReport: 3 }] },
+    })
+  })
+
+  it('updates the elapsed time while a sensor remains stale', () => {
+    new DeviceMonitorService()
+    const notificationMock = jest.fn()
+    notifications.on(notificationMock)
+    emitStateUpdate('important1', '21.5')
+    jest.advanceTimersByTime(3 * 60 * 60 * 1000)
+    notificationMock.mockClear()
+    jest.advanceTimersByTime(60 * 60 * 1000)
+    expect(notificationMock).toHaveBeenLastCalledWith({
+      id: 'noSensorUpdate',
+      enabled: true,
+      payload: { devices: [{ name: 'name1', hoursSinceLastReport: 4 }] },
     })
   })
 
@@ -237,11 +312,9 @@ describe('Device monitor service', () => {
     notificationMock.mockClear()
 
     jest.advanceTimersByTime(2 * 60 * 60 * 1000)
-    expect(notificationMock).not.toHaveBeenCalledWith({
-      id: 'noSensorUpdate',
-      enabled: true,
-      payload: { devices: ['name1'] },
-    })
+    expect(notificationMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'noSensorUpdate', enabled: true }),
+    )
   })
 
   it('should not initialize update monitoring from cached entity states', () => {
@@ -269,11 +342,9 @@ describe('Device monitor service', () => {
     jest.advanceTimersByTime(4 * 60 * 60 * 1000)
 
     expect(cachedStateRequest).not.toHaveBeenCalled()
-    expect(notificationMock).not.toHaveBeenCalledWith({
-      id: 'noSensorUpdate',
-      enabled: true,
-      payload: { devices: ['name1'] },
-    })
+    expect(notificationMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'noSensorUpdate', enabled: true }),
+    )
     expect(service.getServiceStatus().status).toEqual({
       message: 'Low batteries: 0; Offline: 0; No update: 0; On watchlist: 4',
       color: 'green',
@@ -292,14 +363,19 @@ describe('Device monitor service', () => {
     expect(notificationMock).toHaveBeenLastCalledWith({
       id: 'noSensorUpdate',
       enabled: true,
-      payload: { devices: ['name1', 'name2'] },
+      payload: {
+        devices: [
+          { name: 'name1', hoursSinceLastReport: 3 },
+          { name: 'name2', hoursSinceLastReport: 3 },
+        ],
+      },
     })
 
     emitStateUpdate('important1', '21.6')
     expect(notificationMock).toHaveBeenLastCalledWith({
       id: 'noSensorUpdate',
       enabled: true,
-      payload: { devices: ['name2'] },
+      payload: { devices: [{ name: 'name2', hoursSinceLastReport: 3 }] },
     })
   })
 
@@ -353,6 +429,7 @@ describe('Device monitor service', () => {
       {
         entityId: 'dashNode',
         name: 'Dash node',
+        offlineReason: 'pingFailed',
         lowBattery: false,
         offline: true,
         noUpdate: false,
@@ -362,7 +439,7 @@ describe('Device monitor service', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'offlineSensor',
       enabled: true,
-      payload: { devices: ['Dash node'] },
+      payload: { devices: [{ name: 'Dash node', reason: 'pingFailed' }] },
     })
     emitStateUpdate('dashNode', '21.5')
     expect(service.detectedDevices[0].offline).toBe(true)
@@ -393,7 +470,7 @@ describe('Device monitor service', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'offlineSensor',
       enabled: true,
-      payload: { devices: ['Dash node'] },
+      payload: { devices: [{ name: 'Dash node', reason: 'pingFailed' }] },
     })
   })
 

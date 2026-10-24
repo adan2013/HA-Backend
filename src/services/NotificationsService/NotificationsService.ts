@@ -168,7 +168,7 @@ class NotificationsService extends Service {
       this.activeNotifications.unshift({
         ...details,
         title: config.title,
-        description: config.description,
+        icon: config.icon,
         priorityOrder: config.priorityOrder || 'low',
         light: config.light,
         canBeDismissed: config.canBeDismissed || alwaysCanBeDismissed,

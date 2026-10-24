@@ -5,6 +5,7 @@ import { notifications } from '../../events/events'
 import Timer from '../../Timer'
 import { getDaysToDeadline } from './utils'
 import deadlines from '../../configs/deadline.config'
+import { NotificationPayloadMap } from '../NotificationsService/notificationContract'
 
 class DeadlinesService extends Service {
   private entities: HomeAssistantEntity[]
@@ -20,7 +21,8 @@ class DeadlinesService extends Service {
   }
 
   private checkDeadlines() {
-    const warningLabels: string[] = []
+    const warningDeadlines: NotificationPayloadMap['deadlineWarning']['deadlines'] =
+      []
     deadlines.forEach((deadline) => {
       const entity = this.entities.find((e) => e.entityId === deadline.entityId)
       if (entity && !entity.isUnavailable) {
@@ -29,19 +31,21 @@ class DeadlinesService extends Service {
           deadline.interval,
         )
         if (daysLeft <= deadline.warningThreshold) {
-          warningLabels.push(deadline.label)
+          warningDeadlines.push({ label: deadline.label, daysLeft })
         }
       }
     })
-    const warningsDetected = warningLabels.length > 0
+    const warningsDetected = warningDeadlines.length > 0
     notifications.emit({
       id: 'deadlineWarning',
       enabled: warningsDetected,
-      payload: warningsDetected ? { deadlines: warningLabels } : undefined,
+      payload: warningsDetected ? { deadlines: warningDeadlines } : undefined,
     })
     this.setServiceStatus(
       `Deadline count: ${deadlines.length}; Warnings: ${
-        warningsDetected ? warningLabels.join(', ') : 'none'
+        warningsDetected
+          ? warningDeadlines.map((deadline) => deadline.label).join(', ')
+          : 'none'
       }`,
       warningsDetected ? 'yellow' : 'green',
     )

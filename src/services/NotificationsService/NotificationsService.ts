@@ -1,3 +1,5 @@
+import { isDeepStrictEqual } from 'util'
+import { NotificationDetails } from './notificationContract'
 import Service from '../Service'
 import { NotificationLight, NotificationPayload } from './types'
 import notificationConfig from '../../configs/notification.config'
@@ -36,11 +38,11 @@ class NotificationsService extends Service {
   constructor() {
     super('notifications')
     switchNotificationLight(this.notificationLight)
-    notifications.on((payload) => {
-      if (payload.enabled) {
-        this.addNotification(payload.id, payload.extraInfo)
+    notifications.on(({ enabled, ...details }) => {
+      if (enabled) {
+        this.addNotification(details)
       } else {
-        this.removeNotification(payload.id)
+        this.removeNotification(details.id)
       }
     })
     this.updateCollection()
@@ -53,12 +55,13 @@ class NotificationsService extends Service {
     )
     webSocketMessage(WS_CMD.incoming.TRIGGER_NOTIFICATION).on(
       ({ message: { notificationId } }) => {
-        if (notificationId) {
-          this.addNotification(
-            notificationId,
-            'Notification triggered manually',
-            true,
-          )
+        const config = notificationConfig.find(
+          (item) => item.id === notificationId,
+        )
+        if (config) {
+          this.addNotification({ id: config.id }, true)
+        } else if (notificationId) {
+          logger.error('Unknown notification id', { id: notificationId })
         }
       },
     )
@@ -145,15 +148,15 @@ class NotificationsService extends Service {
   }
 
   private addNotification(
-    id: string,
-    extraInfo?: string,
+    details: NotificationDetails,
     alwaysCanBeDismissed = false,
   ) {
+    const { id } = details
     const existingNotification = this.activeNotifications.find(
       (n) => n.id === id,
     )
     if (existingNotification) {
-      if (existingNotification.extraInfo === extraInfo) {
+      if (isDeepStrictEqual(existingNotification.payload, details.payload)) {
         return
       }
       this.activeNotifications = this.activeNotifications.filter(
@@ -163,10 +166,9 @@ class NotificationsService extends Service {
     const config = notificationConfig.find((c) => c.id === id)
     if (config) {
       this.activeNotifications.unshift({
-        id: config.id,
+        ...details,
         title: config.title,
         description: config.description,
-        extraInfo,
         priorityOrder: config.priorityOrder || 'low',
         light: config.light,
         canBeDismissed: config.canBeDismissed || alwaysCanBeDismissed,

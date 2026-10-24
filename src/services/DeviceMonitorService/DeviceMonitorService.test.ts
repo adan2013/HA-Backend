@@ -77,7 +77,7 @@ describe('Device monitor service', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'lowBattery',
       enabled: true,
-      extraInfo: 'Living room remote',
+      payload: { devices: ['Living room remote'] },
     })
   })
 
@@ -95,7 +95,7 @@ describe('Device monitor service', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'offlineSensor',
       enabled: true,
-      extraInfo: 'name3',
+      payload: { devices: ['name3'] },
     })
   })
 
@@ -177,13 +177,13 @@ describe('Device monitor service', () => {
     expect(notificationMock).not.toHaveBeenCalledWith({
       id: 'noSensorUpdate',
       enabled: true,
-      extraInfo: 'name1',
+      payload: { devices: ['name1'] },
     })
     jest.advanceTimersByTime(60 * 1000)
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'noSensorUpdate',
       enabled: true,
-      extraInfo: 'name1',
+      payload: { devices: ['name1'] },
     })
   })
 
@@ -208,7 +208,7 @@ describe('Device monitor service', () => {
     expect(notificationMock).not.toHaveBeenCalledWith({
       id: 'noSensorUpdate',
       enabled: true,
-      extraInfo: 'name1',
+      payload: { devices: ['name1'] },
     })
   })
 
@@ -240,7 +240,7 @@ describe('Device monitor service', () => {
     expect(notificationMock).not.toHaveBeenCalledWith({
       id: 'noSensorUpdate',
       enabled: true,
-      extraInfo: 'name1',
+      payload: { devices: ['name1'] },
     })
     expect(service.getServiceStatus().status).toEqual({
       message:
@@ -261,14 +261,14 @@ describe('Device monitor service', () => {
     expect(notificationMock).toHaveBeenLastCalledWith({
       id: 'noSensorUpdate',
       enabled: true,
-      extraInfo: 'name1, name2',
+      payload: { devices: ['name1', 'name2'] },
     })
 
     emitStateUpdate('important1', '21.6')
     expect(notificationMock).toHaveBeenLastCalledWith({
       id: 'noSensorUpdate',
       enabled: true,
-      extraInfo: 'name2',
+      payload: { devices: ['name2'] },
     })
   })
 })

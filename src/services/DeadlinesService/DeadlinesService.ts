@@ -37,7 +37,7 @@ class DeadlinesService extends Service {
     notifications.emit({
       id: 'deadlineWarning',
       enabled: warningsDetected,
-      extraInfo: warningsDetected ? warningLabels.join(', ') : undefined,
+      payload: warningsDetected ? { deadlines: warningLabels } : undefined,
     })
     this.setServiceStatus(
       `Deadline count: ${deadlines.length}; Warnings: ${

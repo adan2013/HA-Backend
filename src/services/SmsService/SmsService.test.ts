@@ -115,9 +115,15 @@ describe('SmsService', () => {
     await flushPromises()
     expect(apiPost).toHaveBeenCalledTimes(2)
     expect(service.getServiceStatus().status.color).toBe('red')
-    expect(notification).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'smsFailure', enabled: true }),
-    )
+    expect(notification).toHaveBeenCalledWith({
+      id: 'smsFailure',
+      enabled: true,
+      payload: {
+        source: 'waterLeak',
+        errors: ['Sendly unavailable'],
+        delivery: { sent: 1, total: 2 },
+      },
+    })
 
     smsGateway.emit({ source: 'mainDoorOpen', text: 'Door' })
     await flushPromises()
@@ -129,10 +135,17 @@ describe('SmsService', () => {
   })
 
   it('stays red without configuration and does not call Sendly', async () => {
+    const notification = jest.fn()
+    notifications.on(notification)
     const service = new SmsService('', '')
     expect(service.getServiceStatus().status.color).toBe('red')
     smsGateway.emit({ source: 'waterLeak', text: 'Leak' })
     await flushPromises()
     expect(apiPost).not.toHaveBeenCalled()
+    expect(notification).toHaveBeenCalledWith({
+      id: 'smsFailure',
+      enabled: true,
+      payload: { source: 'waterLeak', errors: ['SENDLY_API_KEY is missing'] },
+    })
   })
 })

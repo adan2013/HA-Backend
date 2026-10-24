@@ -41,7 +41,7 @@ class BroadcastDeviceService extends Service {
       notifications.emit({
         id: 'broadcastDeviceCamera',
         enabled: true,
-        extraInfo: detectedCameras.join(', '),
+        payload: { devices: detectedCameras },
       })
       notifications.emit({
         id: 'broadcastDeviceMicrophone',
@@ -51,7 +51,7 @@ class BroadcastDeviceService extends Service {
       notifications.emit({
         id: 'broadcastDeviceMicrophone',
         enabled: true,
-        extraInfo: detectedMicrophones.join(', '),
+        payload: { devices: detectedMicrophones },
       })
       notifications.emit({
         id: 'broadcastDeviceCamera',

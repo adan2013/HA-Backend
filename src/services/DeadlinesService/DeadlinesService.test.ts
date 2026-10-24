@@ -43,7 +43,7 @@ describe('DeadlinesService', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,
-      extraInfo: 'label2',
+      payload: { deadlines: ['label2'] },
     })
   })
 
@@ -55,7 +55,7 @@ describe('DeadlinesService', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,
-      extraInfo: 'label1, label2',
+      payload: { deadlines: ['label1', 'label2'] },
     })
   })
 
@@ -67,13 +67,13 @@ describe('DeadlinesService', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,
-      extraInfo: 'label1, label2',
+      payload: { deadlines: ['label1', 'label2'] },
     })
     emitStateUpdate('entity1', '2023-09-14')
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,
-      extraInfo: 'label2',
+      payload: { deadlines: ['label2'] },
     })
     emitStateUpdate('entity2', '2023-09-14')
     expect(notificationMock).toHaveBeenLastCalledWith({
@@ -91,7 +91,7 @@ describe('DeadlinesService', () => {
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'deadlineWarning',
       enabled: true,
-      extraInfo: 'label2',
+      payload: { deadlines: ['label2'] },
     })
     emitStateUpdate('entity2', 'unavailable')
     expect(notificationMock).toHaveBeenCalledWith({

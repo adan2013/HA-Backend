@@ -44,15 +44,13 @@ class WaterLeakService extends Service {
     if (!alarmWasActive && this.triggeredSensorNames.length > 0) {
       smsGateway.emit({
         source: 'waterLeak',
-        text: `Water leak detected: ${this.triggeredSensorNames.join(
-          ', ',
-        )}.`,
+        text: `Water leak detected: ${this.triggeredSensorNames.join(', ')}.`,
       })
     }
     notifications.emit({
       id: 'waterLeak',
       enabled: this.triggeredSensorNames.length > 0,
-      extraInfo: this.triggeredSensorNames.join(', '),
+      payload: { sensors: [...this.triggeredSensorNames] },
     })
     this.setServiceStatus(
       `Sensor count: ${this.sensorEntities.length}; Leak detected: ${

@@ -32,7 +32,7 @@ type DetectedDeviceMetadata = {
 }
 
 class DeviceMonitorService extends Service {
-  private readonly BATTERY_LOW_THRESHOLD = 40
+  private readonly BATTERY_LOW_THRESHOLD = 30
   private readonly latestStates = new Map<string, EntityState>()
   private readonly pendingPings = new Set<string>()
   detectedDevices: DetectedDeviceMetadata[] = []
@@ -243,7 +243,7 @@ class DeviceMonitorService extends Service {
       result.lowBattery =
         battery?.level !== undefined &&
         battery.level >= 0 &&
-        battery.level < this.BATTERY_LOW_THRESHOLD
+        battery.level <= this.BATTERY_LOW_THRESHOLD
       if (result.lowBattery) result.batteryPercentage = battery?.level
       if (
         config?.monitoring === 'entity' &&

@@ -125,7 +125,16 @@ describe('Device monitor service', () => {
       emitStateUpdate('sensor.remote_battery', value, {
         friendly_name: 'Remote Battery',
       })
-    updateBattery('12')
+    updateBattery('31')
+    expect(notificationMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'lowBattery', enabled: true }),
+    )
+    updateBattery('30')
+    expect(notificationMock).toHaveBeenCalledWith({
+      id: 'lowBattery',
+      enabled: true,
+      payload: { devices: [{ name: 'Remote', batteryPercentage: 30 }] },
+    })
     updateBattery('0')
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'lowBattery',
@@ -133,7 +142,7 @@ describe('Device monitor service', () => {
       payload: { devices: [{ name: 'Remote', batteryPercentage: 0 }] },
     })
     notificationMock.mockClear()
-    updateBattery('40')
+    updateBattery('31')
     expect(notificationMock).toHaveBeenCalledWith({
       id: 'lowBattery',
       enabled: false,

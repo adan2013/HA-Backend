@@ -12,19 +12,19 @@ const deadlines: DeadlineConfig[] = [
     label: 'water prefilters',
     entityId: Entities.inputDateTime.kitchenFilterService,
     interval: 120,
-    warningThreshold: 5,
+    warningThreshold: 3,
   },
   {
     label: 'membrane water filter',
     entityId: Entities.inputDateTime.kitchenMembraneFilterService,
     interval: 485,
-    warningThreshold: 5,
+    warningThreshold: 3,
   },
   {
     label: 'mineralization water filter',
     entityId: Entities.inputDateTime.kitchenFinalFilterService,
     interval: 365,
-    warningThreshold: 5,
+    warningThreshold: 3,
   },
   {
     label: 'car insurance',

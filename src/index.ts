@@ -83,7 +83,11 @@ homeAssistantSync.once(() => {
   sm.registerService(new DeadlinesService())
   sm.registerService(new MainDoorService())
   sm.registerService(new WaterLeakService())
-  sm.registerService(new DeviceMonitorService())
+  sm.registerService(
+    new DeviceMonitorService((entityId) =>
+      homeAssistant.getMqttLastReport(entityId),
+    ),
+  )
   sm.registerService(new EnergyMonitorService())
   sm.registerService(new AniaRoomController())
   sm.registerService(new DanielRoomController())

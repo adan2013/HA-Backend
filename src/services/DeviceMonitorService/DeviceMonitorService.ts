@@ -2,6 +2,7 @@ import Service from '../Service'
 import {
   anyEntityUpdate,
   entityReported,
+  homeAssistantSync,
   notifications,
 } from '../../events/events'
 import Entity from '../../entities/Entity'
@@ -35,6 +36,9 @@ class DeviceMonitorService extends Service {
   private readonly BATTERY_LOW_THRESHOLD = 30
   private readonly latestStates = new Map<string, EntityState>()
   private readonly pendingPings = new Set<string>()
+  private readonly mqttLastReports = new Map<string, number>()
+  private readonly pendingMqttChecks = new Set<string>()
+  private readonly monitoringStartedAt = Date.now()
   detectedDevices: DetectedDeviceMetadata[] = []
   private batteryLevelAlertToggle = Entity.toggle(
     Entities.inputBoolean.system.alertBatteryLevel,
@@ -43,14 +47,18 @@ class DeviceMonitorService extends Service {
     Entities.inputBoolean.system.alertSelfDiagnostic,
   )
 
-  constructor() {
+  constructor(
+    private readonly readMqttLastReport: (
+      entityId: string,
+    ) => Promise<string | undefined>,
+  ) {
     super('deviceMonitor')
     this.updateServiceStatus()
     const registerEntityActivity = (state: EntityState) => {
       const config = this.getDeviceConfig(state.id)
       // LAN availability is independent of Home Assistant entity activity.
       if (config?.monitoring === 'ping') return
-      if (config?.maxHoursWithoutUpdate !== undefined) {
+      if (config) {
         this.latestStates.set(state.id, this.withValidLastReported(state))
       }
       const metadata = this.checkDevice(state)
@@ -60,6 +68,27 @@ class DeviceMonitorService extends Service {
     entityReported.on(registerEntityActivity)
     this.batteryLevelAlertToggle.onChange(() => this.updateServiceStatus())
     this.selfDiagnosticAlertToggle.onChange(() => this.updateServiceStatus())
+    const initializeStates = () => {
+      devices.forEach((config) => {
+        if (config.monitoring === 'ping') return
+        const state = Entity.general(config.entityId, {
+          subscribeToUpdates: false,
+        }).state
+        registerEntityActivity(
+          state ?? {
+            id: config.entityId,
+            state: 'unknown',
+            lastChanged: '',
+            lastUpdated: '',
+            lastReported: '',
+            attributes: {},
+          },
+        )
+      })
+      this.checkForMissingUpdates()
+    }
+    initializeStates()
+    homeAssistantSync.on(initializeStates)
     Timer.onEveryHour(() => this.checkForMissingUpdates())
     devices.forEach((config) => {
       if (config.monitoring !== 'ping') return
@@ -213,11 +242,40 @@ class DeviceMonitorService extends Service {
           config.maxHoursWithoutUpdate !== undefined,
       )
       .forEach((config) => {
+        if (config.monitoring === 'entity' && config.reportSource === 'mqtt') {
+          void this.checkMqttDevice(config.entityId)
+          return
+        }
         const state = this.latestStates.get(config.entityId)
         if (!state) return
         const metadata = this.checkDevice(state)
         this.updateList(metadata, this.shouldReport(metadata))
       })
+  }
+
+  private async checkMqttDevice(entityId: string) {
+    if (this.pendingMqttChecks.has(entityId)) return
+    this.pendingMqttChecks.add(entityId)
+    try {
+      const report = await this.readMqttLastReport(entityId)
+      const timestamp = report ? Date.parse(report) : NaN
+      if (Number.isFinite(timestamp) && timestamp <= Date.now()) {
+        this.mqttLastReports.set(
+          entityId,
+          Math.max(this.mqttLastReports.get(entityId) ?? 0, timestamp),
+        )
+      }
+    } catch (error) {
+      // A failed read must not reset the silence timer or hide a previous alert.
+      logger.error('Unable to read MQTT device activity', { entityId, error })
+    } finally {
+      this.pendingMqttChecks.delete(entityId)
+    }
+    const state = this.latestStates.get(entityId)
+    if (state) {
+      const metadata = this.checkDevice(state)
+      this.updateList(metadata, this.shouldReport(metadata))
+    }
   }
 
   private checkDevice(state: EntityState): DetectedDeviceMetadata {
@@ -249,12 +307,18 @@ class DeviceMonitorService extends Service {
         config?.monitoring === 'entity' &&
         config.maxHoursWithoutUpdate !== undefined
       ) {
-        const lastReportTimestamp = Date.parse(state.lastReported)
+        const lastReportTimestamp =
+          config.reportSource === 'mqtt'
+            ? this.mqttLastReports.get(state.id)
+            : Date.parse(state.lastReported)
+        // If HA has no MQTT history yet, observe a full timeout. Never mistake
+        // the cached entity timestamp (or a successful poll) for device activity.
+        const silenceStartedAt = lastReportTimestamp ?? this.monitoringStartedAt
         result.noUpdate =
-          !Number.isNaN(lastReportTimestamp) &&
-          Date.now() - lastReportTimestamp >=
+          !Number.isNaN(silenceStartedAt) &&
+          Date.now() - silenceStartedAt >=
             config.maxHoursWithoutUpdate * 60 * 60 * 1000
-        if (result.noUpdate) {
+        if (result.noUpdate && lastReportTimestamp !== undefined) {
           result.hoursSinceLastReport = Math.floor(
             (Date.now() - lastReportTimestamp) / (60 * 60 * 1000),
           )

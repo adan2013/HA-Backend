@@ -14,6 +14,7 @@ type EntityDeviceMetadata = {
   entityId: string
   name: string
   maxHoursWithoutUpdate?: number
+  reportSource?: 'mqtt'
 }
 
 type DeviceMetadata = EntityDeviceMetadata | PingDeviceMetadata
@@ -27,12 +28,14 @@ const devices: DeviceMetadata[] = [
     entityId: wls.entityId,
     name: `${wls.name} - water leak`,
     maxHoursWithoutUpdate: PASSIVE_SENSOR_MAX_HOURS_WITHOUT_UPDATE,
+    reportSource: 'mqtt' as const,
   })),
   {
     entityId: Entities.binarySensor.contact.mainDoorDeadbolt,
     name: 'Main door deadbolt',
     monitoring: 'entity',
     maxHoursWithoutUpdate: PASSIVE_SENSOR_MAX_HOURS_WITHOUT_UPDATE,
+    reportSource: 'mqtt',
   },
   {
     entityId: Entities.sensor.temperature.dashNodeServerRack,

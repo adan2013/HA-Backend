@@ -149,6 +149,35 @@ temperature entity. Each check sends three requests; no replies trigger the
 offline notification, and a successful check clears it. Local ping errors are
 logged without changing the last known device status.
 
+Entity monitoring starts from the current HA snapshot, including unavailable
+or missing entities, and refreshes that snapshot after reconnecting. Sensors
+do not need to change state after backend startup to enter the watchlist.
+
+The two leak sensors and the main door deadbolt use `reportSource: 'mqtt'`.
+At startup, after HA reconnects, and every hour, the backend reads their MQTT
+message history through HA's `config/entity_registry/get` and
+`mqtt/device/debug_info` WebSocket APIs using the existing HA token. No broker
+credentials or HA configuration changes are needed. It counts only messages
+on the entity's discovered state topic, excluding bridge availability traffic.
+When a message includes Zigbee2MQTT `last_seen`, that timestamp is used;
+otherwise the receipt time of a non-retained message is used. Broker replay
+of retained messages without `last_seen` does not reset the silence timer.
+An unchanged `water_leak: false` report therefore still counts as contact.
+
+MQTT monitoring uses a 36-hour threshold, checked hourly. An already old
+report triggers an alert at startup. If HA has no usable message history
+(for example, after HA restarts), monitoring starts a full observation window
+instead of treating the cached entity date as device activity. Continued
+silence still triggers an alert after the threshold, with an unknown last-report
+age. Failed diagnostic reads are logged and never reset the timer; previously
+known report times are kept across HA reconnects. This fallback window restarts
+when the backend itself restarts if HA still has no usable history.
+
+Without `last_seen`, the timestamp proves that HA received a device-topic
+publication, not that Zigbee2MQTT freshly read the sensor: a republished cache
+can also produce such a message. Connectivity monitoring cannot establish
+whether a connected sensor's physical probe still detects water.
+
 The Docker image includes `iputils-ping`. When running outside Docker, a `ping`
 executable must be available on Linux or macOS. The backend must have network
 access to the device and permission to send ICMP echo requests.

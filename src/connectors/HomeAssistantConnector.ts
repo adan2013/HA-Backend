@@ -20,6 +20,7 @@ import {
 } from '../events/events'
 import { parseBatteryReading } from '../utils/batteryUtils'
 import { createLogger } from '../logging/logger'
+import { getMqttLastReport, MqttDebugInfo } from './mqttActivity'
 
 const RECONNECT_INTERVAL = 10000
 const ENTITIES_PROBE_INTERVAL = 60000
@@ -34,6 +35,7 @@ class HomeAssistantConnector {
   private socket: WebSocket | undefined
   private entitiesRefreshTimer: NodeJS.Timeout | undefined
   private status: HomeAssistantConnectionState = 'disconnected'
+  private readonly pendingReads = new Set<() => void>()
 
   entities: EntityState[] = []
 
@@ -62,6 +64,7 @@ class HomeAssistantConnector {
     this.socket.onopen = () => this.changeStatus('connected')
     this.socket.onmessage = (e) => this.onReceive(e)
     this.socket.onclose = () => {
+      this.pendingReads.forEach((cancel) => cancel())
       if (this.entitiesRefreshTimer) {
         clearInterval(this.entitiesRefreshTimer)
         this.entitiesRefreshTimer = undefined
@@ -317,6 +320,61 @@ class HomeAssistantConnector {
 
   public getBatteryEntities(): EntityState[] {
     return this.entities.filter((entity) => parseBatteryReading(entity))
+  }
+
+  public async getMqttLastReport(
+    entityId: string,
+  ): Promise<string | undefined> {
+    const entry = await this.readWebSocketResult<{
+      platform: string
+      device_id: string | null
+    }>('config/entity_registry/get', { entity_id: entityId })
+    if (entry.platform !== 'mqtt' || !entry.device_id) {
+      throw new Error(`No MQTT device registered for ${entityId}`)
+    }
+    const info = await this.readWebSocketResult<MqttDebugInfo>(
+      'mqtt/device/debug_info',
+      { device_id: entry.device_id },
+    )
+    return getMqttLastReport(info, entityId)
+  }
+
+  private readWebSocketResult<T>(type: string, payload: object): Promise<T> {
+    if (
+      this.status !== 'synced' ||
+      this.socket?.readyState !== WebSocket.OPEN
+    ) {
+      return Promise.reject(new Error('Home Assistant is not connected'))
+    }
+    return new Promise((resolve, reject) => {
+      const id = this.msgId++
+      const cleanup = () => {
+        clearTimeout(timeout)
+        unsubscribe()
+        this.pendingReads.delete(cancel)
+      }
+      const cancel = () => {
+        cleanup()
+        reject(new Error(`Home Assistant disconnected during ${type}`))
+      }
+      const unsubscribe = homeAssistantResult(id).on((response) => {
+        cleanup()
+        if (response.success) resolve(response.result as T)
+        else
+          reject(new Error(response.error?.message || `Failed to read ${type}`))
+      })
+      const timeout = setTimeout(() => {
+        cleanup()
+        reject(new Error(`Home Assistant request timed out: ${type}`))
+      }, 10000)
+      this.pendingReads.add(cancel)
+      try {
+        this.socket?.send(JSON.stringify({ id, type, ...payload }))
+      } catch (error) {
+        cleanup()
+        reject(error)
+      }
+    })
   }
 
   public async getEntityHistory(

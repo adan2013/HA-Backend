@@ -35,7 +35,12 @@ import {
 } from '../events/events'
 
 describe('HomeAssistantConnector', () => {
+  beforeEach(() =>
+    jest.useFakeTimers().setSystemTime(new Date('2026-11-13T12:00:00Z')),
+  )
   afterEach(() => {
+    jest.clearAllTimers()
+    jest.useRealTimers()
     sentMessages.length = 0
     entityStateRequest.resetListeners()
     entityReported.resetListeners()
@@ -46,6 +51,117 @@ describe('HomeAssistantConnector', () => {
       homeAssistantEvent(id).resetListeners()
       homeAssistantResult(id).resetListeners()
     }
+  })
+
+  const receive = (message: object) =>
+    MockWebSocket.instance.onmessage?.({ data: JSON.stringify(message) })
+  const connect = () => {
+    const connector = new HomeAssistantConnector('home-assistant:8123', 'token')
+    receive({ type: 'auth_ok' })
+    receive({ id: 1, type: 'result', success: true, result: [] })
+    return connector
+  }
+
+  it('reads MQTT receipt time via the registry even if the HA entity never changes', async () => {
+    const connector = connect()
+    const report = connector.getMqttLastReport('binary_sensor.leak')
+    expect(JSON.parse(sentMessages[sentMessages.length - 1])).toMatchObject({
+      type: 'config/entity_registry/get',
+      entity_id: 'binary_sensor.leak',
+    })
+    receive({
+      id: 3,
+      type: 'result',
+      success: true,
+      result: { platform: 'mqtt', device_id: 'leak-device' },
+    })
+    await Promise.resolve()
+    expect(JSON.parse(sentMessages[sentMessages.length - 1])).toMatchObject({
+      type: 'mqtt/device/debug_info',
+      device_id: 'leak-device',
+    })
+    receive({
+      id: 4,
+      type: 'result',
+      success: true,
+      result: {
+        entities: [
+          {
+            entity_id: 'binary_sensor.leak',
+            discovery_data: { payload: { state_topic: 'zigbee2mqtt/leak' } },
+            subscriptions: [
+              {
+                topic: 'zigbee2mqtt/leak',
+                messages: [
+                  {
+                    topic: 'zigbee2mqtt/leak',
+                    payload: '{"water_leak":false}',
+                    time: '2026-11-13T08:52:55Z',
+                    retain: false,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    })
+    await expect(report).resolves.toBe('2026-11-13T08:52:55.000Z')
+  })
+
+  it('rejects a failed MQTT read rather than returning a fresh timestamp', async () => {
+    const connector = connect()
+    const report = connector.getMqttLastReport('binary_sensor.leak')
+    receive({
+      id: 3,
+      type: 'result',
+      success: false,
+      error: { message: 'Entity not found' },
+    })
+    await expect(report).rejects.toThrow('Entity not found')
+  })
+
+  it('times out unanswered reads so monitoring can retry', async () => {
+    const connector = connect()
+    const report = connector.getMqttLastReport('binary_sensor.leak')
+    const assertion = expect(report).rejects.toThrow('timed out')
+    jest.advanceTimersByTime(10000)
+    await assertion
+    const retry = connector.getMqttLastReport('binary_sensor.leak')
+    receive({
+      id: 3,
+      type: 'result',
+      success: true,
+      result: { platform: 'mqtt', device_id: 'old-response' },
+    })
+    receive({
+      id: 4,
+      type: 'result',
+      success: false,
+      error: { message: 'Retry rejected' },
+    })
+    await expect(retry).rejects.toThrow('Retry rejected')
+  })
+
+  it('cancels outstanding reads on disconnect and can read after reconnecting', async () => {
+    const connector = connect()
+    const report = connector.getMqttLastReport('binary_sensor.leak')
+    MockWebSocket.instance.onclose?.()
+    await expect(report).rejects.toThrow('disconnected')
+    await expect(
+      connector.getMqttLastReport('binary_sensor.leak'),
+    ).rejects.toThrow('not connected')
+    jest.advanceTimersByTime(10000)
+    receive({ type: 'auth_ok' })
+    receive({ id: 4, type: 'result', success: true, result: [] })
+    const retry = connector.getMqttLastReport('binary_sensor.leak')
+    receive({
+      id: 6,
+      type: 'result',
+      success: false,
+      error: { message: 'New request received' },
+    })
+    await expect(retry).rejects.toThrow('New request received')
   })
 
   it('should allow service calls from the sync listener', async () => {

@@ -30,7 +30,11 @@ export const homeAssistantEvent = (msgId: number) =>
   new TypedEvent<HomeAssistantCallbackPayload>('ha/event', msgId.toString())
 
 export const homeAssistantResult = (msgId: number) =>
-  new TypedEvent<HomeAssistantCallbackPayload>('ha/result', msgId.toString())
+  new TypedEvent<{
+    success: boolean
+    result?: unknown
+    error?: { message?: string }
+  }>('ha/result', msgId.toString())
 
 export const entityUpdate = (entityId: string) =>
   new TypedEvent<EntityState>('ha/entity', entityId)

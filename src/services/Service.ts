@@ -1,4 +1,4 @@
-import { Status, ServiceStatus, StatusColor } from './types'
+import { HelperStatus, Status, ServiceStatus, StatusColor } from './types'
 import Helper from '../helpers/Helper'
 import { serviceDataUpdate } from '../events/events'
 
@@ -27,7 +27,7 @@ class Service {
 
   public getServiceStatus(): ServiceStatus {
     const helpers: {
-      [name: string]: Status
+      [name: string]: HelperStatus
     } = {}
     this.helpers.forEach((helper) => {
       helpers[helper.name] = helper.getHelperStatus()

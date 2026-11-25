@@ -10,6 +10,7 @@ import HomeAssistantConnector from './HomeAssistantConnector'
 import WS_CMD from './wsCommands'
 import { createLogger, flushLoggerAsync } from '../logging/logger'
 import { readRecentLogs } from '../logging/logReader'
+import { backendVersion } from '../utils/backendVersion'
 
 const AUTH_TIMEOUT = 10000
 const MAX_PAYLOAD_SIZE = 64 * 1024
@@ -300,11 +301,9 @@ class WebSocketServerConnector {
   }
 
   private sendWelcome(ws: WebSocket) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const packageJson = require('../../package.json')
     this.send(ws, {
       type: WS_CMD.outgoing.WELCOME,
-      version: packageJson.version,
+      version: backendVersion,
     })
   }
 

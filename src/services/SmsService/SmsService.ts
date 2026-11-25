@@ -5,14 +5,19 @@ import Entity from '../../entities/Entity'
 import Entities from '../../configs/entities.config'
 import {
   notifications,
+  homeAssistantSync,
   smsGateway,
   webSocketMessage,
 } from '../../events/events'
 import WS_CMD from '../../connectors/wsCommands'
 import { createLogger } from '../../logging/logger'
+import ValueHelper from '../../helpers/ValueHelper'
+import Timer from '../../Timer'
+import InputBooleanEntity from '../../entities/InputBooleanEntity'
 
 const logger = createLogger('SmsService')
 const SENDLY_MESSAGES_URL = 'https://api.sendly.link/api/sms'
+const SENDLY_BALANCE_URL = 'https://api.sendly.link/api/balance'
 const TEST_MESSAGE = 'This is a test SMS.'
 const SENDLY_NUMBER = /^[0-9]{9,11}$/
 
@@ -49,9 +54,8 @@ class SmsService extends Service {
     return error instanceof Error ? error.message : 'Unknown Sendly error'
   }
 
-  private readonly alertsToggle = Entity.toggle(
-    Entities.inputBoolean.notifications.smsAlerts,
-  )
+  private alertsToggle: InputBooleanEntity | null = null
+  private readonly balance = new ValueHelper<number>('balance')
   private readonly apiKey: string
   private readonly recipients: string[]
   private readonly configError: string | null
@@ -69,6 +73,7 @@ class SmsService extends Service {
   ) {
     super('sms')
     this.apiKey = apiKey?.trim() || ''
+    this.registerHelper(this.balance)
     this.recipients = Array.from(
       new Set(
         (recipients || '')
@@ -92,9 +97,21 @@ class SmsService extends Service {
       logger.error('SMS configuration invalid', { reason: this.configError })
     }
     this.updateStatus()
-    this.alertsToggle.onChange(() => this.updateStatus())
+    homeAssistantSync.once(() => {
+      this.alertsToggle = Entity.toggle(
+        Entities.inputBoolean.notifications.smsAlerts,
+      )
+      this.alertsToggle.onChange(() => this.updateStatus())
+      this.updateStatus()
+    })
+    if (this.apiKey) {
+      void this.fetchBalance()
+      Timer.onTime(4, 0, () => void this.fetchBalance())
+    } else {
+      this.balance.setError('SENDLY_API_KEY is missing')
+    }
     smsGateway.on(({ source, text }) => {
-      if (!this.alertsToggle.isOn) {
+      if (!this.alertsToggle?.isOn) {
         logger.info('Automatic SMS skipped because alerts are disabled', {
           source,
         })
@@ -107,6 +124,38 @@ class SmsService extends Service {
     })
   }
 
+  private async fetchBalance(): Promise<void> {
+    try {
+      const response = await axios.get<{ balance?: unknown }>(
+        SENDLY_BALANCE_URL,
+        {
+          headers: { Authorization: `Bearer ${this.apiKey}` },
+          timeout: 10000,
+        },
+      )
+      const rawBalance = response.data?.balance
+      const balance =
+        typeof rawBalance === 'string' &&
+        /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/.test(rawBalance.trim())
+          ? Number(rawBalance)
+          : rawBalance
+      if (typeof balance !== 'number' || !Number.isFinite(balance)) {
+        this.balance.setError('Invalid Sendly balance response')
+        logger.warn('Invalid Sendly balance response')
+        return
+      }
+      this.balance.setValue(balance)
+    } catch (error) {
+      // Do not expose axios config, tokens, or raw upstream error payloads.
+      const status = axios.isAxiosError(error) ? error.response?.status : null
+      const reason = status
+        ? `Sendly balance request failed (HTTP ${status})`
+        : 'Sendly balance request failed'
+      this.balance.setError(reason)
+      logger.warn(reason)
+    }
+  }
+
   private updateStatus() {
     if (this.configError) {
       this.setServiceStatus(
@@ -117,7 +166,7 @@ class SmsService extends Service {
     }
     this.setServiceStatus(
       `Recipients: ${this.recipients.length}; Alerts: ${
-        this.alertsToggle.isOn ? 'ON' : 'OFF'
+        this.alertsToggle?.isOn ? 'ON' : 'OFF'
       }; ${this.lastOutcome}`,
       this.lastSendFailed ? 'red' : 'green',
     )

@@ -210,6 +210,14 @@ Shows the Bambu Lab printer status and progress as notifications. It can also au
 
 Sends SMS alerts through the Sendly API to the configured recipients when SMS alerts are enabled. It shows a notification when sending fails.
 
+Publishes the numeric Sendly account balance as the `value/balance` helper. Balance is fetched at startup and daily at 04:00 in the process timezone, using only `SENDLY_API_KEY` (recipients and HA are not required for balance). A failed read retains the last successful value and timestamp and sets a safe helper error.
+
+### BackendInfoService
+
+Publishes `value/version`, `value/startedAt` (ISO 8601), and `value/entitiesCount` through the existing `getStatus` / `statusUpdate` protocol. Version and startup time are available before HA synchronization; the entity count is initially unknown and then follows the existing synced-entities counter. `welcome.version` is retained for compatibility.
+
+`ValueHelper` adds raw `value` (`number | string | null`), `updatedAt`, and `error` fields to the usual helper status. `null` means no successful reading yet. Values are snapshots returned when service status is requested; no refresh command or value-change broadcast is added.
+
 ### ThermostatController
 
 Registers one `RadiatorMonitorHelper` per thermometer-valve pair defined in `thermostat.config.ts`. The inactivity resend interval is configured by `TEMPERATURE_RESEND_AFTER_MINUTES` (30 minutes by default) in the controller. Device warnings and errors are reported by each helper; the service status only shows the number of monitored radiators.

@@ -9,8 +9,8 @@ class ServiceManager {
   private services: Service[] = []
   private syncedEntitiesCount = 0
 
-  constructor() {
-    this.startDate = new Date()
+  constructor(startDate = new Date()) {
+    this.startDate = startDate
     homeAssistantSync.on(({ entitiesCount }) => {
       this.syncedEntitiesCount = entitiesCount
     })

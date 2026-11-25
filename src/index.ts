@@ -25,6 +25,7 @@ import WashingMachineController from './services/WashingMachineController/Washin
 import DeadlinesService from './services/DeadlinesService/DeadlinesService'
 import MainDoorService from './services/MainDoorService/MainDoorService'
 import ThermostatController from './services/ThermostatController/ThermostatController'
+import BackendInfoService from './services/BackendInfoService/BackendInfoService'
 
 const logger = createLogger('Application')
 
@@ -53,7 +54,10 @@ if (process.env['ENV'] === 'dev') {
   )
 }
 
-const sm = new ServiceManager()
+const startDate = new Date()
+const sm = new ServiceManager(startDate)
+sm.registerService(new BackendInfoService(startDate))
+sm.registerService(new SmsService())
 const homeAssistant = new HomeAssistantConnector(
   process.env['HA_HOST'],
   process.env['HA_TOKEN'],
@@ -66,7 +70,6 @@ new WebSocketServerConnector(
 
 homeAssistantSync.once(() => {
   sm.registerService(new NotificationsService())
-  sm.registerService(new SmsService())
   sm.registerService(
     new WeatherService(
       process.env['WEATHER_API_KEY'],

@@ -12,6 +12,9 @@ const daylightTemperature = 4500
 const daylightNormalBrightness = 175
 const daylightMaxBrightness = 255
 
+const shelvesNormalBrightness = 102
+const shelvesMaxBrightness = 178
+
 const externalButtons = {
   danielRoom: {
     on: '1_single',
@@ -30,6 +33,7 @@ const externalButtons = {
 class DanielRoomController extends Service {
   private bedRemote = Entity.tuyaRemote(Entities.sensor.remote.danielBed)
   private bedLight = Entity.cctLight(Entities.light.danielRoom.bedLamp)
+  private shelvesLight = Entity.monoLight(Entities.light.danielRoom.shelves)
 
   constructor() {
     super('danielRoomController')
@@ -48,9 +52,16 @@ class DanielRoomController extends Service {
     this.bedRemote.onDoublePress(2, () =>
       this.bedLight.setTemperature(daylightTemperature, daylightMaxBrightness),
     )
-    this.bedRemote.onAnyShortPressCount(3, () => this.bedLight.turnOff())
-    this.bedRemote.onDoublePress(4, () => this.turnOnAllLights())
-    this.bedRemote.onHoldPress(4, () => this.turnOffAllLights())
+    this.bedRemote.onSinglePress(3, () => this.bedLight.turnOff())
+    this.bedRemote.onDoublePress(3, () => this.turnOnAllLights())
+    this.bedRemote.onHoldPress(3, () => this.turnOffAllLights())
+    this.bedRemote.onSinglePress(4, () =>
+      this.shelvesLight.setBrightness(shelvesNormalBrightness),
+    )
+    this.bedRemote.onDoublePress(4, () =>
+      this.shelvesLight.setBrightness(shelvesMaxBrightness),
+    )
+    this.bedRemote.onHoldPress(4, () => this.shelvesLight.turnOff())
   }
 
   private triggerAnotherRemote(remoteId: string, button: string) {
@@ -64,6 +75,7 @@ class DanielRoomController extends Service {
   }
 
   private turnOnAllLights() {
+    this.shelvesLight.setBrightness(shelvesNormalBrightness)
     this.triggerAnotherRemote(
       Entities.sensor.remote.danielBed,
       externalButtons.danielRoom.on,
@@ -79,6 +91,7 @@ class DanielRoomController extends Service {
   }
 
   private turnOffAllLights() {
+    this.shelvesLight.turnOff()
     this.triggerAnotherRemote(
       Entities.sensor.remote.danielBed,
       externalButtons.danielRoom.off,

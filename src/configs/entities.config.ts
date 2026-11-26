@@ -63,6 +63,7 @@ const Entities = {
     },
     danielRoom: {
       bedLamp: 'light.danielbedlamp',
+      shelves: 'light.danielshelveslight',
     },
     dashNode: {
       tabletLight: 'light.dash_node_tablet_notification_lights',

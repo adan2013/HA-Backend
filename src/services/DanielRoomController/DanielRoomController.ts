@@ -52,7 +52,10 @@ class DanielRoomController extends Service {
     this.bedRemote.onDoublePress(2, () =>
       this.bedLight.setTemperature(daylightTemperature, daylightMaxBrightness),
     )
-    this.bedRemote.onSinglePress(3, () => this.bedLight.turnOff())
+    this.bedRemote.onSinglePress(3, () => {
+      this.bedLight.turnOff()
+      this.shelvesLight.turnOff()
+    })
     this.bedRemote.onDoublePress(3, () => this.turnOnAllLights())
     this.bedRemote.onHoldPress(3, () => this.turnOffAllLights())
     this.bedRemote.onSinglePress(4, () =>
@@ -91,7 +94,6 @@ class DanielRoomController extends Service {
   }
 
   private turnOffAllLights() {
-    this.shelvesLight.turnOff()
     this.triggerAnotherRemote(
       Entities.sensor.remote.danielBed,
       externalButtons.danielRoom.off,
